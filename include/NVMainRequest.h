@@ -48,7 +48,6 @@
 #include <iostream>
 #include <signal.h>
 
-
 namespace NVM {
 
 enum OpType {
@@ -69,7 +68,8 @@ enum OpType {
     BUS_READ,        /* Data bus read burst */
     BUS_WRITE,       /* Data bus write burst */
     CACHED_READ,     /* Check if read is cached anywhere in hierarchy. */
-    CACHED_WRITE     /* Check if write is cached anywhere in hierarchy. */
+    CACHED_WRITE,    /* Check if write is cached anywhere in hierarchy. */
+    PIM_OP           // PIM operation (RowClone)
 };
 
 enum MemRequestStatus {
@@ -166,7 +166,7 @@ class NVMainRequest {
     ncycle_t
         queueCycle; //< When the memory controller accepted (queued) the request
     ncycle_t issueCycle; //< When the memory controller issued the request to
-                         //the interconnect (dequeued)
+                         // the interconnect (dequeued)
     ncycle_t
         completionCycle; //< When the request was sent back to the requestor
 
