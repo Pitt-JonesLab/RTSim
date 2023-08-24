@@ -25,7 +25,7 @@ build_type = GetOption("build_type")
 
 if build_type == None or build_type == "fast":
     env.Append(CCFLAGS='-O3')
-    env.Append(CCFLAGS='-Werror')
+    #env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -37,7 +37,7 @@ if build_type == None or build_type == "fast":
 elif build_type == "debug":
     env.Append(CCFLAGS='-O0')
     env.Append(CCFLAGS='-ggdb3')
-    env.Append(CCFLAGS='-Werror')
+    #env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -48,7 +48,7 @@ elif build_type == "prof":
     env.Append(CCFLAGS='-O0')
     env.Append(CCFLAGS='-ggdb3')
     env.Append(CCFLAGS='-pg')
-    env.Append(CCFLAGS='-Werror')
+    #env.Append(CCFLAGS='-Werror')
     env.Append(CCFLAGS='-Wall')
     env.Append(CCFLAGS='-Wextra')
     env.Append(CCFLAGS='-Woverloaded-virtual')
@@ -194,15 +194,15 @@ class PrettyPrint(object):
             return strip_build_path(str(f), env)
 
         if len(source) > 0:
-            srcs = map(strip, source)
-            tgts = map(strip, target)
+            srcs = list(map(strip, source))
+            tgts = list(map(strip, target))
             split_src = srcs[0].split("/")
 
             src_basename = os.path.splitext(split_src[-1])[0]
             src_name = src_basename
             suffix = env['OBJSUFFIX']
         else:
-            tgts = map(strip, target)
+            tgts = list(map(strip, target))
             split_src = tgts[0].split("/")
             src_basename = os.path.splitext(split_src[-1])[0]
             src_name = tgts[0]
