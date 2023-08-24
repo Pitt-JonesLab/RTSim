@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/Ranks/StandardRank/StandardRank.cpp
+/mnt/d/code/RTSim/Ranks/StandardRank/StandardRank.cpp

@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/src/TranslationMethod.cpp
+/mnt/d/code/RTSim/src/TranslationMethod.cpp

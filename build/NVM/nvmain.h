@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/NVM/nvmain.h
+/mnt/d/code/RTSim/NVM/nvmain.h

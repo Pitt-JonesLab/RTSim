@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/FaultModels/ECP/ECP.cpp
+/mnt/d/code/RTSim/FaultModels/ECP/ECP.cpp

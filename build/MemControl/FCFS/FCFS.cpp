@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/MemControl/FCFS/FCFS.cpp
+/mnt/d/code/RTSim/MemControl/FCFS/FCFS.cpp

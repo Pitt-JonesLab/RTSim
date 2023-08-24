@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/Endurance/Distributions/Uniform.cpp
+/mnt/d/code/RTSim/Endurance/Distributions/Uniform.cpp

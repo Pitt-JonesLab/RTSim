@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/Utils/CoinMigrator/CoinMigrator.cpp
+/mnt/d/code/RTSim/Utils/CoinMigrator/CoinMigrator.cpp

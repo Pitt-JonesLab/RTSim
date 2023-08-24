@@ -1,1 +1,1 @@
-/net/home/khan/nvmain/DataEncoders/FlipNWrite/FlipNWrite.cpp
+/mnt/d/code/RTSim/DataEncoders/FlipNWrite/FlipNWrite.cpp
