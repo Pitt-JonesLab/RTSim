@@ -104,35 +104,16 @@ void Config::Read( std::string filename )
             /* find the first character that is not space, tab, return */
             size_t cPos = line.find_first_not_of( " \t\r\n" );
 
-            /* if not found, the line is empty. just skip it */
-            if( cPos == std::string::npos )
-                continue;
-            /*
-             * else, check whether the first character is the comment flag. 
-             * if so, skip it 
-             */
-            else if( line[cPos] == ';' )
-                continue;
-            /* else, remove the redundant white space and the possible comments */
-            else
-            {
-                /* find the position of the first ';' */
-                size_t colonPos = line.find_first_of( ";" );
+            // Skip empty lines
+            if( cPos == std::string::npos ) continue;
+            // Skip comments
+            if (line[cPos] == ';') continue;
 
-                /* if there is no ';', extract all */
-                if( colonPos == std::string::npos )
-                {
-                    subline = line.substr( cPos );
-                }
-                else
-                {
-                    /* colonPos must be larger than cPos */
-                    assert( colonPos > cPos );
+            // Remove trailing comments
+            line = line.substr(0, line.find_first_of(";"));
 
-                    /* extract the useful message from the line */
-                    subline = line.substr( cPos, (colonPos - cPos) );
-                }
-            }
+            // Remove trailing whitespace
+            subline = line.substr(0, line.find_last_not_of(" \t\r\n")+1);
 
             /* parse the parameters and values */
             char *cline;

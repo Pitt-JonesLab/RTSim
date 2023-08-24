@@ -179,7 +179,9 @@ void TraceMain::runSimulation() {
 
     TraceLine* tl = new TraceLine();
     while (currentCycle <= simulateCycles || simulateCycles == 0) {
+        std::cout << "TraceMain - Current cycle: " << currentCycle << std::endl;
         if (!trace->GetNextAccess(tl)) {
+            std::cout << "TraceMain - end of trace file reached\n";
             /* Force all modules to drain requests. */
             bool draining = Drain();
 
@@ -202,6 +204,7 @@ void TraceMain::runSimulation() {
         NVMainRequest* request = new NVMainRequest();
 
         request->address = tl->GetAddress();
+        request->address2 = tl->GetAddress2();
         request->type = tl->GetOperation();
         request->bulkCmd = CMD_NOP;
         request->threadId = tl->GetThreadId();
@@ -259,6 +262,8 @@ void TraceMain::runSimulation() {
                 currentCycle = globalEventQueue->GetCurrentCycle();
             }
 
+            std::cout << "TraceMain - Issuing request " << tl->GetCycle()
+                      << " at cycle " << currentCycle << std::endl;
             outstandingRequests++;
             GetChild()->IssueCommand(request);
 
@@ -288,6 +293,7 @@ int TraceMain::RunTrace(int argc, char* argv[]) {
     }
 
     setupConfig(argc, argv);
+    setupChildren();
     printArgs(argc, argv);
     runSimulation();
     printStats();

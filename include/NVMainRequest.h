@@ -142,8 +142,8 @@ class NVMainRequest {
 
     ~NVMainRequest(){};
 
-    NVMAddress address; //< Address of request
-    OpType type;        //< Operation type of request (read, write, etc)
+    NVMAddress address, address2; //< Address of request
+    OpType type; //< Operation type of request (read, write, etc)
     BulkCommand
         bulkCmd; //< Bulk Commands (i.e., Read+Precharge, Write+Precharge, etc)
     ncounters_t threadId; //< Thread ID of issuing application
@@ -193,6 +193,7 @@ class NVMainRequest {
 
 inline const NVMainRequest& NVMainRequest::operator=(const NVMainRequest& m) {
     address = m.address;
+    address2 = m.address2;
     type = m.type;
     bulkCmd = m.bulkCmd;
     threadId = m.threadId;
