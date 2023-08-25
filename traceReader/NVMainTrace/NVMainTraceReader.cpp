@@ -64,7 +64,7 @@ std::string NVMainTraceReader::GetTraceFile() { return traceFile; }
 bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
     /* If there is no trace file, we can't do anything. */
     if (traceFile == "") {
-        std::cerr << "No trace file specified!" << std::endl;
+        throw std::runtime_error("No trace file specified!");
         return false;
     }
 
@@ -72,8 +72,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
     if (!trace.is_open()) {
         trace.open(traceFile.c_str());
         if (!trace.is_open()) {
-            std::cerr << "Could not open trace file: " << traceFile << "!"
-                      << std::endl;
+            throw std::runtime_error("Could not open trace file " + traceFile);
             return false;
         }
     }

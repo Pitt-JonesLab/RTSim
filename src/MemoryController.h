@@ -320,6 +320,8 @@ class MemoryController : public NVMObject {
     void closeRow(NVMainRequest* req);
 
     bool handleCachedRequest(NVMainRequest* req);
+
+    void issueRowCloneCommand(NVMainRequest* req);
 };
 
 }; // namespace NVM

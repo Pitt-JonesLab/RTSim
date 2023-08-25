@@ -1153,6 +1153,8 @@ bool MemoryController::FindCachedAddress(
     *accessibleRequest = NULL;
 
     for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+        if ((*it)->type == PIM_OP) continue;
+
         ncounter_t queueId = GetCommandQueueId((*it)->address);
         NVMainRequest* cachedRequest = MakeCachedRequest((*it));
 
@@ -1690,11 +1692,23 @@ ncounter_t getSubarray(NVMainRequest* req) {
     return bank;
 }
 
+void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
+    std::cout << "MemoryController - Issuing RowClone request "
+              << req->arrivalCycle << std::endl;
+
+    throw std::runtime_error("issueRowCloneCommand not implmented");
+}
+
 /*
  *  NOTE: This function assumes the memory controller uses any predicates when
  *  scheduling. They will not be re-checked here.
  */
 bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
+    if (req->type == PIM_OP) {
+        issueRowCloneCommand(req);
+        return false;
+    }
+
     if (handleCachedRequest(req)) return true;
 
     auto rank = getRank(req);
@@ -1711,6 +1725,8 @@ bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
     } else if (rowIsActivated(req)) {
         starvationCounter[rank][bank][subarray]++;
     } else {
+        throw std::runtime_error("Memory controller cannot issue request " +
+                                 std::to_string(req->arrivalCycle));
         return false;
     }
 
