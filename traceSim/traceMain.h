@@ -107,6 +107,10 @@ class TraceMain : public NVMObject {
      * Prints simulation stats to std output
      */
     void printStats();
+
+    NVMainRequest* getNextRequest();
+
+    void waitForDrain();
 };
 
 }; // namespace NVM

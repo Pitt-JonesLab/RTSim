@@ -164,6 +164,44 @@ void printArgs(int argc, char* argv[]) {
     std::cout << std::endl << std::endl;
 }
 
+NVMainRequest* TraceMain::getNextRequest() {
+    TraceLine tl;
+    if (!trace->GetNextAccess(&tl)) return nullptr;
+    
+    NVMainRequest* request = new NVMainRequest();
+    request->address = tl.GetAddress();
+    request->address2 = tl.GetAddress2();
+    request->type = tl.GetOperation();
+    request->bulkCmd = CMD_NOP;
+    request->threadId = tl.GetThreadId();
+    request->status = MEM_REQUEST_INCOMPLETE;
+    if (!ignoreData) request->data = tl.GetData();
+    if (!ignoreData) request->oldData = tl.GetOldData();
+    request->owner = (NVMObject*) this;
+    request->arrivalCycle = tl.GetCycle();
+
+    return request;
+}
+
+void TraceMain::waitForDrain() {
+    std::cout << "TraceMain - end of trace file reached\n";
+    /* Force all modules to drain requests. */
+    bool draining = Drain();
+
+    std::cout << "Could not read next line from trace file!"
+            << std::endl;
+
+    /* Wait for requests to drain. */
+    while (outstandingRequests > 0) {
+        globalEventQueue->Cycle(1);
+
+        currentCycle++;
+
+        /* Retry drain each cycle if it failed. */
+        if (!draining) draining = Drain();
+    }
+}
+
 void TraceMain::runSimulation() {
     std::cout << "*** Simulating " << simulateCycles << " input cycles. (";
 
@@ -177,98 +215,60 @@ void TraceMain::runSimulation() {
 
     std::cout << simulateCycles << " memory cycles) ***" << std::endl;
 
-    TraceLine* tl = new TraceLine();
     while (currentCycle <= simulateCycles || simulateCycles == 0) {
         std::cout << "TraceMain - Current cycle: " << currentCycle << std::endl;
-        if (!trace->GetNextAccess(tl)) {
-            std::cout << "TraceMain - end of trace file reached\n";
-            /* Force all modules to drain requests. */
-            bool draining = Drain();
 
-            std::cout << "Could not read next line from trace file!"
-                      << std::endl;
+        auto request = getNextRequest();
 
-            /* Wait for requests to drain. */
-            while (outstandingRequests > 0) {
-                globalEventQueue->Cycle(1);
-
-                currentCycle++;
-
-                /* Retry drain each cycle if it failed. */
-                if (!draining) draining = Drain();
-            }
-
+        if (!request) {
+            // waitForDrain
+            waitForDrain();
             break;
         }
 
-        NVMainRequest* request = new NVMainRequest();
-
-        request->address = tl->GetAddress();
-        request->address2 = tl->GetAddress2();
-        request->type = tl->GetOperation();
-        request->bulkCmd = CMD_NOP;
-        request->threadId = tl->GetThreadId();
-        if (!ignoreData) request->data = tl->GetData();
-        if (!ignoreData) request->oldData = tl->GetOldData();
-        request->status = MEM_REQUEST_INCOMPLETE;
-        request->owner = (NVMObject*) this;
-
-        /*
-         * If you want to ignore the cycles used in the trace file, just set
-         * the cycle to 0.
-         */
+        auto requestCycle = request->arrivalCycle;
+        // If you want to ignore the cycles used in the trace file, just set the cycle to 0.
         if (config->KeyExists("IgnoreTraceCycle") &&
             config->GetString("IgnoreTraceCycle") == "true")
-            tl->SetLine(tl->GetAddress(), tl->GetOperation(), 0, tl->GetData(),
-                        tl->GetOldData(), tl->GetThreadId());
+            requestCycle = 0;
 
-        if (request->type != READ && request->type != WRITE)
+        // TODO this should be an exception
+        if (request->type != READ && request->type != WRITE && request->type != PIM_OP)
             std::cout << "traceMain: Unknown Operation: " << request->type
                       << std::endl;
 
-        /*
-         * If the next operation occurs after the requested number of cycles,
-         * we can quit.
-         */
-        if (tl->GetCycle() > simulateCycles && simulateCycles != 0) {
+        // Reached the end of the simulation
+        if (requestCycle > simulateCycles && simulateCycles != 0) {
             globalEventQueue->Cycle(simulateCycles - currentCycle);
             currentCycle += simulateCycles - currentCycle;
 
             break;
-        } else {
-            /*
-             *  If the command is in the past, it can be issued. This would
-             *  occur since the trace was probably generated with an inaccurate
-             *  memory *  simulator, so the cycles may not match up. Otherwise,
-             *  we need to wait.
-             */
-            if (tl->GetCycle() > currentCycle) {
-                globalEventQueue->Cycle(tl->GetCycle() - currentCycle);
-                currentCycle = globalEventQueue->GetCurrentCycle();
-
-                if (currentCycle >= simulateCycles && simulateCycles != 0)
-                    break;
-            }
-
-            /*
-             *  Wait for the memory controller to accept the next command..
-             *  the trace reader is "stalling" until then.
-             */
-            while (!GetChild()->IsIssuable(request)) {
-                if (currentCycle >= simulateCycles && simulateCycles != 0)
-                    break;
-
-                globalEventQueue->Cycle(1);
-                currentCycle = globalEventQueue->GetCurrentCycle();
-            }
-
-            std::cout << "TraceMain - Issuing request " << tl->GetCycle()
-                      << " at cycle " << currentCycle << std::endl;
-            outstandingRequests++;
-            GetChild()->IssueCommand(request);
-
-            if (currentCycle >= simulateCycles && simulateCycles != 0) break;
         }
+
+        // Wait for arrival cycle
+        if (requestCycle > currentCycle) {
+            globalEventQueue->Cycle(requestCycle - currentCycle);
+            currentCycle = globalEventQueue->GetCurrentCycle();
+
+            if (currentCycle >= simulateCycles && simulateCycles != 0)
+                break;
+        }
+
+        // Wait for memory controller
+        while (!GetChild()->IsIssuable(request)) {
+            if (currentCycle >= simulateCycles && simulateCycles != 0)
+                break;
+
+            globalEventQueue->Cycle(1);
+            currentCycle = globalEventQueue->GetCurrentCycle();
+        }
+
+        std::cout << "TraceMain - Issuing request " << requestCycle
+                    << " at cycle " << currentCycle << std::endl;
+        outstandingRequests++;
+        GetChild()->IssueCommand(request);
+
+        if (currentCycle >= simulateCycles && simulateCycles != 0) break;
     }
 }
 

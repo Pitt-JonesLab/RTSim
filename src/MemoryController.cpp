@@ -62,7 +62,6 @@
 #include <limits>
 #include <sstream>
 
-
 using namespace NVM;
 
 /* Command queue removal predicate. */
@@ -1513,204 +1512,219 @@ bool MemoryController::DummyPredicate::operator()(NVMainRequest* /*request*/) {
     return true;
 }
 
-/*
- *  NOTE: This function assumes the memory controller uses any predicates when
- *  scheduling. They will not be re-checked here.
- */
-bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
-    bool rv = false;
+bool MemoryController::bankIsActivated(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+    ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
+    ncounter_t queueId = GetCommandQueueId(req->address);
+
+    return activateQueued[rank][bank];
+}
+
+bool MemoryController::handleCachedRequest(NVMainRequest* req) {
     ncounter_t rank, bank, row, subarray, col;
 
     req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                       &subarray);
 
-    SubArray* writingArray = FindChild(req, SubArray);
-
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
     ncounter_t queueId = GetCommandQueueId(req->address);
 
-    /*
-     *  If the request is somehow accessible (e.g., via caching, etc), but the
-     *  bank state does not match the memory controller, just issue the request
-     *  without updating any internal states.
-     */
-    FailReason reason;
     NVMainRequest* cachedRequest = MakeCachedRequest(req);
 
+    FailReason reason;
     if (GetChild()->IsIssuable(cachedRequest, &reason)) {
         /* Differentiate from row-buffer hits. */
         if (!activateQueued[rank][bank] ||
             !activeSubArray[rank][bank][subarray] ||
             effectiveRow[rank][bank][subarray] != row ||
             effectiveMuxedRow[rank][bank][subarray] != muxLevel) {
-            req->issueCycle = GetEventQueue()->GetCurrentCycle();
-
-            // Update starvation ??
-            commandQueues[queueId].push_back(req);
+            enqueueRequest(req);
 
             delete cachedRequest;
 
             return true;
-        } else {
-            delete cachedRequest;
         }
-    } else {
-        delete cachedRequest;
     }
 
-    if (!activateQueued[rank][bank] && commandQueues[queueId].empty()) {
-        /* Any activate will request the starvation counter */
-        activateQueued[rank][bank] = true;
-        activeSubArray[rank][bank][subarray] = true;
-        effectiveRow[rank][bank][subarray] = row;
-        effectiveMuxedRow[rank][bank][subarray] = muxLevel;
-        starvationCounter[rank][bank][subarray] = 0;
+    delete cachedRequest;
+    return false;
+}
 
-        req->issueCycle = GetEventQueue()->GetCurrentCycle();
+bool MemoryController::rowIsActivated(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
 
-        NVMainRequest* actRequest = MakeActivateRequest(req);
-        actRequest->flags |= (writingArray != NULL && writingArray->IsWriting())
-                                 ? NVMainRequest::FLAG_PRIORITY
-                                 : 0;
-        commandQueues[queueId].push_back(actRequest);
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+    ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
+    ncounter_t queueId = GetCommandQueueId(req->address);
 
-        /* Different row buffer management policy has different behavior */
-        /*
-         * There are two possibilities that the request is the last request:
-         * 1) ClosePage == 1 and there is no other request having row
-         * buffer hit
-         * or 2) ClosePage == 2, the request is always the last request
-         */
-        if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
-            commandQueues[queueId].push_back(MakeImplicitPrechargeRequest(req));
-            activeSubArray[rank][bank][subarray] = false;
-            effectiveRow[rank][bank][subarray] = p->ROWS;
-            effectiveMuxedRow[rank][bank][subarray] = p->ROWS;
-            activateQueued[rank][bank] = false;
-        } else {
-            if (p->MemIsRTM) {
-                NVMainRequest* shiftRequest = MakeShiftRequest(
-                    req); // Place a shift request before the actual read/write
-                          // on the command queue
-                shiftRequest->flags |=
-                    (writingArray != NULL && writingArray->IsWriting())
-                        ? NVMainRequest::FLAG_PRIORITY
-                        : 0;
-                commandQueues[queueId].push_back(shiftRequest);
-            }
+    return activeSubArray[rank][bank][subarray] &&
+           effectiveRow[rank][bank][subarray] == row &&
+           effectiveMuxedRow[rank][bank][subarray] == muxLevel;
+}
 
-            commandQueues[queueId].push_back(req);
+void MemoryController::enqueueActivate(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+    NVMainRequest* actRequest = MakeActivateRequest(req);
+    SubArray* writingArray = FindChild(req, SubArray);
+    ncounter_t queueId = GetCommandQueueId(req->address);
+    actRequest->flags |= (writingArray != NULL && writingArray->IsWriting())
+                             ? NVMainRequest::FLAG_PRIORITY
+                             : 0;
+    commandQueues[queueId].push_back(actRequest);
+
+    ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
+    activateQueued[rank][bank] = true;
+    activeSubArray[rank][bank][subarray] = true;
+    effectiveRow[rank][bank][subarray] = row;
+    effectiveMuxedRow[rank][bank][subarray] = muxLevel;
+    starvationCounter[rank][bank][subarray] = 0;
+}
+
+void MemoryController::enqueueShift(NVMainRequest* req) {
+    SubArray* writingArray = FindChild(req, SubArray);
+    ncounter_t queueId = GetCommandQueueId(req->address);
+
+    if (p->MemIsRTM) {
+        NVMainRequest* shiftRequest =
+            MakeShiftRequest(req); // Place a shift request before the actual
+                                   // read/write on the command queue
+        shiftRequest->flags |=
+            (writingArray != NULL && writingArray->IsWriting())
+                ? NVMainRequest::FLAG_PRIORITY
+                : 0;
+        commandQueues[queueId].push_back(shiftRequest);
+    }
+}
+
+void MemoryController::enqueueRequest(NVMainRequest* req) {
+    ncounter_t queueId = GetCommandQueueId(req->address);
+    req->issueCycle = GetEventQueue()->GetCurrentCycle();
+    commandQueues[queueId].push_back(req);
+}
+
+void MemoryController::enqueueImplicitPrecharge(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+    ncounter_t queueId = GetCommandQueueId(req->address);
+
+    req->issueCycle = GetEventQueue()->GetCurrentCycle();
+    commandQueues[queueId].push_back(MakeImplicitPrechargeRequest(req));
+    activeSubArray[rank][bank][subarray] = false;
+    effectiveRow[rank][bank][subarray] = p->ROWS;
+    effectiveMuxedRow[rank][bank][subarray] = p->ROWS;
+    bool idle = true;
+    for (ncounter_t i = 0; i < subArrayNum; i++) {
+        if (activeSubArray[rank][bank][i] == true) {
+            idle = false;
+            break;
         }
+    }
 
-        rv = true;
-    } else if (activateQueued[rank][bank] &&
-               (!activeSubArray[rank][bank][subarray] ||
-                effectiveRow[rank][bank][subarray] != row ||
-                effectiveMuxedRow[rank][bank][subarray] != muxLevel) &&
+    if (idle) activateQueued[rank][bank] = false;
+}
+
+void MemoryController::closeRow(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+    ncounter_t queueId = GetCommandQueueId(req->address);
+
+    if (activeSubArray[rank][bank][subarray] && p->UsePrecharge) {
+        commandQueues[queueId].push_back(MakePrechargeRequest(
+            effectiveRow[rank][bank][subarray], 0, bank, rank, subarray));
+    }
+}
+
+ncounter_t getBank(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+
+    return bank;
+}
+
+ncounter_t getRank(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+
+    return rank;
+}
+
+ncounter_t getRow(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+
+    return row;
+}
+
+ncounter_t getCol(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+
+    return bank;
+}
+
+ncounter_t getSubarray(NVMainRequest* req) {
+    ncounter_t rank, bank, row, subarray, col;
+
+    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                      &subarray);
+
+    return bank;
+}
+
+/*
+ *  NOTE: This function assumes the memory controller uses any predicates when
+ *  scheduling. They will not be re-checked here.
+ */
+bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
+    if (handleCachedRequest(req)) return true;
+
+    auto rank = getRank(req);
+    auto bank = getBank(req);
+    auto subarray = getSubarray(req);
+    auto queueId = GetCommandQueueId(req->address);
+
+    if (!bankIsActivated(req) && commandQueues[queueId].empty()) {
+        enqueueActivate(req);
+    } else if (activateQueued[rank][bank] && !rowIsActivated(req) &&
                commandQueues[queueId].empty()) {
-        /* Any activate will request the starvation counter */
-        starvationCounter[rank][bank][subarray] = 0;
-        activateQueued[rank][bank] = true;
-
-        req->issueCycle = GetEventQueue()->GetCurrentCycle();
-
-        if (activeSubArray[rank][bank][subarray] && p->UsePrecharge) {
-            commandQueues[queueId].push_back(MakePrechargeRequest(
-                effectiveRow[rank][bank][subarray], 0, bank, rank, subarray));
-        }
-
-        NVMainRequest* actRequest = MakeActivateRequest(req);
-        actRequest->flags |= (writingArray != NULL && writingArray->IsWriting())
-                                 ? NVMainRequest::FLAG_PRIORITY
-                                 : 0;
-        commandQueues[queueId].push_back(actRequest);
-
-        if (p->MemIsRTM) {
-            NVMainRequest* shiftRequest =
-                MakeShiftRequest(req); // Place a shift request before the
-                                       // actual read/write on the command queue
-            shiftRequest->flags |=
-                (writingArray != NULL && writingArray->IsWriting())
-                    ? NVMainRequest::FLAG_PRIORITY
-                    : 0;
-            commandQueues[queueId].push_back(shiftRequest);
-        }
-        commandQueues[queueId].push_back(req);
-
-        activeSubArray[rank][bank][subarray] = true;
-        effectiveRow[rank][bank][subarray] = row;
-        effectiveMuxedRow[rank][bank][subarray] = muxLevel;
-
-        rv = true;
-    } else if (activateQueued[rank][bank] &&
-               activeSubArray[rank][bank][subarray] &&
-               effectiveRow[rank][bank][subarray] == row &&
-               effectiveMuxedRow[rank][bank][subarray] == muxLevel) {
+        closeRow(req);
+        enqueueActivate(req);
+    } else if (rowIsActivated(req)) {
         starvationCounter[rank][bank][subarray]++;
-
-        req->issueCycle = GetEventQueue()->GetCurrentCycle();
-
-        /* Different row buffer management policy has different behavior */
-        /*
-         * There are two possibilities that the request is the last request:
-         * 1) ClosePage == 1 and there is no other request having row
-         * buffer hit
-         * or 2) ClosePage == 2, the request is always the last request
-         */
-        if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
-            /* if Restricted Close-Page is applied, we should never be here */
-            assert(p->ClosePage != 2);
-
-            if (p->MemIsRTM) {
-                NVMainRequest* shiftRequest = MakeShiftRequest(
-                    req); // Place a shift request before the actual read/write
-                          // on the command queue
-                shiftRequest->flags |=
-                    (writingArray != NULL && writingArray->IsWriting())
-                        ? NVMainRequest::FLAG_PRIORITY
-                        : 0;
-                commandQueues[queueId].push_back(shiftRequest);
-            }
-            commandQueues[queueId].push_back(MakeImplicitPrechargeRequest(req));
-            activeSubArray[rank][bank][subarray] = false;
-            effectiveRow[rank][bank][subarray] = p->ROWS;
-            effectiveMuxedRow[rank][bank][subarray] = p->ROWS;
-
-            bool idle = true;
-            for (ncounter_t i = 0; i < subArrayNum; i++) {
-                if (activeSubArray[rank][bank][i] == true) {
-                    idle = false;
-                    break;
-                }
-            }
-
-            if (idle) activateQueued[rank][bank] = false;
-        } else {
-            if (p->MemIsRTM) {
-                NVMainRequest* shiftRequest = MakeShiftRequest(
-                    req); // Place a shift request before the actual read/write
-                          // on the command queue
-                shiftRequest->flags |=
-                    (writingArray != NULL && writingArray->IsWriting())
-                        ? NVMainRequest::FLAG_PRIORITY
-                        : 0;
-                commandQueues[queueId].push_back(shiftRequest);
-            }
-
-            commandQueues[queueId].push_back(req);
-        }
-
-        rv = true;
     } else {
-        rv = false;
+        return false;
+    }
+
+    enqueueShift(req);
+    if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
+        assert(p->ClosePage != 2);
+        enqueueImplicitPrecharge(req);
+    } else {
+        enqueueRequest(req);
     }
 
     /* Schedule wake event for memory commands if not scheduled. */
-    if (rv == true) {
-        ScheduleCommandWake();
-    }
-
-    return rv;
+    ScheduleCommandWake();
+    return true;
 }
 
 void MemoryController::CycleCommandQueues() {
@@ -1722,10 +1736,6 @@ void MemoryController::CycleCommandQueues() {
     }
 
     for (ncounter_t queueIdx = 0; queueIdx < commandQueueCount; queueIdx++) {
-        /*
-         * Requests are placed in queues in priority order, so we can simply
-         * iterator over all queues.
-         */
         ncounter_t queueId = (curQueue + queueIdx) % commandQueueCount;
         FailReason fail;
 

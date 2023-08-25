@@ -369,9 +369,12 @@ void NVMain::PrintPreTrace( NVMainRequest *request )
 
 bool NVMain::IssueCommand( NVMainRequest *request )
 {
+    std::cout << "NVMain - Received request " << request->arrivalCycle << std::endl;
+
     ncounter_t channel, rank, bank, row, col, subarray;
     bool mc_rv;
 
+    // TODO this should throw an exception
     if( !config )
     {
         std::cout << "NVMain: Received request before configuration!\n";
@@ -387,6 +390,7 @@ bool NVMain::IssueCommand( NVMainRequest *request )
     /* Check for any successful prefetches. */
     if( CheckPrefetch( request ) )
     {
+        std::cout << "NVMain - Prefetched request " << request->arrivalCycle << std::endl;
         GetEventQueue()->InsertEvent( EventResponse, this, request, 
                                       GetEventQueue()->GetCurrentCycle() + 1 );
 
@@ -394,6 +398,8 @@ bool NVMain::IssueCommand( NVMainRequest *request )
     }
 
     assert( GetChild( request )->GetTrampoline( ) == memoryControllers[channel] );
+
+    std::cout << "NVMain - Issuing request " << request->arrivalCycle << " to child\n";
     mc_rv = GetChild( request )->IssueCommand( request );
     if( mc_rv == true )
     {
@@ -403,7 +409,7 @@ bool NVMain::IssueCommand( NVMainRequest *request )
         {
             totalReadRequests++;
         }
-        else
+        else if (request->type == WRITE)
         {
             totalWriteRequests++;
         }
