@@ -154,7 +154,7 @@ colors['red']    = '\033[91m'
 colors['normal'] = '\033[0m'
 
 if not sys.stdout.isatty():
-    for key, value in colors.iteritems():
+    for key, value in colors.items():
         colors[key] = ''
 
 
