@@ -59,7 +59,6 @@
 #include <limits>
 #include <signal.h>
 
-
 /*
  * Using -O3 in gcc causes the popcount methods to return incorrect values.
  * Disable optimizations in these methods using compiler specific attributes.
@@ -314,32 +313,7 @@ void SubArray::RegisterStats() {
     AddStat(measuredWriteTimes);
 }
 
-/*
- * Activate() open a row
- */
-bool SubArray::Activate(NVMainRequest* request) {
-    uint64_t activateRow;
-
-    request->address.GetTranslatedAddress(&activateRow, NULL, NULL, NULL, NULL,
-                                          NULL);
-
-    /* Check if we need to cancel or pause a write to service this request. */
-    CheckWritePausing();
-
-    /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
-    /* sanity check */
-    if (nextActivate > GetEventQueue()->GetCurrentCycle()) {
-        std::cerr
-            << "NVMain Error: SubArray violates ACTIVATION timing constraint!"
-            << std::endl;
-        return false;
-    } else if (p->UsePrecharge && state != SUBARRAY_CLOSED) {
-        std::cerr << "NVMain Error: try to open a subarray that is not idle!"
-                  << std::endl;
-        return false;
-    }
-
-    /* Update timing constraints */
+void SubArray::updateActivateTiming(NVMainRequest* request) {
     nextPrecharge = MAX(nextPrecharge, GetEventQueue()->GetCurrentCycle() +
                                            MAX(p->tRCD, p->tRAS));
 
@@ -351,24 +325,26 @@ bool SubArray::Activate(NVMainRequest* request) {
 
     nextPowerDown = MAX(nextPowerDown, GetEventQueue()->GetCurrentCycle() +
                                            MAX(p->tRCD, p->tRAS));
+}
 
-    /* the request is deleted by RequestComplete() */
+void SubArray::handleActivate(NVMainRequest* request) {
+    uint64_t activateRow;
+
+    request->address.GetTranslatedAddress(&activateRow, NULL, NULL, NULL, NULL,
+                                          NULL);
+    openRow = activateRow;
+    state = SUBARRAY_OPEN;
+    writeCycle = false;
+    lastActivate = GetEventQueue()->GetCurrentCycle();
+    activates++;
+
     request->owner = this;
     GetEventQueue()->InsertEvent(EventResponse, this, request,
                                  GetEventQueue()->GetCurrentCycle() + p->tRCD +
                                      p->tSH * (numShifts / wordSize));
+}
 
-    /*
-     * The relative row number is record rather than the absolute row number
-     * within the subarray
-     */
-    openRow = activateRow;
-
-    state = SUBARRAY_OPEN;
-    writeCycle = false;
-
-    lastActivate = GetEventQueue()->GetCurrentCycle();
-
+void SubArray::updateActivateEnergy(NVMainRequest* request) {
     /* Add to bank's total energy. */
     if (p->EnergyModel == "current") {
         /* DRAM Model */
@@ -388,55 +364,21 @@ bool SubArray::Activate(NVMainRequest* request) {
         subArrayEnergy += p->Erd;
         activeEnergy += p->Erd;
     }
-
-    activates++;
-
-    return true;
 }
 
 /*
- * Read() fulfills the column read function
+ * Activate() open a row
  */
-bool SubArray::Read(NVMainRequest* request) {
-    uint64_t readDBC, readDomain;
-
-    request->address.GetTranslatedAddress(&readDBC, &readDomain, NULL, NULL,
-                                          NULL, NULL);
-
-    /* Check if we need to cancel or pause a write to service this request. */
+bool SubArray::Activate(NVMainRequest* request) {
     CheckWritePausing();
+    updateActivateTiming(request);
+    updateActivateEnergy(request);
+    handleActivate(request);
+    return true;
+}
 
-    /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
-    /* sanity check */
-    if (nextRead > GetEventQueue()->GetCurrentCycle()) {
-        std::cerr << "NVMain Error: Subarray violates READ timing constraint!"
-                  << std::endl;
-        return false;
-    } else if (state != SUBARRAY_OPEN) {
-        std::cerr << "NVMain Error: try to read a subarray that is not active!"
-                  << std::endl;
-        return false;
-    } else if (readDBC != openRow) {
-        std::cerr << "NVMain Error: try to read a row that is not opened in a "
-                     "subarray!"
-                  << std::endl;
-        return false;
-    }
-
-    /************************ONLY FOR RTM***************************
-     * Before accessing the subarray, perform the shifting operation
-     * to align port position to the requested data and incur
-     * latency and energy !.
-     ***************************************************************/
-
-    //     if( !Shift( readDBC, readDomain ) )
-    //         std::cout<<"Subarray: Shift function has returned error.
-    //         !!"<<std::endl;
-
-    /* Any additional latency for data encoding. */
+void SubArray::updateReadTiming(NVMainRequest* request) {
     ncycles_t decLat = (dataEncoder ? dataEncoder->Read(request) : 0);
-
-    /* Update timing constraints */
     if (request->type == READ_PRECHARGE) {
         nextActivate =
             MAX(nextActivate,
@@ -447,16 +389,6 @@ bool SubArray::Read(NVMainRequest* request) {
         nextPrecharge = MAX(nextPrecharge, nextActivate);
         nextRead = MAX(nextRead, nextActivate);
         nextWrite = MAX(nextWrite, nextActivate);
-
-        NVMainRequest* preReq = new NVMainRequest();
-        *preReq = *request;
-        preReq->owner = this;
-
-        /* insert the event to issue the implicit precharge */
-        GetEventQueue()->InsertEvent(
-            EventResponse, this, preReq,
-            GetEventQueue()->GetCurrentCycle() + p->tAL + p->tRTP + decLat +
-                MAX(p->tBURST, p->tCCD) * (request->burstCount - 1));
     } else {
         nextPrecharge =
             MAX(nextPrecharge,
@@ -474,34 +406,13 @@ bool SubArray::Read(NVMainRequest* request) {
                            p->tCAS + p->tBURST + p->tRTRS - p->tCWD + decLat);
     }
 
-    /* Read->Powerdown is typical the same for READ and READ_PRECHARGE. */
     nextPowerDown = MAX(
         nextPowerDown, GetEventQueue()->GetCurrentCycle() +
                            MAX(p->tBURST, p->tCCD) * (request->burstCount - 1) +
                            p->tCAS + p->tAL + p->tBURST + 1 + decLat);
+}
 
-    /*
-     *  Data is placed on the bus starting from tCAS and is complete after
-     * tBURST. Wakeup owner at the end of this to notify that the whole request
-     * is complete.
-     *
-     *  Note: In critical word first, tBURST can be replaced with 1.
-     */
-    /* Issue a bus burst request when the burst starts. */
-    NVMainRequest* busReq = new NVMainRequest();
-    *busReq = *request;
-    busReq->type = BUS_WRITE;
-    busReq->owner = this;
-
-    GetEventQueue()->InsertEvent(EventResponse, this, busReq,
-                                 GetEventQueue()->GetCurrentCycle() + p->tCAS +
-                                     decLat);
-
-    /* Notify owner of read completion as well */
-    GetEventQueue()->InsertEvent(EventResponse, this, request,
-                                 GetEventQueue()->GetCurrentCycle() + p->tCAS +
-                                     p->tBURST + decLat);
-
+void SubArray::updateReadEnergy(NVMainRequest* request) {
     /* Calculate energy */
     if (p->EnergyModel == "current") {
         /* DRAM Model */
@@ -516,132 +427,113 @@ bool SubArray::Read(NVMainRequest* request) {
 
         burstEnergy += p->Eopenrd;
     }
+}
 
-    /*
-     *  There's no reason to track data if endurance is not modeled.
-     */
+void SubArray::handleImplicitPrecharge(NVMainRequest* request) {
+    NVMainRequest* preReq = new NVMainRequest();
+    *preReq = *request;
+    preReq->owner = this;
+
+    ncycles_t decodeLatency = (dataEncoder ? dataEncoder->Read(request) : 0);
+    GetEventQueue()->InsertEvent(
+        EventResponse, this, preReq,
+        GetEventQueue()->GetCurrentCycle() + p->tAL + p->tRTP + decodeLatency +
+            MAX(p->tBURST, p->tCCD) * (request->burstCount - 1));
+}
+
+void SubArray::updateSimInterfaceRead(NVMainRequest* request) {
     if (conf->GetSimInterface() != NULL && endrModel != NULL) {
-        /*
-         *  In a trace-based simulation, or a live simulation where simulation
-         * is started in the middle of execution, some data being read maybe
-         * have never been written to memory. In this case, we will store the
-         * value, since the data is always correct from either the simulator or
-         * the value in the trace, which corresponds to the actual value that
-         * was read.
-         *
-         *  Since the read data is already in the request, we don't actually
-         * need to copy it there.
-         */
+        // If the read data is not in memory, save it
         if (!conf->GetSimInterface()->GetDataAtAddress(
                 request->address.GetPhysicalAddress(), NULL)) {
             conf->GetSimInterface()->SetDataAtAddress(
                 request->address.GetPhysicalAddress(), request->data);
         }
     }
+}
+
+void SubArray::handleBusWrite(NVMainRequest* request) {
+    NVMainRequest* busReq = new NVMainRequest();
+    *busReq = *request;
+    busReq->type = BUS_WRITE;
+    busReq->owner = this;
+
+    ncycles_t decodeLatency = (dataEncoder ? dataEncoder->Read(request) : 0);
+    GetEventQueue()->InsertEvent(EventResponse, this, busReq,
+                                 GetEventQueue()->GetCurrentCycle() + p->tCAS +
+                                     decodeLatency);
+}
+
+void SubArray::handleRead(NVMainRequest* request) {
+    if (request->type == READ_PRECHARGE) {
+        handleImplicitPrecharge(request);
+    }
+
+    handleBusWrite(request);
+
+    ncycles_t decodeLatency = (dataEncoder ? dataEncoder->Read(request) : 0);
+    GetEventQueue()->InsertEvent(EventResponse, this, request,
+                                 GetEventQueue()->GetCurrentCycle() + p->tCAS +
+                                     p->tBURST + decodeLatency);
+
+    updateSimInterfaceRead(request);
 
     reads++;
     dataCycles += p->tBURST;
-
-    return true;
 }
 
 /*
- * Write() fulfills the column write function
+ * Read() fulfills the column read function
  */
-bool SubArray::Write(NVMainRequest* request) {
-    uint64_t writeDBC, writeDomain;
-    ncycle_t writeTimer;
-    ncycle_t encLat = 0, endrLat = 0;
-    ncounter_t numUnchangedBits = 0;
+bool SubArray::Read(NVMainRequest* request) {
+    CheckWritePausing();
+    updateReadTiming(request);
+    updateReadEnergy(request);
+    handleRead(request);
+    return true;
+}
 
-    request->address.GetTranslatedAddress(&writeDBC, &writeDomain, NULL, NULL,
-                                          NULL, NULL);
-
-    /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
-    /* sanity check */
-    if (nextWrite > GetEventQueue()->GetCurrentCycle()) {
-        std::cerr << "NVMain Error: Subarray violates WRITE timing constraint!"
-                  << std::endl;
-        return false;
-    } else if (state != SUBARRAY_OPEN) {
-        std::cerr << "NVMain Error: try to write a subarray that is not active!"
-                  << std::endl;
-        return false;
-    } else if (writeDBC != openRow) {
-        std::cerr << "NVMain Error: try to write a row that is not opened "
-                  << "in a subarray!" << std::endl;
-        return false;
-    }
-
-    /************************ONLY FOR RTM***************************
-     * Before accessing the subarray, perform the shifting operation
-     * to align port position to the requested data and incur
-     * latency and energy !.
-     ***************************************************************/
-
-    //     if( !Shift( writeDBC, writeDomain ) )
-    //         std::cout<<"Subarray: Shift function has returned error.
-    //         !!"<<std::endl;
-
-    if (writeMode == WRITE_THROUGH) {
-        encLat = (dataEncoder ? dataEncoder->Write(request) : 0);
-        endrLat = UpdateEndurance(request);
-
-        /* Count the number of bits modified. */
-        if (!p->WriteAllBits) {
-            uint8_t* bitCountData = new uint8_t[request->data.GetSize()];
-
-            for (uint64_t bitCountByte = 0;
-                 bitCountByte < request->data.GetSize(); bitCountByte++) {
-                bitCountData[bitCountByte] =
-                    request->data.GetByte(bitCountByte) ^
-                    request->oldData.GetByte(bitCountByte);
-            }
-
-            ncounter_t bitCountWords = request->data.GetSize() / 4;
-
-            ncounter_t numChangedBits =
-                CountBitsMLC1(1, (uint32_t*) bitCountData, bitCountWords);
-
-            assert(request->data.GetSize() * 8 >= numChangedBits);
-            numUnchangedBits = request->data.GetSize() * 8 - numChangedBits;
-        }
-    }
-
-    /* Determine the write time. */
-    writeTimer = WriteCellData(request);             // Assume write-through.
+void SubArray::unpauseWrite(NVMainRequest* request) {
     if (request->flags & NVMainRequest::FLAG_PAUSED) // This was paused, restart
                                                      // with remaining time
     {
-        writeTimer = request->writeProgress;
         request->flags &= ~NVMainRequest::FLAG_PAUSED; // unpause this
     }
 
     if (request->flags & NVMainRequest::FLAG_CANCELLED) {
         request->flags &= ~NVMainRequest::FLAG_CANCELLED; // restart this
     }
+}
 
-    if (writeMode == WRITE_BACK && writeCycle) {
-        writeTimer = 0;
+void SubArray::handleWritePrecharge(NVMainRequest* request) {
+    NVMainRequest* preReq = new NVMainRequest();
+    *preReq = *request;
+    preReq->owner = this;
 
-        NVMainRequest* requestCopy = new NVMainRequest();
-        *requestCopy = *request;
-        writeBackRequests.push_back(requestCopy);
+    /* insert the event to issue the implicit precharge */
+    auto writeTimer = getWriteTime(request);
+    GetEventQueue()->InsertEvent(
+        EventResponse, this, preReq,
+        GetEventQueue()->GetCurrentCycle() +
+            MAX(p->tBURST, p->tCCD) * (request->burstCount - 1) + p->tAL +
+            p->tCWD + p->tBURST + writeTimer + p->tWR);
+}
+
+ncycle_t SubArray::getWriteTime(NVMainRequest* request) {
+    if (writeMode == WRITE_BACK) return 0;
+
+    ncycle_t encLat = (dataEncoder ? dataEncoder->Write(request) : 0);
+    ncycle_t endrLat = UpdateEndurance(request);
+
+    ncycle_t writeTimer = WriteCellData(request) + encLat + endrLat;
+    if (request->flags & NVMainRequest::FLAG_PAUSED) {
+        writeTimer = request->writeProgress;
     }
+    return writeTimer;
+}
 
-    /* Write canceling/pausing only for write-through memory */
-    if (writeMode == WRITE_THROUGH) request->writeProgress = writeTimer;
-
-    /* Save the next* state incause we cancel a write. */
-    nextActivatePreWrite = nextActivate;
-    nextPrechargePreWrite = nextPrecharge;
-    nextReadPreWrite = nextRead;
-    nextWritePreWrite = nextWrite;
-    nextPowerDownPreWrite = nextPowerDown;
-
+void SubArray::updateWriteTiming(NVMainRequest* request, ncycle_t writeTimer) {
     if (writeMode == WRITE_THROUGH) {
-        writeTimer += encLat + endrLat;
-
         averageWriteTime =
             ((averageWriteTime * static_cast<double>(measuredWriteTimes)) +
              static_cast<double>(writeTimer)) /
@@ -649,7 +541,12 @@ bool SubArray::Write(NVMainRequest* request) {
         measuredWriteTimes++;
     }
 
-    /* Update timing constraints */
+    nextActivatePreWrite = nextActivate;
+    nextPrechargePreWrite = nextPrecharge;
+    nextReadPreWrite = nextRead;
+    nextWritePreWrite = nextWrite;
+    nextPowerDownPreWrite = nextPowerDown;
+
     if (request->type == WRITE_PRECHARGE) {
         nextActivate = MAX(nextActivate, GetEventQueue()->GetCurrentCycle() +
                                              MAX(p->tBURST, p->tCCD) *
@@ -660,18 +557,6 @@ bool SubArray::Write(NVMainRequest* request) {
         nextPrecharge = MAX(nextPrecharge, nextActivate);
         nextRead = MAX(nextRead, nextActivate);
         nextWrite = MAX(nextWrite, nextActivate);
-
-        /* close the subarray */
-        NVMainRequest* preReq = new NVMainRequest();
-        *preReq = *request;
-        preReq->owner = this;
-
-        /* insert the event to issue the implicit precharge */
-        GetEventQueue()->InsertEvent(
-            EventResponse, this, preReq,
-            GetEventQueue()->GetCurrentCycle() +
-                MAX(p->tBURST, p->tCCD) * (request->burstCount - 1) + p->tAL +
-                p->tCWD + p->tBURST + writeTimer + p->tWR);
     } else {
         nextPrecharge =
             MAX(nextPrecharge,
@@ -692,16 +577,29 @@ bool SubArray::Write(NVMainRequest* request) {
 
     nextPowerDown = MAX(nextPowerDown, nextPrecharge);
 
-    /* Mark that a write is in progress in cause we want to pause/cancel. */
-    isWriting = true;
-    writeRequest = request;
-    // TODO: Should we disallow pausing during the data burst?
     writeStart = GetEventQueue()->GetCurrentCycle();
     writeEnd = GetEventQueue()->GetCurrentCycle() + writeTimer;
     writeEventTime = GetEventQueue()->GetCurrentCycle() + p->tCWD +
                      MAX(p->tBURST, p->tCCD) * request->burstCount + writeTimer;
+}
 
-    /* The parent has our hook in the children list, we need to find this. */
+void SubArray::updateWriteEnergy(NVMainRequest* request, ncycle_t writeTimer) {
+    if (p->EnergyModel == "current") {
+        subArrayEnergy += ((p->EIDD4W - p->EIDD3N) * (double) (p->tBURST)) /
+                          (double) (p->BANKS);
+
+        burstEnergy += ((p->EIDD4W - p->EIDD3N) * (double) (p->tBURST)) /
+                       (double) (p->BANKS);
+    } else {
+        ncounter_t numUnchangedBits =
+            request->data.GetSize() * 8 - getNumChangedBits(request);
+        subArrayEnergy += p->Ewr - p->Ewrpb * numUnchangedBits;
+
+        burstEnergy += p->Ewr;
+    }
+}
+
+Event* SubArray::createWriteResponseEvent(NVMainRequest* request) {
     std::vector<NVMObject_hook*>& children =
         GetParent()->GetTrampoline()->GetChildren();
     std::vector<NVMObject_hook*>::iterator it;
@@ -721,7 +619,10 @@ bool SubArray::Write(NVMainRequest* request) {
     writeEvent->SetRecipient(hook);
     writeEvent->SetRequest(request);
 
-    /* Issue a bus burst request when the burst starts. */
+    return writeEvent;
+}
+
+void SubArray::handleBusRead(NVMainRequest* request) {
     NVMainRequest* busReq = new NVMainRequest();
     *busReq = *request;
     busReq->type = BUS_READ;
@@ -729,29 +630,58 @@ bool SubArray::Write(NVMainRequest* request) {
 
     GetEventQueue()->InsertEvent(EventResponse, this, busReq,
                                  GetEventQueue()->GetCurrentCycle() + p->tCWD);
+}
 
-    /* Notify owner of write completion as well */
+void SubArray::handleWrite(NVMainRequest* request, ncycle_t writeTimer) {
+    if (request->type == WRITE_PRECHARGE) {
+        handleWritePrecharge(request);
+    }
+    if (writeMode == WRITE_THROUGH) {
+        request->writeProgress = writeTimer;
+    }
+    if (writeMode == WRITE_BACK && writeCycle) {
+        NVMainRequest* requestCopy = new NVMainRequest();
+        *requestCopy = *request;
+        writeBackRequests.push_back(requestCopy);
+    }
+    unpauseWrite(request);
+    handleBusRead(request);
+
+    auto writeEvent = createWriteResponseEvent(request);
     GetEventQueue()->InsertEvent(writeEvent, writeEventTime);
 
-    /* Calculate energy. */
-    if (p->EnergyModel == "current") {
-        /* DRAM Model. */
-        subArrayEnergy += ((p->EIDD4W - p->EIDD3N) * (double) (p->tBURST)) /
-                          (double) (p->BANKS);
-
-        burstEnergy += ((p->EIDD4W - p->EIDD3N) * (double) (p->tBURST)) /
-                       (double) (p->BANKS);
-    } else {
-        /* Flat energy model. */
-        subArrayEnergy += p->Ewr - p->Ewrpb * numUnchangedBits;
-
-        burstEnergy += p->Ewr;
-    }
-
+    isWriting = true;
+    writeRequest = request;
     writeCycle = true;
-
     writes++;
     dataCycles += p->tBURST;
+}
+
+ncounter_t SubArray::getNumChangedBits(NVMainRequest* request) {
+    if (writeMode == WRITE_THROUGH && !p->WriteAllBits) {
+        uint8_t* bitCountData = new uint8_t[request->data.GetSize()];
+
+        for (uint64_t bitCountByte = 0; bitCountByte < request->data.GetSize();
+             bitCountByte++) {
+            bitCountData[bitCountByte] = request->data.GetByte(bitCountByte) ^
+                                         request->oldData.GetByte(bitCountByte);
+        }
+
+        ncounter_t bitCountWords = request->data.GetSize() / 4;
+
+        return CountBitsMLC1(1, (uint32_t*) bitCountData, bitCountWords);
+    }
+    return 0;
+}
+
+/*
+ * Write() fulfills the column write function
+ */
+bool SubArray::Write(NVMainRequest* request) {
+    auto writeTimer = getWriteTime(request);
+    updateWriteEnergy(request, writeTimer);
+    updateWriteTiming(request, writeTimer);
+    handleWrite(request, writeTimer);
 
     return true;
 }
@@ -1353,50 +1283,36 @@ bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
  * IssueCommand() issue the command so that bank status will be updated
  */
 bool SubArray::IssueCommand(NVMainRequest* req) {
-    bool rv = false;
-
     if (!IsIssuable(req)) {
-        std::cerr << "NVMain Error: Command " << req->type << " can not be "
-                  << "issued in the subarray!" << std::endl;
-    } else {
-        rv = true;
-
-        switch (req->type) {
-            case ACTIVATE:
-                rv = this->Activate(req);
-                break;
-            case SHIFT:
-                rv = this->Shift(req);
-                break;
-
-            case READ:
-            case READ_PRECHARGE:
-                rv = this->Read(req);
-                break;
-
-            case WRITE:
-            case WRITE_PRECHARGE:
-                rv = this->Write(req);
-                break;
-
-            case PRECHARGE:
-            case PRECHARGE_ALL:
-                rv = this->Precharge(req);
-                break;
-
-            case REFRESH:
-                rv = this->Refresh(req);
-                break;
-
-            default:
-                std::cerr
-                    << "NVMain Error : subarray detects unknown operation "
-                    << "in command queue! " << req->type << std::endl;
-                break;
-        }
+        throw std::runtime_error("SubArray can not handle request");
+        return false;
     }
 
-    return rv;
+    switch (req->type) {
+        case ACTIVATE:
+            return Activate(req);
+
+        case SHIFT:
+            return Shift(req);
+
+        case READ:
+        case READ_PRECHARGE:
+            return Read(req);
+
+        case WRITE:
+        case WRITE_PRECHARGE:
+            return Write(req);
+
+        case PRECHARGE:
+        case PRECHARGE_ALL:
+            return Precharge(req);
+
+        case REFRESH:
+            return Refresh(req);
+    }
+
+    throw std::runtime_error("SubArray can not handle request");
+    return false;
 }
 
 bool SubArray::RequestComplete(NVMainRequest* req) {
