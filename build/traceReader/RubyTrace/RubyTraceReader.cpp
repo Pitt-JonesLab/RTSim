@@ -1,1 +1,0 @@
-/mnt/d/code/RTSim/traceReader/RubyTrace/RubyTraceReader.cpp

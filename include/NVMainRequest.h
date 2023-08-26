@@ -48,7 +48,6 @@
 #include <iostream>
 #include <signal.h>
 
-
 namespace NVM {
 
 enum OpType {
@@ -69,7 +68,8 @@ enum OpType {
     BUS_READ,        /* Data bus read burst */
     BUS_WRITE,       /* Data bus write burst */
     CACHED_READ,     /* Check if read is cached anywhere in hierarchy. */
-    CACHED_WRITE     /* Check if write is cached anywhere in hierarchy. */
+    CACHED_WRITE,    /* Check if write is cached anywhere in hierarchy. */
+    PIM_OP           // PIM operation (RowClone)
 };
 
 enum MemRequestStatus {
@@ -142,8 +142,8 @@ class NVMainRequest {
 
     ~NVMainRequest(){};
 
-    NVMAddress address; //< Address of request
-    OpType type;        //< Operation type of request (read, write, etc)
+    NVMAddress address, address2; //< Address of request
+    OpType type; //< Operation type of request (read, write, etc)
     BulkCommand
         bulkCmd; //< Bulk Commands (i.e., Read+Precharge, Write+Precharge, etc)
     ncounters_t threadId; //< Thread ID of issuing application
@@ -166,7 +166,7 @@ class NVMainRequest {
     ncycle_t
         queueCycle; //< When the memory controller accepted (queued) the request
     ncycle_t issueCycle; //< When the memory controller issued the request to
-                         //the interconnect (dequeued)
+                         // the interconnect (dequeued)
     ncycle_t
         completionCycle; //< When the request was sent back to the requestor
 
@@ -193,6 +193,7 @@ class NVMainRequest {
 
 inline const NVMainRequest& NVMainRequest::operator=(const NVMainRequest& m) {
     address = m.address;
+    address2 = m.address2;
     type = m.type;
     bulkCmd = m.bulkCmd;
     threadId = m.threadId;
