@@ -1692,25 +1692,7 @@ ncounter_t getSubarray(NVMainRequest* req) {
     return bank;
 }
 
-void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
-    std::cout << "MemoryController - Issuing RowClone request "
-              << req->arrivalCycle << std::endl;
-
-    throw std::runtime_error("issueRowCloneCommand not implmented");
-}
-
-/*
- *  NOTE: This function assumes the memory controller uses any predicates when
- *  scheduling. They will not be re-checked here.
- */
-bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
-    if (req->type == PIM_OP) {
-        issueRowCloneCommand(req);
-        return false;
-    }
-
-    if (handleCachedRequest(req)) return true;
-
+void MemoryController::handleActivate(NVMainRequest* req) {
     auto rank = getRank(req);
     auto bank = getBank(req);
     auto subarray = getSubarray(req);
@@ -1727,18 +1709,42 @@ bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
     } else {
         throw std::runtime_error("Memory controller cannot issue request " +
                                  std::to_string(req->arrivalCycle));
-        return false;
     }
+}
 
-    enqueueShift(req);
-    if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
-        assert(p->ClosePage != 2);
-        enqueueImplicitPrecharge(req);
+void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
+    std::cout << "MemoryController - Enqueueing RowClone commands at cycle "
+              << GetEventQueue()->GetCurrentCycle() << std::endl;
+
+    handleActivate(req);
+    NVMainRequest* req2 = new NVMainRequest();
+    *req2 = *req;
+    req2->address2 = req->address;
+    handleActivate(req2);
+    delete req2;
+    enqueueRequest(req);
+}
+
+/*
+ *  NOTE: This function assumes the memory controller uses any predicates when
+ *  scheduling. They will not be re-checked here.
+ */
+bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
+    if (req->type == PIM_OP) {
+        issueRowCloneCommand(req);
     } else {
-        enqueueRequest(req);
+        if (handleCachedRequest(req)) return true;
+
+        handleActivate(req);
+        enqueueShift(req);
+        if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
+            assert(p->ClosePage != 2);
+            enqueueImplicitPrecharge(req);
+        } else {
+            enqueueRequest(req);
+        }
     }
 
-    /* Schedule wake event for memory commands if not scheduled. */
     ScheduleCommandWake();
     return true;
 }
@@ -1751,6 +1757,8 @@ void MemoryController::CycleCommandQueues() {
         return;
     }
 
+    std::cout << "MemoryController - Looking to issue a command in cycle "
+              << GetEventQueue()->GetCurrentCycle() << std::endl;
     for (ncounter_t queueIdx = 0; queueIdx < commandQueueCount; queueIdx++) {
         ncounter_t queueId = (curQueue + queueIdx) % commandQueueCount;
         FailReason fail;
@@ -1760,11 +1768,11 @@ void MemoryController::CycleCommandQueues() {
             GetChild()->IsIssuable(commandQueues[queueId].at(0), &fail)) {
             NVMainRequest* queueHead = commandQueues[queueId].at(0);
 
-            *debugStream << GetEventQueue()->GetCurrentCycle()
-                         << " MemoryController: Issued request type "
-                         << queueHead->type << " for address 0x" << std::hex
-                         << queueHead->address.GetPhysicalAddress() << std::dec
-                         << " for queue " << queueId << std::endl;
+            std::cout << GetEventQueue()->GetCurrentCycle()
+                      << " MemoryController: Issued request type "
+                      << queueHead->type << " for address 0x" << std::hex
+                      << queueHead->address.GetPhysicalAddress() << std::dec
+                      << " for queue " << queueId << std::endl;
 
             GetChild()->IssueCommand(queueHead);
 
@@ -1838,6 +1846,8 @@ void MemoryController::CycleCommandQueues() {
             }
         }
     }
+
+    std::cout << "MemoryController - Couldn't issue!\n";
 }
 
 /*

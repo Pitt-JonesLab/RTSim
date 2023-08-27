@@ -313,6 +313,7 @@ class MemoryController : public NVMObject {
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);
 
+    void handleActivate(NVMainRequest* req);
     void enqueueActivate(NVMainRequest* req);
     void enqueueShift(NVMainRequest* req);
     void enqueueRequest(NVMainRequest* req);

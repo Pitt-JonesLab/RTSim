@@ -1223,6 +1223,9 @@ bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
             rv = false;
             if (reason) reason->reason = SUBARRAY_TIMING;
         }
+    } else if (req->type == PIM_OP) {
+        // TODO does this work???
+        return true;
     } else {
         /*
          *  Assume subarray is the end-point for requests. If we haven't found

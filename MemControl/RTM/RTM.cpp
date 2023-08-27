@@ -145,7 +145,8 @@ bool RTM::IsIssuable(NVMainRequest* /*request*/, FailReason* /*fail*/) {
 }
 
 bool RTM::IssueCommand(NVMainRequest* req) {
-    std::cout << "RTM - Received request " << req->arrivalCycle << std::endl;
+    std::cout << "RTM - Received request at cycle "
+              << GetEventQueue()->GetCurrentCycle() << std::endl;
     if (!IsIssuable(req)) {
         return false;
     }

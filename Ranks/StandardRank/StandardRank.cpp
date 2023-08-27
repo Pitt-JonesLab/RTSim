@@ -708,6 +708,14 @@ bool StandardRank::IsIssuable(NVMainRequest* req, FailReason* reason) {
     return rv;
 }
 
+bool StandardRank::rowClone(NVMainRequest* request) {
+    // For now just handle the request
+    // TOOD send this down to children
+    GetEventQueue()->InsertEvent(EventResponse, this, request,
+                                 GetEventQueue()->GetCurrentCycle() + 1);
+    return true;
+}
+
 bool StandardRank::IssueCommand(NVMainRequest* req) {
     if (!IsIssuable(req)) {
         uint64_t bank, rank, channel;
@@ -740,7 +748,7 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
             return this->Write(req);
 
         case PIM_OP:
-            return false;
+            return rowClone(req);
 
         case PRECHARGE:
         case PRECHARGE_ALL:
