@@ -366,9 +366,6 @@ void SubArray::updateActivateEnergy(NVMainRequest* request) {
     }
 }
 
-/*
- * Activate() open a row
- */
 bool SubArray::Activate(NVMainRequest* request) {
     CheckWritePausing();
     updateActivateTiming(request);
@@ -482,9 +479,6 @@ void SubArray::handleRead(NVMainRequest* request) {
     dataCycles += p->tBURST;
 }
 
-/*
- * Read() fulfills the column read function
- */
 bool SubArray::Read(NVMainRequest* request) {
     CheckWritePausing();
     updateReadTiming(request);
@@ -597,6 +591,10 @@ void SubArray::updateWriteEnergy(NVMainRequest* request, ncycle_t writeTimer) {
 
         burstEnergy += p->Ewr;
     }
+
+    auto energy = getWriteEnergy(request);
+    subArrayEnergy += energy;
+    writeEnergy += energy;
 }
 
 Event* SubArray::createWriteResponseEvent(NVMainRequest* request) {
@@ -674,9 +672,6 @@ ncounter_t SubArray::getNumChangedBits(NVMainRequest* request) {
     return 0;
 }
 
-/*
- * Write() fulfills the column write function
- */
 bool SubArray::Write(NVMainRequest* request) {
     auto writeTimer = getWriteTime(request);
     updateWriteEnergy(request, writeTimer);
@@ -686,9 +681,6 @@ bool SubArray::Write(NVMainRequest* request) {
     return true;
 }
 
-/*
- * Shift() fulfills the shift operation before every read/write
- */
 bool SubArray::Shift(NVMainRequest* request) {
     uint64_t dbc, dom;
     request->address.GetTranslatedAddress(&dbc, &dom, NULL, NULL, NULL, NULL);
@@ -702,17 +694,14 @@ bool SubArray::Shift(NVMainRequest* request) {
      *
      */
 
-    numShifts =
-        0; // numShifts holds previous value. Updated it for the new request..
+    // numShifts holds previous value. Updated it for the new request..
+    numShifts = 0;
 
     /* select port */
     ncounter_t port;
 
     if (request->type == WRITE || request->type == WRITE_PRECHARGE) port = 0;
     else port = FindClosestPort(dbc, dom);
-
-    //     std::cout<<"SA: DBC: "<<dbc<< "\tDomain: "<<dom << "\tand selected
-    //     AP: "<<port<<std::endl;
 
     numShifts = abs(rwPortPos[dbc][port] -
                     dom); // absolute of (current position - new position). This
@@ -744,31 +733,9 @@ bool SubArray::Shift(NVMainRequest* request) {
     /* updated the total number of shifts */
     totalnumShifts += numShifts;
 
-    if (rwPortPos[dbc][port] >
-        int(DOMAINS)) // if port position is Invalid, display message and exit.
-                      // note: negative is not checked because data type is
-                      // unsigned.
-    {
-        std::cerr << "Invalid Port position" << std::endl;
-        exit(-1);
+    if (rwPortPos[dbc][port] > int(DOMAINS)) {
+        throw std::runtime_error("Invalid port position");
     }
-
-    /* Update timing constraints */
-    //     nextPrecharge = MAX( nextPrecharge,
-    //                          GetEventQueue()->GetCurrentCycle()
-    //                              + MAX( p->tRCD, p->tRAS ) );
-    //
-    //     nextRead = MAX( nextRead,
-    //                     GetEventQueue()->GetCurrentCycle()
-    //                         + p->tRCD - p->tAL );
-    //
-    //     nextWrite = MAX( nextWrite,
-    //                      GetEventQueue()->GetCurrentCycle()
-    //                          + p->tRCD - p->tAL );
-    //
-    //     nextPowerDown = MAX( nextPowerDown,
-    //                          GetEventQueue()->GetCurrentCycle()
-    //                              + MAX( p->tRCD, p->tRAS ) );
 
     /* the request is deleted by RequestComplete() */
     request->owner = this;
@@ -805,9 +772,6 @@ bool SubArray::Shift(NVMainRequest* request) {
     return true;
 }
 
-/*
- * Precharge() close a row and force the bank back to SUBARRAY_CLOSED
- */
 bool SubArray::Precharge(NVMainRequest* request) {
     ncycle_t writeTimer;
 
@@ -866,10 +830,6 @@ bool SubArray::Precharge(NVMainRequest* request) {
     return true;
 }
 
-/*
- * Refresh() is treated as an ACT and can only be issued when the subarray
- * is idle
- */
 bool SubArray::Refresh(NVMainRequest* request) {
     /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
     /* sanity check */
@@ -1011,6 +971,33 @@ bool SubArray::BetweenWriteIterations() {
     return rv;
 }
 
+double SubArray::getWriteEnergy(NVMainRequest* request) {
+    ncounter_t writeCount0;
+    ncounter_t writeCount1;
+
+    uint32_t* rawData = reinterpret_cast<uint32_t*>(request->data.rawData);
+    unsigned int memoryWordSize =
+        static_cast<unsigned int>(p->tBURST * p->RATE * p->BusWidth);
+    unsigned int writeBytes32 = memoryWordSize / 32;
+    if (rawData) {
+        writeCount0 = CountBitsMLC1(0, rawData, writeBytes32);
+        writeCount1 = CountBitsMLC1(1, rawData, writeBytes32);
+    } else {
+        /* Assume uniformly random data if we don't have data. */
+        writeCount0 = 256;
+        writeCount1 = 256;
+    }
+
+    double baseEnergy = 0.0;
+    if (p->EnergyModel != "current") {
+        baseEnergy += p->Ereset * writeCount0 + p->Eset * writeCount1;
+    }
+
+    if (p->UniformWrites) return baseEnergy;
+    if (p->MLCLevels == 1) return baseEnergy;
+    return 0.0;
+}
+
 ncycle_t SubArray::WriteCellData(NVMainRequest* request) {
     writeIterationStarts.clear();
     uint32_t* rawData = reinterpret_cast<uint32_t*>(request->data.rawData);
@@ -1028,27 +1015,6 @@ ncycle_t SubArray::WriteCellData(NVMainRequest* request) {
             }
         }
 
-        /* Since we are skipping MLC checks below, we need to calculate the
-         * energy here. */
-        ncounter_t writeCount0;
-        ncounter_t writeCount1;
-
-        if (rawData) {
-            writeCount0 = CountBitsMLC1(0, rawData, writeBytes32);
-            writeCount1 = CountBitsMLC1(1, rawData, writeBytes32);
-        } else {
-            /* Assume uniformly random data if we don't have data. */
-            writeCount0 = 256;
-            writeCount1 = 256;
-        }
-
-        if (p->EnergyModel != "current") {
-            subArrayEnergy += p->Ereset * writeCount0;
-            subArrayEnergy += p->Eset * writeCount1;
-            writeEnergy += p->Ereset * writeCount0;
-            writeEnergy += p->Eset * writeCount1;
-        }
-
         return p->tWP;
     }
 
@@ -1061,13 +1027,6 @@ ncycle_t SubArray::WriteCellData(NVMainRequest* request) {
     if (p->MLCLevels == 1) {
         ncounter_t writeCount0 = CountBitsMLC1(0, rawData, writeBytes32);
         ncounter_t writeCount1 = CountBitsMLC1(1, rawData, writeBytes32);
-
-        if (p->EnergyModel != "current") {
-            subArrayEnergy += p->Ereset * writeCount0;
-            subArrayEnergy += p->Eset * writeCount1;
-            writeEnergy += p->Ereset * writeCount0;
-            writeEnergy += p->Eset * writeCount1;
-        }
 
         ncycle_t delay0 = (writeCount0 == 0) ? 0 : p->tWP0;
         ncycle_t delay1 = (writeCount1 == 0) ? 0 : p->tWP1;
@@ -1170,9 +1129,6 @@ ncycle_t SubArray::NextIssuable(NVMainRequest* request) {
     return nextCompare;
 }
 
-/*
- * IsIssuable() tells whether one request satisfies the timing constraints
- */
 bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
     uint64_t opRow;
     bool rv = true;
@@ -1279,9 +1235,6 @@ bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
     return rv;
 }
 
-/*
- * IssueCommand() issue the command so that bank status will be updated
- */
 bool SubArray::IssueCommand(NVMainRequest* req) {
     if (!IsIssuable(req)) {
         throw std::runtime_error("SubArray can not handle request");
@@ -1472,9 +1425,6 @@ SubArrayState SubArray::GetState() { return state; }
 
 void SubArray::SetName(std::string) {}
 
-/*
- * Corresponds to physical subarray id
- */
 void SubArray::SetId(ncounter_t id) { subArrayId = id; }
 
 std::string SubArray::GetName() { return ""; }
@@ -1501,30 +1451,14 @@ bool SubArray::Idle() {
 
 void SubArray::Cycle(ncycle_t) {}
 
-/*
- *  Count the appearances for "value" for 2-bit MLC where value
- *  can be 0 (binary 00), 1 (binary 01), 2 (binary 10) or 3
- *  (binary 11).
- */
 ncounter_t NO_OPT SubArray::Count32MLC2(uint8_t value, uint32_t data) {
-    /*
-     *  This method counts the number of 11 pairs, so we need to convert
-     *  the bit pattern we are looking for to be 11.
-     */
+    value %= 4;
     if (value == 0) data ^= 0xFFFFFFFF;
     else if (value == 1) data ^= 0xAAAAAAAA;
     else if (value == 2) data ^= 0x55555555;
 
-    assert(value < 4);
-
-    /*
-     *  Count number of "11" pairs by ANDing together every-event bit
-     *  with every odd bit. The resulting ANDed value will be 1 if both
-     *  even and odd bit are 1 (i.e. "11") and 0 otherwise.
-     */
-    uint32_t count = (data & 0x55555555) & ((data & 0xAAAAAAAA) >> 1);
-
-    return Count32MLC1(count);
+    uint32_t occurences = (data & 0x55555555) & ((data & 0xAAAAAAAA) >> 1);
+    return Count32MLC1(occurences);
 }
 
 ncounter_t NO_OPT SubArray::CountBitsMLC2(uint8_t value, uint32_t* data,
@@ -1539,10 +1473,6 @@ ncounter_t NO_OPT SubArray::CountBitsMLC2(uint8_t value, uint32_t* data,
 }
 
 ncounter_t NO_OPT SubArray::Count32MLC1(uint32_t data) {
-    /*
-     *  Count the number of ones in this value using some
-     *  bit-manipulation magic.
-     */
     uint32_t count = data;
     count = count - ((count >> 1) & 0x55555555);
     count = (count & 0x33333333) + ((count >> 2) & 0x33333333);
