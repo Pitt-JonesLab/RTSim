@@ -49,6 +49,7 @@
 #include "src/DataEncoder.h"
 #include "src/EnduranceModel.h"
 #include "src/MemoryController.h"
+#include "src/ModuleTiming.h"
 #include "src/NVMObject.h"
 #include "src/Params.h"
 

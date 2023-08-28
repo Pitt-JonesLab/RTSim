@@ -56,4 +56,5 @@ NVMainSource('EventQueue.cpp')
 NVMainSource('Stats.cpp')
 NVMainSource('Debug.cpp')
 NVMainSource('TagGenerator.cpp')
+NVMainSource('ModuleTiming.cpp')
 

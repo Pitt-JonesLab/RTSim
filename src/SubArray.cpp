@@ -775,20 +775,6 @@ bool SubArray::Shift(NVMainRequest* request) {
 bool SubArray::Precharge(NVMainRequest* request) {
     ncycle_t writeTimer;
 
-    /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
-    /* sanity check */
-    if (nextPrecharge > GetEventQueue()->GetCurrentCycle()) {
-        std::cerr
-            << "NVMain Error: SubArray violates PRECHARGE timing constraint!"
-            << std::endl;
-        return false;
-    } else if (state != SUBARRAY_CLOSED && state != SUBARRAY_OPEN) {
-        std::cerr
-            << "NVMain Error: try to precharge a subarray that is neither "
-            << "idle nor active" << std::endl;
-        return false;
-    }
-
     /* Update timing constraints */
     writeTimer = MAX(1, p->tRP); // Assume write-through. Needs to be at least
                                  // one due to event callback.
@@ -831,19 +817,6 @@ bool SubArray::Precharge(NVMainRequest* request) {
 }
 
 bool SubArray::Refresh(NVMainRequest* request) {
-    /* TODO: Can we remove this sanity check and totally trust IsIssuable()? */
-    /* sanity check */
-    if (nextActivate > GetEventQueue()->GetCurrentCycle()) {
-        std::cerr
-            << "NVMain Error: SubArray violates REFRESH timing constraint!"
-            << std::endl;
-        return false;
-    } else if ((state != SUBARRAY_CLOSED && p->UsePrecharge)) {
-        std::cerr << "NVMain Error: try to refresh a subarray that is not idle "
-                  << std::endl;
-        return false;
-    }
-
     /* Update timing constraints */
     nextActivate =
         MAX(nextActivate, GetEventQueue()->GetCurrentCycle() + p->tRFC);
@@ -1118,124 +1091,81 @@ ncycle_t SubArray::WriteCellData(NVMainRequest* request) {
 }
 
 ncycle_t SubArray::NextIssuable(NVMainRequest* request) {
-    ncycle_t nextCompare = 0;
-
-    if (request->type == ACTIVATE) nextCompare = nextActivate;
-    else if (request->type == READ) nextCompare = nextRead;
-    else if (request->type == WRITE) nextCompare = nextWrite;
-    else if (request->type == PRECHARGE) nextCompare = nextPrecharge;
-
-    // Should have no children
-    return nextCompare;
+    if (request->type == ACTIVATE) return nextActivate;
+    else if (request->type == READ) return nextRead;
+    else if (request->type == WRITE) return nextWrite;
+    else if (request->type == PRECHARGE) return nextPrecharge;
+    return 0;
 }
 
 bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
+    if (nextCommand != CMD_NOP) return false;
+    if (reason) reason->reason = SUBARRAY_TIMING;
+
+    ModuleTiming timing(nextActivate, nextPrecharge, nextRead, nextWrite,
+                        nextPowerDown);
+    if (!timing.isIssuable(req, GetEventQueue()->GetCurrentCycle())) {
+        if (req->type == ACTIVATE) {
+            actWaits++;
+            actWaitTotal += nextActivate - (GetEventQueue()->GetCurrentCycle());
+        }
+        return false;
+    }
+
     uint64_t opRow;
     bool rv = true;
 
     req->address.GetTranslatedAddress(&opRow, NULL, NULL, NULL, NULL, NULL);
 
-    if (nextCommand != CMD_NOP) return false;
-
-    if (req->type == ACTIVATE) {
-        if (nextActivate >
-                (GetEventQueue()
-                     ->GetCurrentCycle()) /* if it is too early to open */
-            ||
-            (p->UsePrecharge &&
-             state != SUBARRAY_CLOSED) /* or, the subarray needs a precharge */
-            || (p->WritePausing && isWriting &&
-                writeRequest->flags &
-                    NVMainRequest::FLAG_FORCED) /* or, write can't be paused. */
-            || (p->WritePausing && isWriting &&
-                !(req->flags &
-                  NVMainRequest::FLAG_PRIORITY))) /* Prevent normal row buffer
-                                                     misses from pausing writes
-                                                     at odd times. */
-        {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
+    auto notActive = state != SUBARRAY_OPEN;
+    auto notIdle = state != SUBARRAY_CLOSED;
+    auto wrongRow = opRow != openRow;
+    auto needsPrecharge = p->UsePrecharge && notIdle;
+    auto cantPause = p->WritePausing && isWriting &&
+                     (writeRequest->flags & NVMainRequest::FLAG_FORCED);
+    auto cantPauseBufferMisses = p->WritePausing && isWriting &&
+                                 !(req->flags & NVMainRequest::FLAG_PRIORITY);
+    switch (req->type) {
+        case ACTIVATE: {
+            auto fail = needsPrecharge || cantPause || cantPauseBufferMisses;
+            return !fail;
         }
 
-        if (rv == false) {
-            /* if it is too early to open the subarray */
-            if (nextActivate > (GetEventQueue()->GetCurrentCycle())) {
-                actWaits++;
-                actWaitTotal +=
-                    nextActivate - (GetEventQueue()->GetCurrentCycle());
-            }
+        case READ:
+        case READ_PRECHARGE: {
+            auto fail = notActive || wrongRow || cantPause;
+            return !fail;
         }
-    } else if (req->type == SHIFT) {
-        /* We assume subarray can always shift, because ACTIVATE before this has
-         * been successfully performed. */
-    } else if (req->type == READ || req->type == READ_PRECHARGE) {
-        if (nextRead >
-                (GetEventQueue()
-                     ->GetCurrentCycle()) /* if it is too early to read */
-            || state != SUBARRAY_OPEN     /* or, the subarray is not active */
-            || opRow != openRow /* or, the target row is not the open row */
-            ||
-            (p->WritePausing && isWriting &&
-             writeRequest->flags &
-                 NVMainRequest::FLAG_FORCED)) /* or, write can't be paused. */
-        {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
+
+        case WRITE:
+        case WRITE_PRECHARGE: {
+            auto fail = notActive || wrongRow;
+            return !fail;
         }
-    } else if (req->type == WRITE || req->type == WRITE_PRECHARGE) {
-        if (nextWrite >
-                (GetEventQueue()
-                     ->GetCurrentCycle()) /* if it is too early to write */
-            || state != SUBARRAY_OPEN     /* or, the subarray is not active */
-            || opRow != openRow) /* or, the target row is not the open row */
-        {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
+
+        case PRECHARGE:
+        case PRECHARGE_ALL: {
+            auto fail = (notActive && notIdle);
+            return !fail;
         }
-    } else if (req->type == PRECHARGE || req->type == PRECHARGE_ALL) {
-        if (nextPrecharge >
-                (GetEventQueue()
-                     ->GetCurrentCycle()) /* if it is too early to precharge */
-            ||
-            (state !=
-                 SUBARRAY_OPEN /* or the subbary is neither active nor idle */
-             && state != SUBARRAY_CLOSED)) {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
-        }
-    } else if (req->type == POWERDOWN_PDA || req->type == POWERDOWN_PDPF ||
-               req->type == POWERDOWN_PDPS) {
-        /* Bank doesn't know write time, so we need to check the subarray */
-        if (nextPowerDown > (GetEventQueue()->GetCurrentCycle()) || isWriting) {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
-        }
-    } else if (req->type == POWERUP) {
-        /* We assume subarray can always power up, as it is under bank control.
-         */
-    } else if (req->type == REFRESH) {
-        if (nextActivate >
-                (GetEventQueue()
-                     ->GetCurrentCycle()) /* if it is too early to refresh */
-            || (state != SUBARRAY_CLOSED &&
-                p->UsePrecharge)) /* or, the subarray is not idle */
-        {
-            rv = false;
-            if (reason) reason->reason = SUBARRAY_TIMING;
-        }
-    } else if (req->type == PIM_OP) {
-        // TODO does this work???
-        return true;
-    } else {
-        /*
-         *  Assume subarray is the end-point for requests. If we haven't found
-         * this request yet, it is not supported.
-         */
-        rv = false;
-        if (reason) reason->reason = UNSUPPORTED_COMMAND;
+
+        case POWERDOWN_PDA:
+        case POWERDOWN_PDPF:
+        case POWERDOWN_PDPS:
+            return !isWriting;
+
+        case REFRESH:
+            return !needsPrecharge;
+
+        case SHIFT:
+        case POWERUP:
+        case PIM_OP:
+            return true;
+
+        default:
+            if (reason) reason->reason = UNSUPPORTED_COMMAND;
+            return false;
     }
-
-    return rv;
 }
 
 bool SubArray::IssueCommand(NVMainRequest* req) {
@@ -1265,9 +1195,11 @@ bool SubArray::IssueCommand(NVMainRequest* req) {
 
         case REFRESH:
             return Refresh(req);
-    }
 
-    throw std::runtime_error("SubArray can not handle request");
+        default:
+            throw std::runtime_error("SubArray can not handle request");
+            return false;
+    }
     return false;
 }
 

@@ -2,6 +2,7 @@
 /log
 /cputraces
 /traces_with_Ids
+/.vscode
 .sconsign.dblite
 *.log
 *.o
