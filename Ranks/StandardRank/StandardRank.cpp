@@ -600,8 +600,9 @@ ncycle_t StandardRank::NextIssuable(NVMainRequest* request) {
         nextCompare = nextWrite;
     else if (request->type == PRECHARGE || request->type == PRECHARGE_ALL)
         nextCompare = nextPrecharge;
-    else if (request->type == PIM_OP) nextCompare = nextRead; // TODO fix timing
-    else if (request->type == SHIFT) nextCompare = nextRead;  // TODO fix timing
+    else if (request->type == ROWCLONE_SRC || request->type == ROWCLONE_DEST)
+        nextCompare = nextRead;                              // TODO fix timing
+    else if (request->type == SHIFT) nextCompare = nextRead; // TODO fix timing
     else assert(false);
 
     return MAX(GetChild(request)->NextIssuable(request), nextCompare);
@@ -747,7 +748,8 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
         case WRITE_PRECHARGE:
             return this->Write(req);
 
-        case PIM_OP:
+        case ROWCLONE_SRC:
+        case ROWCLONE_DEST:
             return rowClone(req);
 
         case PRECHARGE:

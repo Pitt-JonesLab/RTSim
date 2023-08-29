@@ -1159,7 +1159,8 @@ bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
 
         case SHIFT:
         case POWERUP:
-        case PIM_OP:
+        case ROWCLONE_SRC:
+        case ROWCLONE_DEST:
             return true;
 
         default:

@@ -1153,7 +1153,8 @@ bool MemoryController::FindCachedAddress(
     *accessibleRequest = NULL;
 
     for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
-        if ((*it)->type == PIM_OP) continue;
+        if ((*it)->type == ROWCLONE_SRC || (*it)->type == ROWCLONE_DEST)
+            continue;
 
         ncounter_t queueId = GetCommandQueueId((*it)->address);
         NVMainRequest* cachedRequest = MakeCachedRequest((*it));
@@ -1712,37 +1713,28 @@ void MemoryController::handleActivate(NVMainRequest* req) {
     }
 }
 
-void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
-    std::cout << "MemoryController - Enqueueing RowClone commands at cycle "
-              << GetEventQueue()->GetCurrentCycle() << std::endl;
-
-    handleActivate(req);
-    NVMainRequest* req2 = new NVMainRequest();
-    *req2 = *req;
-    req2->address2 = req->address;
-    handleActivate(req2);
-    delete req2;
-    enqueueRequest(req);
-}
-
 /*
  *  NOTE: This function assumes the memory controller uses any predicates when
  *  scheduling. They will not be re-checked here.
  */
 bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
-    if (req->type == PIM_OP) {
-        issueRowCloneCommand(req);
-    } else {
-        if (handleCachedRequest(req)) return true;
-
+    // TODO clean up this function
+    if (req->type == ROWCLONE_SRC || req->type == ROWCLONE_DEST) {
         handleActivate(req);
-        enqueueShift(req);
-        if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
-            assert(p->ClosePage != 2);
-            enqueueImplicitPrecharge(req);
-        } else {
-            enqueueRequest(req);
-        }
+        enqueueRequest(req);
+        ScheduleCommandWake();
+        return true;
+    }
+
+    if (handleCachedRequest(req)) return true;
+
+    handleActivate(req);
+    enqueueShift(req);
+    if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
+        assert(p->ClosePage != 2);
+        enqueueImplicitPrecharge(req);
+    } else {
+        enqueueRequest(req);
     }
 
     ScheduleCommandWake();

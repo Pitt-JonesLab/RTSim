@@ -35,7 +35,8 @@ bool ModuleTiming::isIssuable(NVMainRequest* req, ncycle_t cycle) {
 
         case SHIFT:
         case POWERUP:
-        case PIM_OP:
+        case ROWCLONE_SRC:
+        case ROWCLONE_DEST:
             return true;
 
         default:

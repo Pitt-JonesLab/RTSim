@@ -111,6 +111,12 @@ class TraceMain : public NVMObject {
     NVMainRequest* getNextRequest();
 
     void waitForDrain();
+
+    bool issueRequest(NVMainRequest* req);
+
+    bool issueRowClone(NVMainRequest* req);
+
+    bool tryCycle(ncycle_t cycles);
 };
 
 }; // namespace NVM
