@@ -710,10 +710,7 @@ bool StandardRank::IsIssuable(NVMainRequest* req, FailReason* reason) {
 }
 
 bool StandardRank::rowClone(NVMainRequest* request) {
-    // For now just handle the request
-    // TOOD send this down to children
-    GetEventQueue()->InsertEvent(EventResponse, this, request,
-                                 GetEventQueue()->GetCurrentCycle() + 1);
+    GetChild()->IssueCommand(request);
     return true;
 }
 

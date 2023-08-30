@@ -1098,6 +1098,13 @@ ncycle_t SubArray::NextIssuable(NVMainRequest* request) {
     return 0;
 }
 
+bool SubArray::rowClone(NVMainRequest* request) {
+    GetEventQueue()->InsertEvent(EventResponse, this, request,
+                                 GetEventQueue()->GetCurrentCycle() + 1);
+    return true;
+    // TODO ROWCLONE_DEST updates the sim interface
+}
+
 bool SubArray::IsIssuable(NVMainRequest* req, FailReason* reason) {
     if (nextCommand != CMD_NOP) return false;
     if (reason) reason->reason = SUBARRAY_TIMING;
@@ -1193,6 +1200,10 @@ bool SubArray::IssueCommand(NVMainRequest* req) {
         case PRECHARGE:
         case PRECHARGE_ALL:
             return Precharge(req);
+
+        case ROWCLONE_SRC:
+        case ROWCLONE_DEST:
+            return rowClone(req);
 
         case REFRESH:
             return Refresh(req);

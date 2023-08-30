@@ -97,6 +97,7 @@ class SubArray : public NVMObject {
     bool Write(NVMainRequest* request);
     bool Shift(NVMainRequest* request);
     bool Precharge(NVMainRequest* request);
+    bool rowClone(NVMainRequest* request);
 
     /*
      * Activates the subarray.
