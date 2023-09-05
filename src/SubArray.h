@@ -247,6 +247,17 @@ class SubArray : public NVMObject {
     double writeEnergy;
     double refreshEnergy;
 
+    struct SubArrayEnergy {
+        double totalEnergy;
+        double shiftEnergy;
+        double activeEnergy;
+        double burstEnergy;
+        double writeEnergy;
+        double refreshEnergy;
+    };
+
+    SubArrayEnergy energy;
+
     uint64_t worstCaseEndurance, averageEndurance;
 
     ncounter_t reads, writes, activates, precharges, refreshes;

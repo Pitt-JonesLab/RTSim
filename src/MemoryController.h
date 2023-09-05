@@ -48,6 +48,7 @@
 #include "src/Config.h"
 #include "src/Interconnect.h"
 #include "src/NVMObject.h"
+#include "src/SubArrayCounter.h"
 
 #include <deque>
 #include <iostream>
@@ -147,9 +148,16 @@ class MemoryController : public NVMObject {
     ncounter_t*** effectiveRow;
     ncounter_t*** effectiveMuxedRow;
     ncounter_t*** activeSubArray;
-    ncounter_t*** starvationCounter;
+    SubArrayCounter starvationCounters;
     ncounter_t starvationThreshold;
     ncounter_t subArrayNum;
+
+    // starvationCounter, effectiveRow, effectiveMuxedRow, and activeSubArray
+    // are 3D arrays of size RANKS x BANKS x SUBARRAYS
+    // starvationCounter counts all row transactions
+    // activeSubArray is true when the subarray is active, false otherwise
+    // effectiveRow and effectiveMuxedRow hold which row is activated in each
+    // subarray
 
     bool* rankPowerDown;
 
