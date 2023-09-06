@@ -133,7 +133,6 @@ class MemoryController : public NVMObject {
 
     // Private Vars
     SubArrayCounter activeSubArrays;
-    // Interconnect* memory;
     ncycle_t lastCommandWake;
     ncounter_t wakeupCount;
     ncycle_t lastIssueCycle;
@@ -168,11 +167,8 @@ class MemoryController : public NVMObject {
     const int transactionQueuePriority = 30;
     const int commandQueuePriority = 40;
     const int refreshPriority = 20;
-    const int lowPowerPriority = 10;
     const int cleanupPriority = -10;
 
-    // Private Functions
-    void InitBankQueues(unsigned int numQueues);
     void CommandQueueCallback(void* data);
     void CleanupCallback(void* data);
     void RefreshCallback(void* data);
@@ -181,18 +177,11 @@ class MemoryController : public NVMObject {
     NVMainRequest* MakeCachedRequest(NVMainRequest* triggerRequest);
     bool TransactionAvailable(ncounter_t queueId);
     void ScheduleCommandWake();
-    NVMainRequest* MakeActivateRequest(const ncounter_t, const ncounter_t,
-                                       const ncounter_t, const ncounter_t,
-                                       const ncounter_t);
     NVMainRequest* MakeShiftRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* MakeShiftRequest(const ncounter_t, const ncounter_t,
-                                    const ncounter_t, const ncounter_t,
-                                    const ncounter_t);
     NVMainRequest* MakeImplicitPrechargeRequest(NVMainRequest* triggerRequest);
     NVMainRequest* MakePrechargeRequest(const ncounter_t, const ncounter_t,
                                         const ncounter_t, const ncounter_t,
                                         const ncounter_t);
-    NVMainRequest* MakePrechargeAllRequest(NVMainRequest* triggerRequest);
     NVMainRequest* MakePrechargeAllRequest(const ncounter_t, const ncounter_t,
                                            const ncounter_t, const ncounter_t,
                                            const ncounter_t);
@@ -201,14 +190,6 @@ class MemoryController : public NVMObject {
                                       const ncounter_t);
     NVMainRequest* MakePowerdownRequest(OpType pdOp, const ncounter_t rank);
     NVMainRequest* MakePowerupRequest(const ncounter_t rank);
-    bool FindStarvedRequests(std::list<NVMainRequest*>& transactionQueue,
-                             std::vector<NVMainRequest*>& starvedRequests);
-    bool FindRowBufferHits(std::list<NVMainRequest*>& transactionQueue,
-                           std::vector<NVMainRequest*>& hitRequests);
-    bool FindOldestReadyRequests(std::list<NVMainRequest*>& transactionQueue,
-                                 std::vector<NVMainRequest*>& oldestRequests);
-    bool FindClosedBankRequests(std::list<NVMainRequest*>& transactionQueue,
-                                std::vector<NVMainRequest*>& closedRequests);
     bool FindCachedAddress(std::list<NVMainRequest*>& transactionQueue,
                            NVMainRequest** accessibleRequest,
                            NVM::SchedulingPredicate& p);
@@ -218,47 +199,72 @@ class MemoryController : public NVMObject {
     bool FindWriteStalledRead(std::list<NVMainRequest*>& transactionQueue,
                               NVMainRequest** hitRequest,
                               NVM::SchedulingPredicate& p);
-    bool FindStarvedRequests(std::list<NVMainRequest*>& transactionQueue,
-                             std::vector<NVMainRequest*>& starvedRequests,
-                             NVM::SchedulingPredicate& p);
-    bool FindRowBufferHits(std::list<NVMainRequest*>& transactionQueue,
-                           std::vector<NVMainRequest*>& hitRequests,
-                           NVM::SchedulingPredicate& p);
-    bool FindOldestReadyRequests(std::list<NVMainRequest*>& transactionQueue,
-                                 std::vector<NVMainRequest*>& oldestRequests,
-                                 NVM::SchedulingPredicate& p);
-    bool FindClosedBankRequests(std::list<NVMainRequest*>& transactionQueue,
-                                std::vector<NVMainRequest*>& closedRequests,
-                                NVM::SchedulingPredicate& p);
-    /* IsLastRequest() tells whether no other request has the row buffer hit in
-     * the transaction queue */
+
+    /*
+     * Tells whether no other request has the row buffer hit in the transaction
+     * queue
+     */
     virtual bool IsLastRequest(std::list<NVMainRequest*>& transactionQueue,
                                NVMainRequest* request);
-    /* MoveCurrentQueue() increment curQueue */
+
+    /*
+     * Increments curQueue
+     */
     void MoveCurrentQueue();
-    /* return true if the delayed refresh in the corresponding bank reach the
-     * threshold */
+
+    /*
+     * Returns true if the delayed refresh in the corresponding bank reach the
+     * threshold
+     */
     bool NeedRefresh(const ncounter_t, const ncounter_t);
-    /* return true if ALL command queues in the bank group are empty */
+
+    /*
+     * Returns true if ALL command queues in the bank group are empty
+     */
     bool IsRefreshBankQueueEmpty(const ncounter_t, const ncounter_t);
-    /* set the refresh flag for a given bank group */
+
+    /*
+     * Sets the refresh flag for a given bank group
+     */
     void SetRefresh(const ncounter_t, const ncounter_t);
-    /* reset the refresh flag for a given bank group */
+
+    /*
+     * Resets the refresh flag for a given bank group
+     */
     void ResetRefresh(const ncounter_t, const ncounter_t);
-    /* reset the refresh queued flag for a given bank group */
+
+    /*
+     * Resets the refresh queued flag for a given bank group
+     */
     void ResetRefreshQueued(const ncounter_t bank, const ncounter_t rank);
-    /* increment the delayedRefreshCounter in a given bank group */
+
+    /*
+     * Increments the delayedRefreshCounter in a given bank group
+     */
     void IncrementRefreshCounter(const ncounter_t, const ncounter_t);
-    /* decrement the delayedRefreshCounter in a given bank group */
+
+    /*
+     * Decrements the delayedRefreshCounter in a given bank group
+     */
     void DecrementRefreshCounter(const ncounter_t, const ncounter_t);
-    /* issue REFRESH command if necessary; otherwise do nothing */
+
+    /*
+     * Issues REFRESH command if necessary
+     */
     virtual bool HandleRefresh();
-    /* check whether any all command queues in the rank are empty */
+
+    /*
+     * Checks whether any all command queues in the rank are empty
+     */
     bool RankQueueEmpty(const ncounter_t&);
+
     void PowerDown(const ncounter_t&);
+
     void PowerUp(const ncounter_t&);
-    virtual void HandleLowPower();
-    /* Check if a command queue is empty or will be cleaned up. */
+
+    /*
+     * Checks if a command queue is empty or will be cleaned up.
+     */
     bool EffectivelyEmpty(const ncounter_t&);
 
     class DummyPredicate : public SchedulingPredicate {

@@ -744,41 +744,6 @@ void MemoryController::PowerUp(const ncounter_t& rankId) {
     }
 }
 
-void MemoryController::HandleLowPower() {
-    for (ncounter_t rankId = 0; rankId < p->RANKS; rankId++) {
-        bool needRefresh = false;
-        if (p->UseRefresh) {
-            for (ncounter_t bankId = 0; bankId < m_refreshBankNum; bankId++) {
-                ncounter_t bankGroupHead = bankId * p->BanksPerRefresh;
-
-                if (NeedRefresh(bankGroupHead, rankId)) {
-                    needRefresh = true;
-                    break;
-                }
-            }
-        }
-
-        /* if some of the banks in this rank need refresh */
-        if (needRefresh) {
-            NVMainRequest* powerupRequest = MakePowerupRequest(rankId);
-
-            /* if the rank is powered down, power it up */
-            if (rankPowerDown[rankId] &&
-                GetChild()->IsIssuable(powerupRequest)) {
-                GetChild()->IssueCommand(powerupRequest);
-                rankPowerDown[rankId] = false;
-            } else {
-                delete powerupRequest;
-            }
-        }
-        /* else, check whether the rank can be powered down or up */
-        else {
-            if (rankPowerDown[rankId]) PowerUp(rankId);
-            else PowerDown(rankId);
-        }
-    }
-}
-
 void MemoryController::SetID(unsigned int id) { this->id = id; }
 
 unsigned int MemoryController::GetID() { return this->id; }
@@ -811,23 +776,6 @@ MemoryController::MakeActivateRequest(NVMainRequest* triggerRequest) {
     return activateRequest;
 }
 
-NVMainRequest* MemoryController::MakeActivateRequest(
-    const ncounter_t row, const ncounter_t col, const ncounter_t bank,
-    const ncounter_t rank, const ncounter_t subarray) {
-    NVMainRequest* activateRequest = new NVMainRequest();
-
-    activateRequest->type = ACTIVATE;
-    ncounter_t actAddr =
-        GetDecoder()->ReverseTranslate(row, col, bank, rank, id, subarray);
-    activateRequest->address.SetPhysicalAddress(actAddr);
-    activateRequest->address.SetTranslatedAddress(row, col, bank, rank, id,
-                                                  subarray);
-    activateRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    activateRequest->owner = this;
-
-    return activateRequest;
-}
-
 NVMainRequest*
 MemoryController::MakeShiftRequest(NVMainRequest* triggerRequest) {
     NVMainRequest* shiftRequest = new NVMainRequest();
@@ -835,25 +783,6 @@ MemoryController::MakeShiftRequest(NVMainRequest* triggerRequest) {
     shiftRequest->type = SHIFT;
     shiftRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
     shiftRequest->address = triggerRequest->address;
-    shiftRequest->owner = this;
-
-    return shiftRequest;
-}
-
-NVMainRequest* MemoryController::MakeShiftRequest(const ncounter_t row,
-                                                  const ncounter_t col,
-                                                  const ncounter_t bank,
-                                                  const ncounter_t rank,
-                                                  const ncounter_t subarray) {
-    NVMainRequest* shiftRequest = new NVMainRequest();
-
-    shiftRequest->type = SHIFT;
-    ncounter_t actAddr =
-        GetDecoder()->ReverseTranslate(row, col, bank, rank, id, subarray);
-    shiftRequest->address.SetPhysicalAddress(actAddr);
-    shiftRequest->address.SetTranslatedAddress(row, col, bank, rank, id,
-                                               subarray);
-    shiftRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
     shiftRequest->owner = this;
 
     return shiftRequest;
@@ -886,18 +815,6 @@ NVMainRequest* MemoryController::MakePrechargeRequest(
     prechargeRequest->owner = this;
 
     return prechargeRequest;
-}
-
-NVMainRequest*
-MemoryController::MakePrechargeAllRequest(NVMainRequest* triggerRequest) {
-    NVMainRequest* prechargeAllRequest = new NVMainRequest();
-
-    prechargeAllRequest->type = PRECHARGE_ALL;
-    prechargeAllRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    prechargeAllRequest->address = triggerRequest->address;
-    prechargeAllRequest->owner = this;
-
-    return prechargeAllRequest;
 }
 
 NVMainRequest* MemoryController::MakePrechargeAllRequest(
@@ -1684,8 +1601,6 @@ bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
 }
 
 void MemoryController::CycleCommandQueues() {
-    // HandleLowPower( );
-
     /* If a refresh event schedule for this cycle was handled, we are done. */
     if (handledRefresh == GetEventQueue()->GetCurrentCycle()) {
         return;
