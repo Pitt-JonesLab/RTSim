@@ -7,13 +7,15 @@ SubArrayCounter::SubArrayCounter() :
     numBanks(0),
     numSubArrays(0) {}
 
-SubArrayCounter::SubArrayCounter(Params* p, Config* config) :
+SubArrayCounter::SubArrayCounter(Params* p, Config* config,
+                                 ncounter_t initial) :
     numRanks(p->RANKS),
     numBanks(p->BANKS) {
     if (config->KeyExists("MATHeight")) numSubArrays = p->ROWS / p->MATHeight;
     else numSubArrays = 1;
 
-    counters = std::vector<ncounter_t>(numRanks * numBanks * numSubArrays, 0);
+    counters =
+        std::vector<ncounter_t>(numRanks * numBanks * numSubArrays, initial);
 }
 
 ncounter_t& SubArrayCounter::operator[](NVMainRequest* req) {
@@ -46,8 +48,16 @@ void SubArrayCounter::increment(NVMAddress address) {
     counters[getAddressIndex(address)]++;
 }
 
-void SubArrayCounter::clear(NVMainRequest* req) { clear(req->address); }
+void SubArrayCounter::clear(NVMainRequest* req, ncounter_t reset) {
+    clear(req->address, reset);
+}
 
-void SubArrayCounter::clear(NVMAddress address) {
-    counters[getAddressIndex(address)] = 0;
+void SubArrayCounter::clear(NVMAddress address, ncounter_t reset) {
+    counters[getAddressIndex(address)] = reset;
+}
+
+void SubArrayCounter::clear(size_t rank, size_t bank, ncounter_t reset) {
+    for (size_t i = 0; i < numSubArrays; i++)
+        counters[rank * numBanks * numSubArrays + bank * numSubArrays + i] =
+            reset;
 }

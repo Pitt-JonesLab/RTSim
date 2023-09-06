@@ -84,10 +84,6 @@ MemoryController::MemoryController() {
     starvationThreshold = 4;
     subArrayNum = 1;
     activateQueued = NULL;
-    effectiveRow = NULL;
-    effectiveMuxedRow = NULL;
-    activeSubArray = NULL;
-
     delayedRefreshCounter = NULL;
 
     curQueue = 0;
@@ -102,22 +98,10 @@ MemoryController::~MemoryController() {
         delete[] activateQueued[i];
         delete[] bankNeedRefresh[i];
         delete[] refreshQueued[i];
-
-        for (ncounter_t j = 0; j < p->BANKS; j++) {
-            delete[] effectiveRow[i][j];
-            delete[] effectiveMuxedRow[i][j];
-            delete[] activeSubArray[i][j];
-        }
-        delete[] effectiveRow[i];
-        delete[] effectiveMuxedRow[i];
-        delete[] activeSubArray[i];
     }
 
     delete[] commandQueues;
     delete[] activateQueued;
-    delete[] effectiveRow;
-    delete[] effectiveMuxedRow;
-    delete[] activeSubArray;
     delete[] bankNeedRefresh;
     delete[] rankPowerDown;
 
@@ -318,14 +302,11 @@ void MemoryController::SetMappingScheme() {
 }
 
 void MemoryController::SetConfig(Config* conf, bool createChildren) {
-    std::cout << '1';
     this->config = conf;
 
     Params* params = new Params();
     params->SetParams(conf);
     SetParams(params);
-
-    std::cout << '1';
 
     if (createChildren) {
         uint64_t channels, ranks, banks, rows, cols, subarrays;
@@ -344,7 +325,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
             ->GetTranslationMethod()
             ->GetCount(&rows, &cols, &banks, &ranks, &channels, &subarrays);
 
-        std::cout << '1';
         /* Allows for differing layouts per channel by overwriting the method.
          */
         if (conf->KeyExists("MATHeight")) {
@@ -360,7 +340,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
 
         TranslationMethod* method = new TranslationMethod();
 
-        std::cout << '1';
         method->SetBitWidths(NVM::mlog2(rows), NVM::mlog2(cols),
                              NVM::mlog2(banks), NVM::mlog2(ranks),
                              NVM::mlog2(channels), NVM::mlog2(subarrays));
@@ -400,7 +379,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
                   (8 * 1024))
               << " KB." << std::endl;
 
-    std::cout << '1';
     if (conf->KeyExists("MATHeight")) {
         subArrayNum = p->ROWS / p->MATHeight;
     } else {
@@ -409,7 +387,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
 
     /* Determine number of command queues. Assume per-bank queues as this was
      * the default for older nvmain versions. */
-    std::cout << '1';
     queueModel = PerBankQueues;
     commandQueueCount = p->RANKS * p->BANKS;
     if (conf->KeyExists("QueueModel")) {
@@ -426,26 +403,18 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         /* Add your custom types here. */
     }
 
-    std::cout << "Creating " << commandQueueCount << " command queues."
-              << std::endl;
-
-    std::cout << '1';
     commandQueues = new std::deque<NVMainRequest*>[commandQueueCount];
     activateQueued = new bool*[p->RANKS];
     refreshQueued = new bool*[p->RANKS];
     starvationCounters = SubArrayCounter(p, conf);
-    effectiveRow = new ncounter_t**[p->RANKS];
-    effectiveMuxedRow = new ncounter_t**[p->RANKS];
-    activeSubArray = new ncounter_t**[p->RANKS];
+    activeSubArrays = SubArrayCounter(p, conf);
+    activeRow = SubArrayCounter(p, conf, p->ROWS);
+    activeMuxedRow = SubArrayCounter(p, conf, p->ROWS);
     rankPowerDown = new bool[p->RANKS];
 
-    std::cout << '1';
     for (ncounter_t i = 0; i < p->RANKS; i++) {
         activateQueued[i] = new bool[p->BANKS];
         refreshQueued[i] = new bool[p->BANKS];
-        activeSubArray[i] = new ncounter_t*[p->BANKS];
-        effectiveRow[i] = new ncounter_t*[p->BANKS];
-        effectiveMuxedRow[i] = new ncounter_t*[p->BANKS];
 
         if (p->UseLowPower) rankPowerDown[i] = p->InitPD;
         else rankPowerDown[i] = false;
@@ -453,17 +422,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         for (ncounter_t j = 0; j < p->BANKS; j++) {
             activateQueued[i][j] = false;
             refreshQueued[i][j] = false;
-
-            effectiveRow[i][j] = new ncounter_t[subArrayNum];
-            effectiveMuxedRow[i][j] = new ncounter_t[subArrayNum];
-            activeSubArray[i][j] = new ncounter_t[subArrayNum];
-
-            for (ncounter_t m = 0; m < subArrayNum; m++) {
-                activeSubArray[i][j][m] = false;
-                /* set the initial effective row as invalid */
-                effectiveRow[i][j][m] = p->ROWS;
-                effectiveMuxedRow[i][j][m] = p->ROWS;
-            }
         }
     }
 
@@ -655,11 +613,9 @@ bool MemoryController::HandleRefresh() {
                             commandQueues[queueId].push_back(cmdRefPre);
 
                             /* clear all active subarrays */
-                            for (ncounter_t sa = 0; sa < subArrayNum; sa++) {
-                                activeSubArray[i][refBank][sa] = false;
-                                effectiveRow[i][refBank][sa] = p->ROWS;
-                                effectiveMuxedRow[i][refBank][sa] = p->ROWS;
-                            }
+                            activeSubArrays.clear(i, refBank);
+                            activeRow.clear(i, refBank, p->ROWS);
+                            activeMuxedRow.clear(i, refBank, p->ROWS);
                             activateQueued[i][refBank] = false;
                         }
                     }
@@ -1082,11 +1038,10 @@ bool MemoryController::FindStarvedRequest(
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
         if (activateQueued[rank][bank] &&
-            (!activeSubArray[rank][bank]
-                            [subarray] /* The subarray is inactive */
-             || effectiveRow[rank][bank][subarray] != row /* Row buffer miss */
+            (!activeSubArrays[*it] ||
+             activeRow[*it] != row /* Row buffer miss */
              ||
-             effectiveMuxedRow[rank][bank][subarray] !=
+             activeMuxedRow[*it] !=
                  muxLevel) /* Subset of row buffer is not at the sense amps */
             && !bankNeedRefresh[rank][bank] /* The bank is not waiting for a
                                                refresh */
@@ -1286,15 +1241,14 @@ bool MemoryController::FindRowBufferHit(
         /* By design, mux level can only be a subset of the selected columns. */
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
-        if (activateQueued[rank][bank]              /* The bank is active */
-            && activeSubArray[rank][bank][subarray] /* The subarray is open */
-            && effectiveRow[rank][bank][subarray] ==
-                   row /* The effective row is the row of this request */
-            && effectiveMuxedRow[rank][bank][subarray] ==
-                   muxLevel /* Subset of row buffer is currently at the sense
-                               amps */
-            && !bankNeedRefresh[rank][bank] /* The bank is not waiting for a
-                                               refresh */
+        if (activateQueued[rank][bank] /* The bank is active */
+            && activeSubArrays[*it] &&
+            activeRow[*it] ==
+                row /* The effective row is the row of this request */
+            && activeMuxedRow[*it] == muxLevel /* Subset of row buffer is
+                                                  currently at the sense amps */
+            && !bankNeedRefresh[rank][bank]    /* The bank is not waiting for a
+                                                  refresh */
             && !refreshQueued[rank][bank] /* Don't interrupt refreshes queued on
                                              bank group head. */
             && (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
@@ -1354,15 +1308,14 @@ bool MemoryController::FindRTMRowBufferHit(
         /* By design, mux level can only be a subset of the selected columns. */
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
-        if (activateQueued[rank][bank]              /* The bank is active */
-            && activeSubArray[rank][bank][subarray] /* The subarray is open */
-            && effectiveRow[rank][bank][subarray] ==
-                   row /* The effective row is the row of this request */
-            && effectiveMuxedRow[rank][bank][subarray] ==
-                   muxLevel /* Subset of row buffer is currently at the sense
-                               amps */
-            && !bankNeedRefresh[rank][bank] /* The bank is not waiting for a
-                                               refresh */
+        if (activateQueued[rank][bank] /* The bank is active */
+            && activeSubArrays[*it] &&
+            activeRow[*it] ==
+                row /* The effective row is the row of this request */
+            && activeMuxedRow[*it] == muxLevel /* Subset of row buffer is
+                                                  currently at the sense amps */
+            && !bankNeedRefresh[rank][bank]    /* The bank is not waiting for a
+                                                  refresh */
             && !refreshQueued[rank][bank] /* Don't interrupt refreshes queued on
                                              bank group head. */
             && (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
@@ -1533,10 +1486,8 @@ bool MemoryController::handleCachedRequest(NVMainRequest* req) {
     FailReason reason;
     if (GetChild()->IsIssuable(cachedRequest, &reason)) {
         /* Differentiate from row-buffer hits. */
-        if (!activateQueued[rank][bank] ||
-            !activeSubArray[rank][bank][subarray] ||
-            effectiveRow[rank][bank][subarray] != row ||
-            effectiveMuxedRow[rank][bank][subarray] != muxLevel) {
+        if (!activateQueued[rank][bank] || !activeSubArrays[req] ||
+            activeRow[req] != row || activeMuxedRow[req] != muxLevel) {
             enqueueRequest(req);
 
             delete cachedRequest;
@@ -1557,9 +1508,8 @@ bool MemoryController::rowIsActivated(NVMainRequest* req) {
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
     ncounter_t queueId = GetCommandQueueId(req->address);
 
-    return activeSubArray[rank][bank][subarray] &&
-           effectiveRow[rank][bank][subarray] == row &&
-           effectiveMuxedRow[rank][bank][subarray] == muxLevel;
+    return activeSubArrays[req] && activeRow[req] == row &&
+           activeMuxedRow[req] == muxLevel;
 }
 
 void MemoryController::enqueueActivate(NVMainRequest* req) {
@@ -1577,9 +1527,9 @@ void MemoryController::enqueueActivate(NVMainRequest* req) {
 
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
     activateQueued[rank][bank] = true;
-    activeSubArray[rank][bank][subarray] = true;
-    effectiveRow[rank][bank][subarray] = row;
-    effectiveMuxedRow[rank][bank][subarray] = muxLevel;
+    activeSubArrays.increment(req);
+    activeRow[req] = row;
+    activeMuxedRow[req] = muxLevel;
     starvationCounters.clear(req);
 }
 
@@ -1614,12 +1564,12 @@ void MemoryController::enqueueImplicitPrecharge(NVMainRequest* req) {
 
     req->issueCycle = GetEventQueue()->GetCurrentCycle();
     commandQueues[queueId].push_back(MakeImplicitPrechargeRequest(req));
-    activeSubArray[rank][bank][subarray] = false;
-    effectiveRow[rank][bank][subarray] = p->ROWS;
-    effectiveMuxedRow[rank][bank][subarray] = p->ROWS;
+    activeSubArrays.clear(req);
+    activeRow.clear(req, p->ROWS);
+    activeMuxedRow.clear(req, p->ROWS);
     bool idle = true;
     for (ncounter_t i = 0; i < subArrayNum; i++) {
-        if (activeSubArray[rank][bank][i] == true) {
+        if (activeSubArrays[req]) {
             idle = false;
             break;
         }
@@ -1635,9 +1585,9 @@ void MemoryController::closeRow(NVMainRequest* req) {
                                       &subarray);
     ncounter_t queueId = GetCommandQueueId(req->address);
 
-    if (activeSubArray[rank][bank][subarray] && p->UsePrecharge) {
-        commandQueues[queueId].push_back(MakePrechargeRequest(
-            effectiveRow[rank][bank][subarray], 0, bank, rank, subarray));
+    if (activeSubArrays[req] && p->UsePrecharge) {
+        commandQueues[queueId].push_back(
+            MakePrechargeRequest(activeRow[req], 0, bank, rank, subarray));
     }
 }
 

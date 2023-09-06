@@ -504,7 +504,7 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
         activateQueued[rank][bank] = true;
-        effectiveRow[rank][bank][subarray] = row;
+        activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
@@ -515,13 +515,12 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
         bankLocked[rank][bank] = true;
 
         rv = true;
-    } else if (activateQueued[rank][bank] &&
-               effectiveRow[rank][bank][subarray] != row &&
+    } else if (activateQueued[rank][bank] && activeRow[req] != row &&
                commandQueues[queueId].empty()) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
         activateQueued[rank][bank] = true;
-        effectiveRow[rank][bank][subarray] = row;
+        activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
@@ -533,8 +532,7 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
         bankLocked[rank][bank] = true;
 
         rv = true;
-    } else if (activateQueued[rank][bank] &&
-               effectiveRow[rank][bank][subarray] == row) {
+    } else if (activateQueued[rank][bank] && activeRow[req] == row) {
         starvationCounters.increment(req);
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
@@ -564,7 +562,7 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
         activateQueued[rank][bank] = true;
-        effectiveRow[rank][bank][subarray] = row;
+        activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
@@ -573,13 +571,12 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
         commandQueues[queueId].push_back(req);
 
         rv = true;
-    } else if (activateQueued[rank][bank] &&
-               effectiveRow[rank][bank][subarray] != row &&
+    } else if (activateQueued[rank][bank] && activeRow[req] != row &&
                commandQueues[queueId].empty()) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
         activateQueued[rank][bank] = true;
-        effectiveRow[rank][bank][subarray] = row;
+        activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
@@ -589,8 +586,7 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
         commandQueues[queueId].push_back(req);
 
         rv = true;
-    } else if (activateQueued[rank][bank] &&
-               effectiveRow[rank][bank][subarray] == row) {
+    } else if (activateQueued[rank][bank] && activeRow[req] == row) {
         starvationCounters.increment(req);
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();

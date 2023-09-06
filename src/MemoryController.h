@@ -145,9 +145,8 @@ class MemoryController : public NVMObject {
 
     bool** activateQueued;
     bool** refreshQueued;
-    ncounter_t*** effectiveRow;
-    ncounter_t*** effectiveMuxedRow;
-    ncounter_t*** activeSubArray;
+    SubArrayCounter activeRow;
+    SubArrayCounter activeMuxedRow;
     SubArrayCounter starvationCounters;
     ncounter_t starvationThreshold;
     ncounter_t subArrayNum;
@@ -318,6 +317,8 @@ class MemoryController : public NVMObject {
     ncounter_t simulation_cycles;
 
     private:
+    SubArrayCounter activeSubArrays;
+
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);
 
