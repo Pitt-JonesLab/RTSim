@@ -302,8 +302,6 @@ void MemoryController::SetMappingScheme() {
 }
 
 void MemoryController::SetConfig(Config* conf, bool createChildren) {
-    this->config = conf;
-
     Params* params = new Params();
     params->SetParams(conf);
     SetParams(params);
@@ -349,7 +347,7 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         /* Initialize interconnect */
         std::stringstream confString;
 
-        memory = InterconnectFactory::CreateInterconnect(
+        auto memory = InterconnectFactory::CreateInterconnect(
             conf->GetString("INTERCONNECT"));
 
         confString.str("");
@@ -481,7 +479,7 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         }
     }
 
-    if (p->PrintConfig) config->Print();
+    if (p->PrintConfig) conf->Print();
 
     SetDebugName("MemoryController", conf);
 }
@@ -780,8 +778,6 @@ void MemoryController::HandleLowPower() {
         }
     }
 }
-
-Config* MemoryController::GetConfig() { return (this->config); }
 
 void MemoryController::SetID(unsigned int id) { this->id = id; }
 
