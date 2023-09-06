@@ -91,15 +91,30 @@ class MemoryController : public NVMObject {
     ncounter_t starvationThreshold;
 
     void InitQueues(unsigned int numQueues);
+
+    /*
+     * Decode command queue in priority order
+     *
+     * 0 -- Fixed Scheduling from Rank0 and Bank0
+     * 1 -- Rank-first round-robin
+     * 2 -- Bank-first round-robin
+     */
     ncounter_t GetCommandQueueId(NVMAddress addr);
+
     void Prequeue(ncounter_t queueNum, NVMainRequest* request);
     void Enqueue(ncounter_t queueNum, NVMainRequest* request);
     NVMainRequest* MakeActivateRequest(NVMainRequest* triggerRequest);
     NVMainRequest* MakePrechargeRequest(NVMainRequest* triggerRequest);
     bool FindStarvedRequest(std::list<NVMainRequest*>& transactionQueue,
                             NVMainRequest** starvedRequest);
+
+    /*
+     *  Find any requests that can be serviced without going through a normal
+     * activation cycle.
+     */
     bool FindCachedAddress(std::list<NVMainRequest*>& transactionQueue,
                            NVMainRequest** accessibleRequest);
+
     bool FindRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
                           NVMainRequest** hitRequest);
     bool FindRTMRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
@@ -124,8 +139,11 @@ class MemoryController : public NVMObject {
     bool FindClosedBankRequest(std::list<NVMainRequest*>& transactionQueue,
                                NVMainRequest** closedRequest,
                                NVM::SchedulingPredicate& p);
-    /* basically, it increment the delayedRefreshCounter and generate the next
-     * refresh pulse */
+
+    /*
+     * Increments the delayedRefreshCounter and generate the next
+     * refresh pulse
+     */
     void ProcessRefreshPulse(NVMainRequest*);
 
     private:
@@ -190,6 +208,11 @@ class MemoryController : public NVMObject {
                                       const ncounter_t);
     NVMainRequest* MakePowerdownRequest(OpType pdOp, const ncounter_t rank);
     NVMainRequest* MakePowerupRequest(const ncounter_t rank);
+
+    /*
+     *  Find any requests that can be serviced without going through a normal
+     * activation cycle.
+     */
     bool FindCachedAddress(std::list<NVMainRequest*>& transactionQueue,
                            NVMainRequest** accessibleRequest,
                            NVM::SchedulingPredicate& p);
@@ -215,11 +238,21 @@ class MemoryController : public NVMObject {
     /*
      * Returns true if the delayed refresh in the corresponding bank reach the
      * threshold
+     *
+     * NeedRefresh() has three functions:
+     *  1) it returns false when no refresh is used (p->UseRefresh = false)
+     *  2) it returns false if the delayed refresh counter does not
+     *  reach the threshold, which provides the flexibility for
+     *  fine-granularity refresh
+     *  3) it automatically find the bank group the argument "bank"
+     *  specifies and return the result
      */
     bool NeedRefresh(const ncounter_t, const ncounter_t);
 
     /*
      * Returns true if ALL command queues in the bank group are empty
+     * it simply checks all banks in the refresh bank group whether their
+     * command queues are empty. the result is the union of each check
      */
     bool IsRefreshBankQueueEmpty(const ncounter_t, const ncounter_t);
 
@@ -255,6 +288,9 @@ class MemoryController : public NVMObject {
 
     /*
      * Checks whether any all command queues in the rank are empty
+     *
+     * RankQueueEmpty() check all command queues in the given rank to see
+     * whether they are empty, return true if all queues are empty
      */
     bool RankQueueEmpty(const ncounter_t&);
 
@@ -266,11 +302,6 @@ class MemoryController : public NVMObject {
      * Checks if a command queue is empty or will be cleaned up.
      */
     bool EffectivelyEmpty(const ncounter_t&);
-
-    class DummyPredicate : public SchedulingPredicate {
-        public:
-        bool operator()(NVMainRequest* request);
-    };
 
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);
