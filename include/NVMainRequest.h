@@ -69,7 +69,7 @@ enum OpType {
     BUS_WRITE,       /* Data bus write burst */
     CACHED_READ,     /* Check if read is cached anywhere in hierarchy. */
     CACHED_WRITE,    /* Check if write is cached anywhere in hierarchy. */
-    PIM_OP           // PIM operation (RowClone)
+    ROW_CLONE        /* RowClone */ 
 };
 
 enum MemRequestStatus {

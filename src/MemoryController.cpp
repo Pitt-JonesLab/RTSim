@@ -1153,7 +1153,7 @@ bool MemoryController::FindCachedAddress(
     *accessibleRequest = NULL;
 
     for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
-        if ((*it)->type == PIM_OP) continue;
+        if ((*it)->type == ROW_CLONE) continue;
 
         ncounter_t queueId = GetCommandQueueId((*it)->address);
         NVMainRequest* cachedRequest = MakeCachedRequest((*it));
@@ -1704,7 +1704,7 @@ void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
  *  scheduling. They will not be re-checked here.
  */
 bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
-    if (req->type == PIM_OP) {
+    if (req->type == ROW_CLONE) {
         issueRowCloneCommand(req);
         return false;
     }

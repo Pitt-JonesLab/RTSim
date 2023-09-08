@@ -233,7 +233,7 @@ void TraceMain::runSimulation() {
             requestCycle = 0;
 
         // TODO this should be an exception
-        if (request->type != READ && request->type != WRITE && request->type != PIM_OP)
+        if (request->type != READ && request->type != WRITE && request->type != ROW_CLONE)
             std::cout << "traceMain: Unknown Operation: " << request->type
                       << std::endl;
 

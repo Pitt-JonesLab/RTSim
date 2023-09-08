@@ -123,7 +123,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
             else if (fieldId == 1) {
                 if (field == "R") operation = READ;
                 else if (field == "W") operation = WRITE;
-                else if (field == "P") operation = PIM_OP;
+                else if (field == "ROW_CLONE") operation = ROW_CLONE;
                 else
                     std::cout << "Warning: Unknown operation `" << field << "'"
                               << std::endl;
@@ -137,7 +137,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
             }
             // Read data (or address2 for RowClone)
             else if (fieldId == 3) {
-                if (operation == PIM_OP) {
+                if (operation == ROW_CLONE) {
                     std::stringstream fmat;
 
                     fmat << std::hex << field;
@@ -220,7 +220,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
 
     linenum++;
 
-    if (operation != READ && operation != WRITE && operation != PIM_OP)
+    if (operation != READ && operation != WRITE && operation != ROW_CLONE)
         std::cout << "NVMainTraceReader: Unknown Operation: " << operation
                   << "Line number is " << linenum << ". Full Line is \""
                   << fullLine << "\"" << std::endl;
@@ -234,7 +234,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
 
     nextAccess->SetLine(nAddress, operation, cycle, dataBlock, oldDataBlock,
                         threadId);
-    if (operation == PIM_OP) {
+    if (operation == ROW_CLONE) {
         NVMAddress destAddress;
         destAddress.SetPhysicalAddress(address2);
         nextAccess->setAddress2(destAddress);

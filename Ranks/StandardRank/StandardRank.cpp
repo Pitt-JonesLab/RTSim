@@ -600,7 +600,7 @@ ncycle_t StandardRank::NextIssuable(NVMainRequest* request) {
         nextCompare = nextWrite;
     else if (request->type == PRECHARGE || request->type == PRECHARGE_ALL)
         nextCompare = nextPrecharge;
-    else if (request->type == PIM_OP) nextCompare = nextRead; // TODO fix timing
+    else if (request->type == ROW_CLONE) nextCompare = nextRead; // TODO fix timing
     else if (request->type == SHIFT) nextCompare = nextRead;  // TODO fix timing
     else assert(false);
 
@@ -739,7 +739,7 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
         case WRITE_PRECHARGE:
             return this->Write(req);
 
-        case PIM_OP:
+        case ROW_CLONE:
             return false;
 
         case PRECHARGE:
