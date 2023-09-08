@@ -124,20 +124,21 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
                 if (field == "R") operation = READ;
                 else if (field == "W") operation = WRITE;
                 else if (field == "ROW_CLONE") operation = ROW_CLONE;
+                else if (field == "TRANSVERSE_READ") operation = TRANSVERSE_READ;
                 else
                     std::cout << "Warning: Unknown operation `" << field << "'"
                               << std::endl;
             }
-            // Read address
+            // Read address (SRC for RowClone and TransverseRead)
             else if (fieldId == 2) {
                 std::stringstream fmat;
 
                 fmat << std::hex << field;
                 fmat >> address;
             }
-            // Read data (or address2 for RowClone)
+            // Read data (or DEST (address2) for RowClone and TransverseRead)
             else if (fieldId == 3) {
-                if (operation == ROW_CLONE) {
+                if (operation == ROW_CLONE || operation == TRANSVERSE_READ) {
                     std::stringstream fmat;
 
                     fmat << std::hex << field;

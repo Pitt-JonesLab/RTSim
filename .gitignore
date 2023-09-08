@@ -7,3 +7,4 @@
 *.o
 *.fast
 *.debug
+output.txt
