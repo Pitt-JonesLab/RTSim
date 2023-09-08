@@ -49,6 +49,7 @@
 #include "src/DataEncoder.h"
 #include "src/EnduranceModel.h"
 #include "src/MemoryController.h"
+#include "src/ModuleTiming.h"
 #include "src/NVMObject.h"
 #include "src/Params.h"
 
@@ -96,11 +97,39 @@ class SubArray : public NVMObject {
     bool Write(NVMainRequest* request);
     bool Shift(NVMainRequest* request);
     bool Precharge(NVMainRequest* request);
+    bool rowClone(NVMainRequest* request);
+
+    /*
+     * Activates the subarray.
+     * Fails if the subarray is idle
+     *
+     * @param request Refresh request to be handled
+     *
+     * @return True is successful, false otherwise
+     */
     bool Refresh(NVMainRequest* request);
 
+    /*
+     * Determines whether the given request satisfies the timing constraints
+     *
+     * @param req Request to be checked
+     * @param reason Optional output parameter for failure reason
+     *
+     * @return True if successful, false otherwise
+     */
     bool IsIssuable(NVMainRequest* req, FailReason* reason = NULL);
+
+    /*
+     * Issues the request and updates bank status
+     *
+     * @param req Request to be issued
+     *
+     * @return True if successful, false otherwise
+     */
     bool IssueCommand(NVMainRequest* req);
+
     bool RequestComplete(NVMainRequest* req);
+
     ncycle_t NextIssuable(NVMainRequest* request);
 
     void SetConfig(Config* c, bool createChildren = true);
@@ -128,7 +157,13 @@ class SubArray : public NVMObject {
     ncounter_t FindClosestPort(uint64_t dbc, uint64_t domain); // RTM specific
 
     void SetName(std::string);
-    void SetId(ncounter_t);
+
+    /*
+     * Sets the physical subarray id
+     *
+     * @param id New value for id
+     */
+    void SetId(ncounter_t id);
 
     void RegisterStats();
     void CalculateStats();
@@ -212,6 +247,17 @@ class SubArray : public NVMObject {
     double writeEnergy;
     double refreshEnergy;
 
+    struct SubArrayEnergy {
+        double totalEnergy;
+        double shiftEnergy;
+        double activeEnergy;
+        double burstEnergy;
+        double writeEnergy;
+        double refreshEnergy;
+    };
+
+    SubArrayEnergy energy;
+
     uint64_t worstCaseEndurance, averageEndurance;
 
     ncounter_t reads, writes, activates, precharges, refreshes;
@@ -238,7 +284,17 @@ class SubArray : public NVMObject {
 
     ncycle_t UpdateEndurance(NVMainRequest* request);
 
+    /*
+     * Counts the occurences of 2-bit MLC.
+     *
+     * @param value 2-bit value to search for. Only the least significant 2 bits
+     * are considered
+     * @param data 32-bit data to search through
+     *
+     * @return Number of times value occurs in data
+     */
     ncounter_t Count32MLC2(uint8_t value, uint32_t data);
+
     ncounter_t CountBitsMLC2(uint8_t value, uint32_t* data, ncounter_t words);
     ncounter_t Count32MLC1(uint32_t data);
     ncounter_t CountBitsMLC1(uint8_t value, uint32_t* data, ncounter_t words);
@@ -263,6 +319,7 @@ class SubArray : public NVMObject {
     void handleWritePrecharge(NVMainRequest* request);
     ncycle_t getWriteTime(NVMainRequest* request);
     void handleWrite(NVMainRequest* request, ncycle_t writeTimer);
+    double getWriteEnergy(NVMainRequest* request);
 };
 
 }; // namespace NVM

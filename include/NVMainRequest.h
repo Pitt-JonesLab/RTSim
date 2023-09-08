@@ -73,7 +73,9 @@ enum OpType {
     TRANSVERSE_READ,  /* Transverse Read (RTM PIM)*/
     TRANSVERSE_WRITE_L,  /* Transverse Write Shifting Leftwards (in to Right out from Left) (RTM PIM)*/
     TRANSVERSE_WRITE_R  /* Transverse Write Shifting Rightwards (in to Left out from Right) (RTM PIM)*/
-
+    PIM_OP,          // PIM operation (RowClone)
+    ROWCLONE_SRC,
+    ROWCLONE_DEST
 };
 
 enum MemRequestStatus {

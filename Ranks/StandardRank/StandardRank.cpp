@@ -600,8 +600,9 @@ ncycle_t StandardRank::NextIssuable(NVMainRequest* request) {
         nextCompare = nextWrite;
     else if (request->type == PRECHARGE || request->type == PRECHARGE_ALL)
         nextCompare = nextPrecharge;
-    else if (request->type == ROW_CLONE) nextCompare = nextRead; // TODO fix timing
-    else if (request->type == SHIFT) nextCompare = nextRead;  // TODO fix timing
+    else if (request->type == ROWCLONE_SRC || request->type == ROWCLONE_DEST)
+        nextCompare = nextRead;                              // TODO fix timing
+    else if (request->type == SHIFT) nextCompare = nextRead; // TODO fix timing
     else assert(false);
 
     return MAX(GetChild(request)->NextIssuable(request), nextCompare);
@@ -708,6 +709,11 @@ bool StandardRank::IsIssuable(NVMainRequest* req, FailReason* reason) {
     return rv;
 }
 
+bool StandardRank::rowClone(NVMainRequest* request) {
+    GetChild()->IssueCommand(request);
+    return true;
+}
+
 bool StandardRank::IssueCommand(NVMainRequest* req) {
     if (!IsIssuable(req)) {
         uint64_t bank, rank, channel;
@@ -738,9 +744,9 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
         case WRITE:
         case WRITE_PRECHARGE:
             return this->Write(req);
-
-        case ROW_CLONE:
-            return false;
+        case ROWCLONE_SRC:
+        case ROWCLONE_DEST:
+            return rowClone(req);
 
         case PRECHARGE:
         case PRECHARGE_ALL:

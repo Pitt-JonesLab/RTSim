@@ -167,7 +167,7 @@ void printArgs(int argc, char* argv[]) {
 NVMainRequest* TraceMain::getNextRequest() {
     TraceLine tl;
     if (!trace->GetNextAccess(&tl)) return nullptr;
-    
+
     NVMainRequest* request = new NVMainRequest();
     request->address = tl.GetAddress();
     request->address2 = tl.GetAddress2();
@@ -188,8 +188,7 @@ void TraceMain::waitForDrain() {
     /* Force all modules to drain requests. */
     bool draining = Drain();
 
-    std::cout << "Could not read next line from trace file!"
-            << std::endl;
+    std::cout << "Could not read next line from trace file!" << std::endl;
 
     /* Wait for requests to drain. */
     while (outstandingRequests > 0) {
@@ -200,6 +199,45 @@ void TraceMain::waitForDrain() {
         /* Retry drain each cycle if it failed. */
         if (!draining) draining = Drain();
     }
+}
+
+bool TraceMain::issueRequest(NVMainRequest* req) {
+    while (!GetChild()->IsIssuable(req)) {
+        if (!tryCycle(1)) return false;
+    }
+
+    auto requestCycle = req->arrivalCycle;
+    std::cout << "TraceMain - Issuing request " << requestCycle << " at cycle "
+              << currentCycle << std::endl;
+    outstandingRequests++;
+    GetChild()->IssueCommand(req);
+
+    return true;
+}
+
+bool TraceMain::tryCycle(ncycle_t cycles) {
+    if (simulateCycles < (currentCycle + cycles) && simulateCycles > 0) {
+        globalEventQueue->Cycle(simulateCycles - currentCycle);
+        currentCycle = simulateCycles;
+        return false;
+    }
+
+    globalEventQueue->Cycle(cycles);
+    currentCycle = globalEventQueue->GetCurrentCycle();
+    return true;
+}
+
+bool TraceMain::issueRowClone(NVMainRequest* req) {
+    NVMainRequest* srcReq = req;
+    srcReq->type = ROWCLONE_SRC;
+    if (!issueRequest(srcReq)) return false;
+
+    NVMainRequest* destReq = new NVMainRequest();
+    *destReq = *req;
+    destReq->address = destReq->address2;
+    destReq->type = ROWCLONE_DEST;
+    if (!issueRequest(destReq)) return false;
+    return true;
 }
 
 void TraceMain::runSimulation() {
@@ -221,54 +259,28 @@ void TraceMain::runSimulation() {
         auto request = getNextRequest();
 
         if (!request) {
-            // waitForDrain
             waitForDrain();
             break;
         }
 
         auto requestCycle = request->arrivalCycle;
-        // If you want to ignore the cycles used in the trace file, just set the cycle to 0.
+
         if (config->KeyExists("IgnoreTraceCycle") &&
             config->GetString("IgnoreTraceCycle") == "true")
             requestCycle = 0;
 
-        // TODO this should be an exception
-        if (request->type != READ && request->type != WRITE && request->type != ROW_CLONE)
-            std::cout << "traceMain: Unknown Operation: " << request->type
-                      << std::endl;
+        if (request->type != READ && request->type != WRITE &&
+            request->type != PIM_OP)
+            throw std::runtime_error("Unknown operation in trace file");
 
-        // Reached the end of the simulation
-        if (requestCycle > simulateCycles && simulateCycles != 0) {
-            globalEventQueue->Cycle(simulateCycles - currentCycle);
-            currentCycle += simulateCycles - currentCycle;
+        if (requestCycle > currentCycle)
+            if (!tryCycle(requestCycle - currentCycle)) break;
 
-            break;
+        if (request->type == PIM_OP) {
+            if (!issueRowClone(request)) break;
+        } else {
+            if (!issueRequest(request)) break;
         }
-
-        // Wait for arrival cycle
-        if (requestCycle > currentCycle) {
-            globalEventQueue->Cycle(requestCycle - currentCycle);
-            currentCycle = globalEventQueue->GetCurrentCycle();
-
-            if (currentCycle >= simulateCycles && simulateCycles != 0)
-                break;
-        }
-
-        // Wait for memory controller
-        while (!GetChild()->IsIssuable(request)) {
-            if (currentCycle >= simulateCycles && simulateCycles != 0)
-                break;
-
-            globalEventQueue->Cycle(1);
-            currentCycle = globalEventQueue->GetCurrentCycle();
-        }
-
-        std::cout << "TraceMain - Issuing request " << requestCycle
-                    << " at cycle " << currentCycle << std::endl;
-        outstandingRequests++;
-        GetChild()->IssueCommand(request);
-
-        if (currentCycle >= simulateCycles && simulateCycles != 0) break;
     }
 }
 

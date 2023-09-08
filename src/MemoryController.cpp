@@ -83,7 +83,6 @@ MemoryController::MemoryController() {
 
     starvationThreshold = 4;
     subArrayNum = 1;
-    starvationCounter = NULL;
     activateQueued = NULL;
     effectiveRow = NULL;
     effectiveMuxedRow = NULL;
@@ -105,19 +104,16 @@ MemoryController::~MemoryController() {
         delete[] refreshQueued[i];
 
         for (ncounter_t j = 0; j < p->BANKS; j++) {
-            delete[] starvationCounter[i][j];
             delete[] effectiveRow[i][j];
             delete[] effectiveMuxedRow[i][j];
             delete[] activeSubArray[i][j];
         }
-        delete[] starvationCounter[i];
         delete[] effectiveRow[i];
         delete[] effectiveMuxedRow[i];
         delete[] activeSubArray[i];
     }
 
     delete[] commandQueues;
-    delete[] starvationCounter;
     delete[] activateQueued;
     delete[] effectiveRow;
     delete[] effectiveMuxedRow;
@@ -437,7 +433,7 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
     commandQueues = new std::deque<NVMainRequest*>[commandQueueCount];
     activateQueued = new bool*[p->RANKS];
     refreshQueued = new bool*[p->RANKS];
-    starvationCounter = new ncounter_t**[p->RANKS];
+    starvationCounters = SubArrayCounter(p, conf);
     effectiveRow = new ncounter_t**[p->RANKS];
     effectiveMuxedRow = new ncounter_t**[p->RANKS];
     activeSubArray = new ncounter_t**[p->RANKS];
@@ -450,7 +446,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         activeSubArray[i] = new ncounter_t*[p->BANKS];
         effectiveRow[i] = new ncounter_t*[p->BANKS];
         effectiveMuxedRow[i] = new ncounter_t*[p->BANKS];
-        starvationCounter[i] = new ncounter_t*[p->BANKS];
 
         if (p->UseLowPower) rankPowerDown[i] = p->InitPD;
         else rankPowerDown[i] = false;
@@ -459,13 +454,11 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
             activateQueued[i][j] = false;
             refreshQueued[i][j] = false;
 
-            starvationCounter[i][j] = new ncounter_t[subArrayNum];
             effectiveRow[i][j] = new ncounter_t[subArrayNum];
             effectiveMuxedRow[i][j] = new ncounter_t[subArrayNum];
             activeSubArray[i][j] = new ncounter_t[subArrayNum];
 
             for (ncounter_t m = 0; m < subArrayNum; m++) {
-                starvationCounter[i][j][m] = 0;
                 activeSubArray[i][j][m] = false;
                 /* set the initial effective row as invalid */
                 effectiveRow[i][j][m] = p->ROWS;
@@ -1099,7 +1092,7 @@ bool MemoryController::FindStarvedRequest(
                                                refresh */
             && !refreshQueued[rank][bank] /* Don't interrupt refreshes queued on
                                              bank group head. */
-            && starvationCounter[rank][bank][subarray] >=
+            && starvationCounters[*it] >=
                    starvationThreshold /* This subarray has reached starvation
                                           threshold */
             && (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
@@ -1153,7 +1146,8 @@ bool MemoryController::FindCachedAddress(
     *accessibleRequest = NULL;
 
     for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
-        if ((*it)->type == ROW_CLONE) continue;
+        if ((*it)->type == ROWCLONE_SRC || (*it)->type == ROWCLONE_DEST)
+            continue;
 
         ncounter_t queueId = GetCommandQueueId((*it)->address);
         NVMainRequest* cachedRequest = MakeCachedRequest((*it));
@@ -1586,7 +1580,7 @@ void MemoryController::enqueueActivate(NVMainRequest* req) {
     activeSubArray[rank][bank][subarray] = true;
     effectiveRow[rank][bank][subarray] = row;
     effectiveMuxedRow[rank][bank][subarray] = muxLevel;
-    starvationCounter[rank][bank][subarray] = 0;
+    starvationCounters.clear(req);
 }
 
 void MemoryController::enqueueShift(NVMainRequest* req) {
@@ -1692,11 +1686,27 @@ ncounter_t getSubarray(NVMainRequest* req) {
     return bank;
 }
 
-void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
-    std::cout << "MemoryController - Issuing RowClone request "
-              << req->arrivalCycle << std::endl;
+void MemoryController::handleActivate(NVMainRequest* req) {
+    auto rank = getRank(req);
+    auto bank = getBank(req);
+    auto subarray = getSubarray(req);
+    auto queueId = GetCommandQueueId(req->address);
+    auto row = getRow(req);
 
-    throw std::runtime_error("issueRowCloneCommand not implmented");
+    if (!bankIsActivated(req) && commandQueues[queueId].empty()) {
+        enqueueActivate(req);
+        std::cout << "Memory Controller - Activated bank " << bank << std::endl;
+    } else if (activateQueued[rank][bank] && !rowIsActivated(req) &&
+               commandQueues[queueId].empty()) {
+        closeRow(req);
+        enqueueActivate(req);
+        std::cout << "Memory Controller switched to row " << row << std::endl;
+    } else if (rowIsActivated(req)) {
+        starvationCounters.increment(req);
+    } else {
+        throw std::runtime_error("Memory controller cannot issue request " +
+                                 std::to_string(req->arrivalCycle));
+    }
 }
 
 /*
@@ -1704,32 +1714,17 @@ void MemoryController::issueRowCloneCommand(NVMainRequest* req) {
  *  scheduling. They will not be re-checked here.
  */
 bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
-    if (req->type == ROW_CLONE) {
-        issueRowCloneCommand(req);
-        return false;
+    // TODO clean up this function
+    if (req->type == ROWCLONE_SRC || req->type == ROWCLONE_DEST) {
+        handleActivate(req);
+        enqueueRequest(req);
+        ScheduleCommandWake();
+        return true;
     }
 
     if (handleCachedRequest(req)) return true;
 
-    auto rank = getRank(req);
-    auto bank = getBank(req);
-    auto subarray = getSubarray(req);
-    auto queueId = GetCommandQueueId(req->address);
-
-    if (!bankIsActivated(req) && commandQueues[queueId].empty()) {
-        enqueueActivate(req);
-    } else if (activateQueued[rank][bank] && !rowIsActivated(req) &&
-               commandQueues[queueId].empty()) {
-        closeRow(req);
-        enqueueActivate(req);
-    } else if (rowIsActivated(req)) {
-        starvationCounter[rank][bank][subarray]++;
-    } else {
-        throw std::runtime_error("Memory controller cannot issue request " +
-                                 std::to_string(req->arrivalCycle));
-        return false;
-    }
-
+    handleActivate(req);
     enqueueShift(req);
     if (req->flags & NVMainRequest::FLAG_LAST_REQUEST && p->UsePrecharge) {
         assert(p->ClosePage != 2);
@@ -1738,7 +1733,6 @@ bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
         enqueueRequest(req);
     }
 
-    /* Schedule wake event for memory commands if not scheduled. */
     ScheduleCommandWake();
     return true;
 }
@@ -1760,11 +1754,14 @@ void MemoryController::CycleCommandQueues() {
             GetChild()->IsIssuable(commandQueues[queueId].at(0), &fail)) {
             NVMainRequest* queueHead = commandQueues[queueId].at(0);
 
-            *debugStream << GetEventQueue()->GetCurrentCycle()
-                         << " MemoryController: Issued request type "
-                         << queueHead->type << " for address 0x" << std::hex
-                         << queueHead->address.GetPhysicalAddress() << std::dec
-                         << " for queue " << queueId << std::endl;
+            auto row = getRow(queueHead);
+
+            std::cout << GetEventQueue()->GetCurrentCycle()
+                      << " MemoryController: Issued request type "
+                      << queueHead->type << " for address 0x" << std::hex
+                      << queueHead->address.GetPhysicalAddress() << std::dec
+                      << " row " << row << " for queue " << queueId
+                      << std::endl;
 
             GetChild()->IssueCommand(queueHead);
 

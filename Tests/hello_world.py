@@ -14,6 +14,7 @@ code = code.returncode
 
 if code != 0:
     print("Test run failed!")
+    print(output)
     exit(1)
 
 print(len(output))
