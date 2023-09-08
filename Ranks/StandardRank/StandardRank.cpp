@@ -744,7 +744,6 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
         case WRITE:
         case WRITE_PRECHARGE:
             return this->Write(req);
-
         case ROWCLONE_SRC:
         case ROWCLONE_DEST:
             return rowClone(req);

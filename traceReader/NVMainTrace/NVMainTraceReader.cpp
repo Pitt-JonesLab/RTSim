@@ -123,21 +123,22 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
             else if (fieldId == 1) {
                 if (field == "R") operation = READ;
                 else if (field == "W") operation = WRITE;
-                else if (field == "P") operation = PIM_OP;
+                else if (field == "ROW_CLONE") operation = ROW_CLONE;
+                else if (field == "TRANSVERSE_READ") operation = TRANSVERSE_READ;
                 else
                     std::cout << "Warning: Unknown operation `" << field << "'"
                               << std::endl;
             }
-            // Read address
+            // Read address (SRC for RowClone and TransverseRead)
             else if (fieldId == 2) {
                 std::stringstream fmat;
 
                 fmat << std::hex << field;
                 fmat >> address;
             }
-            // Read data (or address2 for RowClone)
+            // Read data (or DEST (address2) for RowClone and TransverseRead)
             else if (fieldId == 3) {
-                if (operation == PIM_OP) {
+                if (operation == ROW_CLONE || operation == TRANSVERSE_READ) {
                     std::stringstream fmat;
 
                     fmat << std::hex << field;
@@ -220,7 +221,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
 
     linenum++;
 
-    if (operation != READ && operation != WRITE && operation != PIM_OP)
+    if (operation != READ && operation != WRITE && operation != ROW_CLONE)
         std::cout << "NVMainTraceReader: Unknown Operation: " << operation
                   << "Line number is " << linenum << ". Full Line is \""
                   << fullLine << "\"" << std::endl;
@@ -234,7 +235,7 @@ bool NVMainTraceReader::GetNextAccess(TraceLine* nextAccess) {
 
     nextAccess->SetLine(nAddress, operation, cycle, dataBlock, oldDataBlock,
                         threadId);
-    if (operation == PIM_OP) {
+    if (operation == ROW_CLONE) {
         NVMAddress destAddress;
         destAddress.SetPhysicalAddress(address2);
         nextAccess->setAddress2(destAddress);
