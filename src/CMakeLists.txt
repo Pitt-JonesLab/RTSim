@@ -17,6 +17,8 @@ set(MAIN_SOURCES
     ${RTSIM_DIR}/src/Stats.cpp  
     ${RTSIM_DIR}/src/SubArray.cpp 
     ${RTSIM_DIR}/src/TagGenerator.cpp 
-    ${RTSIM_DIR}/src/TranslationMethod.cpp)
+    ${RTSIM_DIR}/src/TranslationMethod.cpp
+    ${RTSIM_DIR}/src/SubArrayCounter.cpp
+    ${RTSIM_DIR}/src/ModuleTiming.cpp)
 
 set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)
