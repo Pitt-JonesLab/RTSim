@@ -77,7 +77,7 @@ bool WasIssued(NVMainRequest* request) {
     return (request->flags & NVMainRequest::FLAG_ISSUED);
 }
 
-MemoryController::MemoryController() {
+MemoryController::MemoryController() : reqMaker(this) {
     transactionQueues = NULL;
     transactionQueueCount = 0;
     commandQueues = NULL;
@@ -410,8 +410,8 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
                 delayedRefreshCounter[i][j] = 0;
 
                 ncounter_t refreshBankHead = j * p->BanksPerRefresh;
-                NVMainRequest* refreshPulse =
-                    MakeRefreshRequest(0, 0, refreshBankHead, i, 0);
+                NVMainRequest* refreshPulse = reqMaker.makeRefreshRequest(
+                    0, 0, refreshBankHead, i, id, 0);
                 ncycle_t offset = (i * m_refreshBankNum + j) * m_refreshSlice;
 
                 GetEventQueue()->InsertCallback(
@@ -492,7 +492,8 @@ bool MemoryController::HandleRefresh() {
             FailReason fail;
 
             if (NeedRefresh(j, i)) {
-                NVMainRequest* cmdRefresh = MakeRefreshRequest(0, 0, j, i, 0);
+                NVMainRequest* cmdRefresh =
+                    reqMaker.makeRefreshRequest(0, 0, j, i, id, 0);
 
                 if (p->UsePrecharge) {
                     for (ncounter_t tmpBank = 0; tmpBank < p->BanksPerRefresh;
@@ -503,7 +504,8 @@ bool MemoryController::HandleRefresh() {
 
                         if (activateQueued[i][refBank] == true) {
                             NVMainRequest* cmdRefPre =
-                                MakePrechargeAllRequest(0, 0, refBank, i, 0);
+                                reqMaker.makePrechargeAllRequest(0, 0, refBank,
+                                                                 i, id, 0);
 
                             commandQueues[queueId].push_back(cmdRefPre);
                             activeSubArrays.clear(i, refBank);
@@ -587,7 +589,8 @@ void MemoryController::PowerDown(const ncounter_t& rankId) {
     else if (p->PowerDownMode == "FASTEXIT") pdOp = POWERDOWN_PDPF;
     else std::cerr << "NVMain Error: Undefined low power mode" << std::endl;
 
-    NVMainRequest* powerdownRequest = MakePowerdownRequest(pdOp, rankId);
+    NVMainRequest* powerdownRequest =
+        reqMaker.makePowerdownRequest(pdOp, id, rankId);
 
     NVMObject* child;
     FindChildType(powerdownRequest, Rank, child);
@@ -597,7 +600,7 @@ void MemoryController::PowerDown(const ncounter_t& rankId) {
         delete powerdownRequest;
 
         pdOp = POWERDOWN_PDA;
-        powerdownRequest = MakePowerdownRequest(pdOp, rankId);
+        powerdownRequest = reqMaker.makePowerdownRequest(pdOp, id, rankId);
     }
 
     if (RankQueueEmpty(rankId) && GetChild()->IsIssuable(powerdownRequest)) {
@@ -609,7 +612,7 @@ void MemoryController::PowerDown(const ncounter_t& rankId) {
 }
 
 void MemoryController::PowerUp(const ncounter_t& rankId) {
-    NVMainRequest* powerupRequest = MakePowerupRequest(rankId);
+    NVMainRequest* powerupRequest = reqMaker.makePowerupRequest(rankId, id);
 
     if (RankQueueEmpty(rankId) == false &&
         GetChild()->IsIssuable(powerupRequest)) {
@@ -623,147 +626,6 @@ void MemoryController::PowerUp(const ncounter_t& rankId) {
 void MemoryController::SetID(unsigned int id) { this->id = id; }
 
 unsigned int MemoryController::GetID() { return this->id; }
-
-NVMainRequest*
-MemoryController::MakeCachedRequest(NVMainRequest* triggerRequest) {
-    assert(triggerRequest->type == READ || triggerRequest->type == WRITE);
-
-    NVMainRequest* cachedRequest = new NVMainRequest();
-
-    *cachedRequest = *triggerRequest;
-    cachedRequest->type =
-        (triggerRequest->type == READ ? CACHED_READ : CACHED_WRITE);
-    cachedRequest->owner = this;
-
-    return cachedRequest;
-}
-
-NVMainRequest*
-MemoryController::MakeActivateRequest(NVMainRequest* triggerRequest) {
-    NVMainRequest* activateRequest = new NVMainRequest();
-
-    activateRequest->type = ACTIVATE;
-    activateRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    activateRequest->address = triggerRequest->address;
-    activateRequest->owner = this;
-
-    return activateRequest;
-}
-
-NVMainRequest*
-MemoryController::MakeShiftRequest(NVMainRequest* triggerRequest) {
-    NVMainRequest* shiftRequest = new NVMainRequest();
-
-    shiftRequest->type = SHIFT;
-    shiftRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    shiftRequest->address = triggerRequest->address;
-    shiftRequest->owner = this;
-
-    return shiftRequest;
-}
-
-NVMainRequest*
-MemoryController::MakePrechargeRequest(NVMainRequest* triggerRequest) {
-    NVMainRequest* prechargeRequest = new NVMainRequest();
-
-    prechargeRequest->type = PRECHARGE;
-    prechargeRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    prechargeRequest->address = triggerRequest->address;
-    prechargeRequest->owner = this;
-
-    return prechargeRequest;
-}
-
-NVMainRequest* MemoryController::MakePrechargeRequest(
-    const ncounter_t row, const ncounter_t col, const ncounter_t bank,
-    const ncounter_t rank, const ncounter_t subarray) {
-    NVMainRequest* prechargeRequest = new NVMainRequest();
-
-    prechargeRequest->type = PRECHARGE;
-    ncounter_t preAddr =
-        GetDecoder()->ReverseTranslate(row, col, bank, rank, id, subarray);
-    prechargeRequest->address.SetPhysicalAddress(preAddr);
-    prechargeRequest->address.SetTranslatedAddress(row, col, bank, rank, id,
-                                                   subarray);
-    prechargeRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    prechargeRequest->owner = this;
-
-    return prechargeRequest;
-}
-
-NVMainRequest* MemoryController::MakePrechargeAllRequest(
-    const ncounter_t row, const ncounter_t col, const ncounter_t bank,
-    const ncounter_t rank, const ncounter_t subarray) {
-    NVMainRequest* prechargeAllRequest = new NVMainRequest();
-
-    prechargeAllRequest->type = PRECHARGE_ALL;
-    ncounter_t preAddr =
-        GetDecoder()->ReverseTranslate(row, col, bank, rank, id, subarray);
-    prechargeAllRequest->address.SetPhysicalAddress(preAddr);
-    prechargeAllRequest->address.SetTranslatedAddress(row, col, bank, rank, id,
-                                                      subarray);
-    prechargeAllRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    prechargeAllRequest->owner = this;
-
-    return prechargeAllRequest;
-}
-
-NVMainRequest*
-MemoryController::MakeImplicitPrechargeRequest(NVMainRequest* triggerRequest) {
-    if (triggerRequest->type == READ) triggerRequest->type = READ_PRECHARGE;
-    else if (triggerRequest->type == WRITE)
-        triggerRequest->type = WRITE_PRECHARGE;
-
-    triggerRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-
-    return triggerRequest;
-}
-
-NVMainRequest* MemoryController::MakeRefreshRequest(const ncounter_t row,
-                                                    const ncounter_t col,
-                                                    const ncounter_t bank,
-                                                    const ncounter_t rank,
-                                                    const ncounter_t subarray) {
-    NVMainRequest* refreshRequest = new NVMainRequest();
-
-    refreshRequest->type = REFRESH;
-    ncounter_t preAddr =
-        GetDecoder()->ReverseTranslate(row, col, bank, rank, id, subarray);
-    refreshRequest->address.SetPhysicalAddress(preAddr);
-    refreshRequest->address.SetTranslatedAddress(row, col, bank, rank, id,
-                                                 subarray);
-    refreshRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    refreshRequest->owner = this;
-
-    return refreshRequest;
-}
-
-NVMainRequest* MemoryController::MakePowerdownRequest(OpType pdOp,
-                                                      const ncounter_t rank) {
-    NVMainRequest* powerdownRequest = new NVMainRequest();
-
-    powerdownRequest->type = pdOp;
-    ncounter_t pdAddr = GetDecoder()->ReverseTranslate(0, 0, 0, rank, id, 0);
-    powerdownRequest->address.SetPhysicalAddress(pdAddr);
-    powerdownRequest->address.SetTranslatedAddress(0, 0, 0, rank, id, 0);
-    powerdownRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    powerdownRequest->owner = this;
-
-    return powerdownRequest;
-}
-
-NVMainRequest* MemoryController::MakePowerupRequest(const ncounter_t rank) {
-    NVMainRequest* powerupRequest = new NVMainRequest();
-
-    powerupRequest->type = POWERUP;
-    ncounter_t puAddr = GetDecoder()->ReverseTranslate(0, 0, 0, rank, id, 0);
-    powerupRequest->address.SetPhysicalAddress(puAddr);
-    powerupRequest->address.SetTranslatedAddress(0, 0, 0, rank, id, 0);
-    powerupRequest->issueCycle = GetEventQueue()->GetCurrentCycle();
-    powerupRequest->owner = this;
-
-    return powerupRequest;
-}
 
 bool MemoryController::IsLastRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest* request) {
@@ -856,7 +718,7 @@ bool MemoryController::FindCachedAddress(
             return false;
 
         ncounter_t queueId = GetCommandQueueId(req->address);
-        NVMainRequest* cachedRequest = MakeCachedRequest(req);
+        NVMainRequest* cachedRequest = reqMaker.makeCachedRequest(req);
 
         bool good = (commandQueues[queueId].empty() &&
                      GetChild()->IsIssuable(cachedRequest) &&
@@ -896,7 +758,7 @@ bool MemoryController::FindWriteStalledRead(
             return false;
         }
 
-        NVMainRequest* testActivate = MakeActivateRequest(req);
+        NVMainRequest* testActivate = reqMaker.makeActivateRequest(req);
         testActivate->flags |= NVMainRequest::FLAG_PRIORITY;
 
         bool good = (req->type == READ && !bankNeedRefresh[rank][bank] &&
@@ -1042,7 +904,7 @@ bool MemoryController::handleCachedRequest(NVMainRequest* req) {
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
     ncounter_t queueId = GetCommandQueueId(req->address);
 
-    NVMainRequest* cachedRequest = MakeCachedRequest(req);
+    NVMainRequest* cachedRequest = reqMaker.makeCachedRequest(req);
 
     FailReason reason;
     if (GetChild()->IsIssuable(cachedRequest, &reason)) {
@@ -1077,7 +939,7 @@ void MemoryController::enqueueActivate(NVMainRequest* req) {
 
     req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                       &subarray);
-    NVMainRequest* actRequest = MakeActivateRequest(req);
+    NVMainRequest* actRequest = reqMaker.makeActivateRequest(req);
     SubArray* writingArray = FindChild(req, SubArray);
     ncounter_t queueId = GetCommandQueueId(req->address);
     actRequest->flags |= (writingArray != NULL && writingArray->IsWriting())
@@ -1098,9 +960,9 @@ void MemoryController::enqueueShift(NVMainRequest* req) {
     ncounter_t queueId = GetCommandQueueId(req->address);
 
     if (p->MemIsRTM) {
-        NVMainRequest* shiftRequest =
-            MakeShiftRequest(req); // Place a shift request before the actual
-                                   // read/write on the command queue
+        NVMainRequest* shiftRequest = reqMaker.makeShiftRequest(
+            req); // Place a shift request before the actual
+                  // read/write on the command queue
         shiftRequest->flags |=
             (writingArray != NULL && writingArray->IsWriting())
                 ? NVMainRequest::FLAG_PRIORITY
@@ -1123,7 +985,8 @@ void MemoryController::enqueueImplicitPrecharge(NVMainRequest* req) {
     ncounter_t queueId = GetCommandQueueId(req->address);
 
     req->issueCycle = GetEventQueue()->GetCurrentCycle();
-    commandQueues[queueId].push_back(MakeImplicitPrechargeRequest(req));
+    commandQueues[queueId].push_back(
+        reqMaker.makeImplicitPrechargeRequest(req));
     activeSubArrays.clear(req);
     activeRow.clear(req, p->ROWS);
     activeMuxedRow.clear(req, p->ROWS);
@@ -1146,8 +1009,8 @@ void MemoryController::closeRow(NVMainRequest* req) {
     ncounter_t queueId = GetCommandQueueId(req->address);
 
     if (activeSubArrays[req] && p->UsePrecharge) {
-        commandQueues[queueId].push_back(
-            MakePrechargeRequest(activeRow[req], 0, bank, rank, subarray));
+        commandQueues[queueId].push_back(reqMaker.makePrechargeRequest(
+            activeRow[req], 0, bank, rank, id, subarray));
     }
 }
 

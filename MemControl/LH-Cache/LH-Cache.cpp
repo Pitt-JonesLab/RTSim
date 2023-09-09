@@ -508,7 +508,7 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakeActivateRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD1));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD2));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD3));
@@ -524,8 +524,8 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakePrechargeRequest(req));
-        commandQueues[queueId].push_back(MakeActivateRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makePrechargeRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD1));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD2));
         commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD3));
@@ -566,7 +566,7 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakeActivateRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
         commandQueues[queueId].push_back(MakeTagWriteRequest(req));
         commandQueues[queueId].push_back(req);
 
@@ -580,8 +580,8 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakePrechargeRequest(req));
-        commandQueues[queueId].push_back(MakeActivateRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makePrechargeRequest(req));
+        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
         commandQueues[queueId].push_back(MakeTagWriteRequest(req));
         commandQueues[queueId].push_back(req);
 

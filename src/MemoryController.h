@@ -48,6 +48,7 @@
 #include "src/Config.h"
 #include "src/Interconnect.h"
 #include "src/NVMObject.h"
+#include "src/RequestMaker.h"
 #include "src/SubArrayCounter.h"
 
 #include <deque>
@@ -81,6 +82,7 @@ class MemoryController : public NVMObject {
     virtual void Cycle(ncycle_t steps);
     virtual void SetConfig(Config* conf, bool createChildren = true);
     void SetID(unsigned int id);
+    unsigned int GetID();
 
     protected:
     ncounter_t psInterval;
@@ -90,6 +92,7 @@ class MemoryController : public NVMObject {
     SubArrayCounter activeRow;
     SubArrayCounter starvationCounters;
     ncounter_t starvationThreshold;
+    RequestMaker reqMaker;
 
     void InitQueues(unsigned int numQueues);
 
@@ -104,8 +107,6 @@ class MemoryController : public NVMObject {
 
     void Prequeue(ncounter_t queueNum, NVMainRequest* request);
     void Enqueue(ncounter_t queueNum, NVMainRequest* request);
-    NVMainRequest* MakeActivateRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* MakePrechargeRequest(NVMainRequest* triggerRequest);
     bool FindStarvedRequest(std::list<NVMainRequest*>& transactionQueue,
                             NVMainRequest** starvedRequest);
 
@@ -192,23 +193,8 @@ class MemoryController : public NVMObject {
     void CleanupCallback(void* data);
     void RefreshCallback(void* data);
     void SetMappingScheme();
-    unsigned int GetID();
-    NVMainRequest* MakeCachedRequest(NVMainRequest* triggerRequest);
     bool TransactionAvailable(ncounter_t queueId);
     void ScheduleCommandWake();
-    NVMainRequest* MakeShiftRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* MakeImplicitPrechargeRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* MakePrechargeRequest(const ncounter_t, const ncounter_t,
-                                        const ncounter_t, const ncounter_t,
-                                        const ncounter_t);
-    NVMainRequest* MakePrechargeAllRequest(const ncounter_t, const ncounter_t,
-                                           const ncounter_t, const ncounter_t,
-                                           const ncounter_t);
-    NVMainRequest* MakeRefreshRequest(const ncounter_t, const ncounter_t,
-                                      const ncounter_t, const ncounter_t,
-                                      const ncounter_t);
-    NVMainRequest* MakePowerdownRequest(OpType pdOp, const ncounter_t rank);
-    NVMainRequest* MakePowerupRequest(const ncounter_t rank);
 
     /*
      *  Find any requests that can be serviced without going through a normal
