@@ -20,6 +20,7 @@ set(MAIN_SOURCES
     ${RTSIM_DIR}/src/TranslationMethod.cpp
     ${RTSIM_DIR}/src/SubArrayCounter.cpp
     ${RTSIM_DIR}/src/ModuleTiming.cpp
-    ${RTSIM_DIR}/src/RequestMaker.cpp)
+    ${RTSIM_DIR}/src/RequestMaker.cpp
+    ${RTSIM_DIR}/src/RequestFinder.cpp)
 
 set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)

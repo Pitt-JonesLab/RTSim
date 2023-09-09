@@ -406,38 +406,42 @@ void LH_Cache::Cycle(ncycle_t /*steps*/) {
     NVMainRequest* nextRequest = NULL;
 
     /* Check fill queue (write buffering). */
-    if (FindStarvedRequest(*fillQueue, &nextRequest, FQF)) {
+    if (reqFinder.FindStarvedRequest(*fillQueue, &nextRequest, FQF)) {
         rb_miss++;
         starvation_precharges++;
-    } else if (FindRowBufferHit(*fillQueue, &nextRequest, FQF)) {
+    } else if (reqFinder.FindRowBufferHit(*fillQueue, &nextRequest, FQF)) {
         rb_hits++;
-    } else if (FindOldestReadyRequest(*fillQueue, &nextRequest, FQF)) {
+    } else if (reqFinder.FindOldestReadyRequest(*fillQueue, &nextRequest,
+                                                FQF)) {
         rb_miss++;
-    } else if (FindClosedBankRequest(*fillQueue, &nextRequest, FQF)) {
+    } else if (reqFinder.FindClosedBankRequest(*fillQueue, &nextRequest, FQF)) {
         rb_miss++;
     }
 
     /* Check request queue. */
-    else if (FindStarvedRequest(*drcQueue, &nextRequest, locks)) {
+    else if (reqFinder.FindStarvedRequest(*drcQueue, &nextRequest, locks)) {
         rb_miss++;
         starvation_precharges++;
-    } else if (FindRowBufferHit(*drcQueue, &nextRequest, locks)) {
+    } else if (reqFinder.FindRowBufferHit(*drcQueue, &nextRequest, locks)) {
         rb_hits++;
-    } else if (FindOldestReadyRequest(*drcQueue, &nextRequest, locks)) {
+    } else if (reqFinder.FindOldestReadyRequest(*drcQueue, &nextRequest,
+                                                locks)) {
         rb_miss++;
-    } else if (FindClosedBankRequest(*drcQueue, &nextRequest, locks)) {
+    } else if (reqFinder.FindClosedBankRequest(*drcQueue, &nextRequest,
+                                               locks)) {
         rb_miss++;
     }
 
     /* Check fill queue (no write buffering). */
-    else if (FindStarvedRequest(*fillQueue, &nextRequest, NWB)) {
+    else if (reqFinder.FindStarvedRequest(*fillQueue, &nextRequest, NWB)) {
         rb_miss++;
         starvation_precharges++;
-    } else if (FindRowBufferHit(*fillQueue, &nextRequest, NWB)) {
+    } else if (reqFinder.FindRowBufferHit(*fillQueue, &nextRequest, NWB)) {
         rb_hits++;
-    } else if (FindOldestReadyRequest(*fillQueue, &nextRequest, NWB)) {
+    } else if (reqFinder.FindOldestReadyRequest(*fillQueue, &nextRequest,
+                                                NWB)) {
         rb_miss++;
-    } else if (FindClosedBankRequest(*fillQueue, &nextRequest, NWB)) {
+    } else if (reqFinder.FindClosedBankRequest(*fillQueue, &nextRequest, NWB)) {
         rb_miss++;
     }
 

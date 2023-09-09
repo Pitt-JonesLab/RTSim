@@ -214,25 +214,25 @@ void RTM::Cycle(ncycle_t steps) {
     NVMainRequest* nextRequest = NULL;
 
     /* Check for starved requests BEFORE row buffer hits. */
-    if (FindStarvedRequest(*memQueue, &nextRequest)) {
+    if (reqFinder.FindStarvedRequest(*memQueue, &nextRequest)) {
         rb_miss++;
         starvation_precharges++;
     }
     /* Check for row buffer hits. */
-    else if (FindRTMRowBufferHit(*memQueue, &nextRequest)) {
+    else if (reqFinder.FindRTMRowBufferHit(*memQueue, &nextRequest)) {
         rb_hits++;
     }
     /* Check if the address is accessible through any other means. */
-    else if (FindCachedAddress(*memQueue, &nextRequest)) {
-    } else if (FindWriteStalledRead(*memQueue, &nextRequest)) {
+    else if (reqFinder.FindCachedAddress(*memQueue, &nextRequest)) {
+    } else if (reqFinder.FindWriteStalledRead(*memQueue, &nextRequest)) {
         if (nextRequest != NULL) write_pauses++;
     }
     /* Find the oldest request that can be issued. */
-    else if (FindOldestReadyRequest(*memQueue, &nextRequest)) {
+    else if (reqFinder.FindOldestReadyRequest(*memQueue, &nextRequest)) {
         rb_miss++;
     }
     /* Find requests to a bank that is closed. */
-    else if (FindClosedBankRequest(*memQueue, &nextRequest)) {
+    else if (reqFinder.FindClosedBankRequest(*memQueue, &nextRequest)) {
         rb_miss++;
     } else {
         nextRequest = NULL;

@@ -48,6 +48,7 @@
 #include "src/Config.h"
 #include "src/Interconnect.h"
 #include "src/NVMObject.h"
+#include "src/RequestFinder.h"
 #include "src/RequestMaker.h"
 #include "src/SubArrayCounter.h"
 
@@ -59,15 +60,6 @@
 #include <vector>
 
 namespace NVM {
-
-class SchedulingPredicate {
-    public:
-    SchedulingPredicate() {}
-
-    ~SchedulingPredicate() {}
-
-    virtual bool operator()(NVMainRequest* /*request*/) { return true; }
-};
 
 class MemoryController : public NVMObject {
     public:
@@ -93,6 +85,7 @@ class MemoryController : public NVMObject {
     SubArrayCounter starvationCounters;
     ncounter_t starvationThreshold;
     RequestMaker reqMaker;
+    RequestFinder reqFinder;
 
     void InitQueues(unsigned int numQueues);
 
@@ -107,40 +100,8 @@ class MemoryController : public NVMObject {
 
     void Prequeue(ncounter_t queueNum, NVMainRequest* request);
     void Enqueue(ncounter_t queueNum, NVMainRequest* request);
-    bool FindStarvedRequest(std::list<NVMainRequest*>& transactionQueue,
-                            NVMainRequest** starvedRequest);
-
-    /*
-     *  Find any requests that can be serviced without going through a normal
-     * activation cycle.
-     */
-    bool FindCachedAddress(std::list<NVMainRequest*>& transactionQueue,
-                           NVMainRequest** accessibleRequest);
-
-    bool FindRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
-                          NVMainRequest** hitRequest);
-    bool FindRTMRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
-                             NVMainRequest** hitRequest);
-    bool FindWriteStalledRead(std::list<NVMainRequest*>& transactionQueue,
-                              NVMainRequest** hitRequest);
-    bool FindOldestReadyRequest(std::list<NVMainRequest*>& transactionQueue,
-                                NVMainRequest** oldestRequest);
-    bool FindClosedBankRequest(std::list<NVMainRequest*>& transactionQueue,
-                               NVMainRequest** closedRequest);
     bool IssueMemoryCommands(NVMainRequest* req);
     void CycleCommandQueues();
-    bool FindStarvedRequest(std::list<NVMainRequest*>& transactionQueue,
-                            NVMainRequest** starvedRequest,
-                            NVM::SchedulingPredicate& p);
-    bool FindRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
-                          NVMainRequest** hitRequest,
-                          NVM::SchedulingPredicate& p);
-    bool FindOldestReadyRequest(std::list<NVMainRequest*>& transactionQueue,
-                                NVMainRequest** oldestRequest,
-                                NVM::SchedulingPredicate& p);
-    bool FindClosedBankRequest(std::list<NVMainRequest*>& transactionQueue,
-                               NVMainRequest** closedRequest,
-                               NVM::SchedulingPredicate& p);
 
     /*
      * Increments the delayedRefreshCounter and generate the next
@@ -195,20 +156,6 @@ class MemoryController : public NVMObject {
     void SetMappingScheme();
     bool TransactionAvailable(ncounter_t queueId);
     void ScheduleCommandWake();
-
-    /*
-     *  Find any requests that can be serviced without going through a normal
-     * activation cycle.
-     */
-    bool FindCachedAddress(std::list<NVMainRequest*>& transactionQueue,
-                           NVMainRequest** accessibleRequest,
-                           NVM::SchedulingPredicate& p);
-    bool FindRTMRowBufferHit(std::list<NVMainRequest*>& transactionQueue,
-                             NVMainRequest** hitRequest,
-                             NVM::SchedulingPredicate& p);
-    bool FindWriteStalledRead(std::list<NVMainRequest*>& transactionQueue,
-                              NVMainRequest** hitRequest,
-                              NVM::SchedulingPredicate& p);
 
     /*
      * Tells whether no other request has the row buffer hit in the transaction
@@ -299,9 +246,8 @@ class MemoryController : public NVMObject {
     void enqueueImplicitPrecharge(NVMainRequest* req);
     void closeRow(NVMainRequest* req);
     bool handleCachedRequest(NVMainRequest* req);
-    NVMainRequest*
-    searchForTransaction(std::list<NVMainRequest*>& transactionQueue,
-                         std::function<bool(NVMainRequest*)> filter);
+
+    friend class RequestFinder;
 };
 
 }; // namespace NVM
