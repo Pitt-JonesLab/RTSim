@@ -59,6 +59,7 @@
 #include <cassert>
 #include <csignal>
 #include <cstdlib>
+#include <functional>
 #include <limits>
 #include <sstream>
 
@@ -793,6 +794,21 @@ bool MemoryController::IsLastRequest(
     return rv;
 }
 
+NVMainRequest* MemoryController::searchForTransaction(
+    std::list<NVMainRequest*>& transactionQueue,
+    std::function<bool(NVMainRequest*)> filter) {
+    auto search =
+        std::find_if(transactionQueue.begin(), transactionQueue.end(), filter);
+    if (search != transactionQueue.end()) {
+        auto req = *search;
+        if (IsLastRequest(transactionQueue, req))
+            req->flags |= NVMainRequest::FLAG_LAST_REQUEST;
+        transactionQueue.erase(search);
+        return req;
+    }
+    return nullptr;
+}
+
 bool MemoryController::FindStarvedRequest(
     std::list<NVMainRequest*>& transactionQueue,
     NVMainRequest** starvedRequest) {
@@ -804,41 +820,24 @@ bool MemoryController::FindStarvedRequest(
 bool MemoryController::FindStarvedRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** starvedRequest,
     SchedulingPredicate& pred) {
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *starvedRequest = NULL;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+    auto isStarved = [&](NVMainRequest* req) {
+        ncounter_t queueId = GetCommandQueueId(req->address);
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
-
-        if (!commandQueues[queueId].empty()) continue;
-
-        (*it)->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                            &subarray);
-
+        req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                          &subarray);
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
-        if (activateQueued[rank][bank] &&
-            (!activeSubArrays[*it] || activeRow[*it] != row ||
-             activeMuxedRow[*it] != muxLevel) &&
-            !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
-            starvationCounters[*it] >= starvationThreshold &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            commandQueues[queueId].empty() && pred((*it))) {
-            *starvedRequest = (*it);
-            transactionQueue.erase(it);
+        return (activateQueued[rank][bank] &&
+                (!activeSubArrays[req] || activeRow[req] != row ||
+                 activeMuxedRow[req] != muxLevel) &&
+                !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
+                starvationCounters[req] >= starvationThreshold &&
+                req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                commandQueues[queueId].empty() && pred(req));
+    };
 
-            if (IsLastRequest(transactionQueue, (*starvedRequest)))
-                (*starvedRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-            break;
-        }
-    }
-
-    return rv;
+    *starvedRequest = searchForTransaction(transactionQueue, isStarved);
+    return (*starvedRequest != nullptr);
 }
 
 bool MemoryController::FindCachedAddress(
@@ -852,35 +851,24 @@ bool MemoryController::FindCachedAddress(
 bool MemoryController::FindCachedAddress(
     std::list<NVMainRequest*>& transactionQueue,
     NVMainRequest** accessibleRequest, SchedulingPredicate& pred) {
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
+    auto isAccessible = [&](NVMainRequest* req) {
+        if (req->type == ROWCLONE_SRC || req->type == ROWCLONE_DEST)
+            return false;
 
-    *accessibleRequest = NULL;
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        NVMainRequest* cachedRequest = MakeCachedRequest(req);
 
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
-        if ((*it)->type == ROWCLONE_SRC || (*it)->type == ROWCLONE_DEST)
-            continue;
-
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
-        NVMainRequest* cachedRequest = MakeCachedRequest((*it));
-
-        if (commandQueues[queueId].empty() &&
-            GetChild()->IsIssuable(cachedRequest) &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            pred((*it))) {
-            *accessibleRequest = (*it);
-            transactionQueue.erase(it);
-
-            delete cachedRequest;
-
-            rv = true;
-            break;
-        }
+        bool good = (commandQueues[queueId].empty() &&
+                     GetChild()->IsIssuable(cachedRequest) &&
+                     req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                     pred(req));
 
         delete cachedRequest;
-    }
+        return good;
+    };
 
-    return rv;
+    *accessibleRequest = searchForTransaction(transactionQueue, isAccessible);
+    return (*accessibleRequest != nullptr);
 }
 
 bool MemoryController::FindWriteStalledRead(
@@ -893,62 +881,37 @@ bool MemoryController::FindWriteStalledRead(
 bool MemoryController::FindWriteStalledRead(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** hitRequest,
     SchedulingPredicate& pred) {
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *hitRequest = NULL;
-
-    if (!p->WritePausing) return false;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
-        if ((*it)->type != READ) continue;
+    auto isHit = [&](NVMainRequest* req) {
+        if (!p->WritePausing) return false;
 
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
-
-        if (!commandQueues[queueId].empty()) continue;
-
-        (*it)->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                            &subarray);
-
-        SubArray* writingArray = FindChild((*it), SubArray);
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                          &subarray);
+        SubArray* writingArray = FindChild(req, SubArray);
 
         if (writingArray == NULL) return false;
-
-        NVMainRequest* testActivate = MakeActivateRequest((*it));
-        testActivate->flags |= NVMainRequest::FLAG_PRIORITY;
-
-        if (!bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
-            writingArray->IsWriting() &&
-            (GetChild()->IsIssuable((*it)) ||
-             GetChild()->IsIssuable(testActivate)) &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            commandQueues[queueId].empty() && pred((*it))) {
-            if (!writingArray->BetweenWriteIterations() &&
-                p->pauseMode == PauseMode_Normal) {
-                delete testActivate;
-
-                rv = true;
-                break;
-            }
-
-            *hitRequest = (*it);
-            transactionQueue.erase(it);
-
-            delete testActivate;
-
-            if (IsLastRequest(transactionQueue, (*hitRequest)))
-                (*hitRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-
-            break;
+        if (!writingArray->BetweenWriteIterations() &&
+            p->pauseMode == PauseMode_Normal) {
+            return false;
         }
 
-        delete testActivate;
-    }
+        NVMainRequest* testActivate = MakeActivateRequest(req);
+        testActivate->flags |= NVMainRequest::FLAG_PRIORITY;
 
-    return rv;
+        bool good = (req->type == READ && !bankNeedRefresh[rank][bank] &&
+                     !refreshQueued[rank][bank] && writingArray->IsWriting() &&
+                     (GetChild()->IsIssuable(req) ||
+                      GetChild()->IsIssuable(testActivate)) &&
+                     req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                     commandQueues[queueId].empty() && pred(req));
+
+        delete testActivate;
+        return good;
+    };
+
+    *hitRequest = searchForTransaction(transactionQueue, isHit);
+    return (*hitRequest != nullptr);
 }
 
 bool MemoryController::FindRowBufferHit(
@@ -961,41 +924,22 @@ bool MemoryController::FindRowBufferHit(
 bool MemoryController::FindRowBufferHit(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** hitRequest,
     SchedulingPredicate& pred) {
-
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *hitRequest = NULL;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+    auto isHit = [&](NVMainRequest* req) {
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
-
-        if (!commandQueues[queueId].empty()) continue;
-
-        (*it)->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                            &subarray);
-
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                          &subarray);
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
-        if (activateQueued[rank][bank] && activeSubArrays[*it] &&
-            activeRow[*it] == row && activeMuxedRow[*it] == muxLevel &&
-            !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            commandQueues[queueId].empty() && pred((*it))) {
-            *hitRequest = (*it);
-            transactionQueue.erase(it);
+        return (activateQueued[rank][bank] && activeSubArrays[req] &&
+                activeRow[req] == row && activeMuxedRow[req] == muxLevel &&
+                !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
+                req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                commandQueues[queueId].empty() && pred(req));
+    };
+    *hitRequest = searchForTransaction(transactionQueue, isHit);
 
-            if (IsLastRequest(transactionQueue, (*hitRequest)))
-                (*hitRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-
-            break;
-        }
-    }
-
-    return rv;
+    return (*hitRequest != nullptr);
 }
 
 bool MemoryController::FindRTMRowBufferHit(
@@ -1008,41 +952,22 @@ bool MemoryController::FindRTMRowBufferHit(
 bool MemoryController::FindRTMRowBufferHit(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** hitRequest,
     SchedulingPredicate& pred) {
-
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *hitRequest = NULL;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+    auto isHit = [&](NVMainRequest* req) {
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
-
-        if (!commandQueues[queueId].empty()) continue;
-
-        (*it)->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                            &subarray);
-
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
+                                          &subarray);
         ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
 
-        if (activateQueued[rank][bank] && activeSubArrays[*it] &&
-            activeRow[*it] == row && activeMuxedRow[*it] == muxLevel &&
-            !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            commandQueues[queueId].empty() && pred((*it))) {
-            *hitRequest = (*it);
-            transactionQueue.erase(it);
+        return (activateQueued[rank][bank] && activeSubArrays[req] &&
+                activeRow[req] == row && activeMuxedRow[req] == muxLevel &&
+                !bankNeedRefresh[rank][bank] && !refreshQueued[rank][bank] &&
+                req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                commandQueues[queueId].empty() && pred(req));
+    };
 
-            if (IsLastRequest(transactionQueue, (*hitRequest)))
-                (*hitRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-
-            break;
-        }
-    }
-
-    return rv;
+    *hitRequest = searchForTransaction(transactionQueue, isHit);
+    return (*hitRequest != nullptr);
 }
 
 bool MemoryController::FindOldestReadyRequest(
@@ -1056,36 +981,19 @@ bool MemoryController::FindOldestReadyRequest(
 bool MemoryController::FindOldestReadyRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** oldestRequest,
     SchedulingPredicate& pred) {
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *oldestRequest = NULL;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+    auto isOldest = [&](NVMainRequest* req) {
         ncounter_t rank, bank;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
-        if (!commandQueues[queueId].empty()) continue;
+        return (activateQueued[rank][bank] && !bankNeedRefresh[rank][bank] &&
+                !refreshQueued[rank][bank] && commandQueues[queueId].empty() &&
+                req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                pred(req));
+    };
 
-        (*it)->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL,
-                                            NULL);
-
-        if (activateQueued[rank][bank] && !bankNeedRefresh[rank][bank] &&
-            !refreshQueued[rank][bank] && commandQueues[queueId].empty() &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            pred((*it))) {
-            *oldestRequest = (*it);
-            transactionQueue.erase(it);
-
-            if (IsLastRequest(transactionQueue, (*oldestRequest)))
-                (*oldestRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-            break;
-        }
-    }
-
-    return rv;
+    *oldestRequest = searchForTransaction(transactionQueue, isOldest);
+    return (*oldestRequest != nullptr);
 }
 
 bool MemoryController::FindClosedBankRequest(
@@ -1099,36 +1007,19 @@ bool MemoryController::FindClosedBankRequest(
 bool MemoryController::FindClosedBankRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** closedRequest,
     SchedulingPredicate& pred) {
-    bool rv = false;
-    std::list<NVMainRequest*>::iterator it;
-
-    *closedRequest = NULL;
-
-    for (it = transactionQueue.begin(); it != transactionQueue.end(); it++) {
+    auto isClosed = [&](NVMainRequest* req) {
         ncounter_t rank, bank;
-        ncounter_t queueId = GetCommandQueueId((*it)->address);
+        ncounter_t queueId = GetCommandQueueId(req->address);
+        req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
-        if (!commandQueues[queueId].empty()) continue;
+        return (!activateQueued[rank][bank] && !bankNeedRefresh[rank][bank] &&
+                !refreshQueued[rank][bank] && commandQueues[queueId].empty() &&
+                req->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
+                pred(req));
+    };
 
-        (*it)->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL,
-                                            NULL);
-
-        if (!activateQueued[rank][bank] && !bankNeedRefresh[rank][bank] &&
-            !refreshQueued[rank][bank] && commandQueues[queueId].empty() &&
-            (*it)->arrivalCycle != GetEventQueue()->GetCurrentCycle() &&
-            pred((*it))) {
-            *closedRequest = (*it);
-            transactionQueue.erase(it);
-
-            if (IsLastRequest(transactionQueue, (*closedRequest)))
-                (*closedRequest)->flags |= NVMainRequest::FLAG_LAST_REQUEST;
-
-            rv = true;
-            break;
-        }
-    }
-
-    return rv;
+    *closedRequest = searchForTransaction(transactionQueue, isClosed);
+    return (*closedRequest != nullptr);
 }
 
 bool MemoryController::bankIsActivated(NVMainRequest* req) {

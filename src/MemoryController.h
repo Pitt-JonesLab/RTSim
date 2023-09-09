@@ -51,6 +51,7 @@
 #include "src/SubArrayCounter.h"
 
 #include <deque>
+#include <functional>
 #include <iostream>
 #include <list>
 #include <string>
@@ -312,6 +313,9 @@ class MemoryController : public NVMObject {
     void enqueueImplicitPrecharge(NVMainRequest* req);
     void closeRow(NVMainRequest* req);
     bool handleCachedRequest(NVMainRequest* req);
+    NVMainRequest*
+    searchForTransaction(std::list<NVMainRequest*>& transactionQueue,
+                         std::function<bool(NVMainRequest*)> filter);
 };
 
 }; // namespace NVM
