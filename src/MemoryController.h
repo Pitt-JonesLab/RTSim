@@ -48,6 +48,7 @@
 #include "src/Config.h"
 #include "src/Interconnect.h"
 #include "src/NVMObject.h"
+#include "src/RefreshHandler.h"
 #include "src/RequestFinder.h"
 #include "src/RequestMaker.h"
 #include "src/SubArrayCounter.h"
@@ -86,6 +87,7 @@ class MemoryController : public NVMObject {
     ncounter_t starvationThreshold;
     RequestMaker reqMaker;
     RequestFinder reqFinder;
+    RefreshHandler refreshHandler;
 
     void InitQueues(unsigned int numQueues);
 
@@ -170,57 +172,6 @@ class MemoryController : public NVMObject {
     void MoveCurrentQueue();
 
     /*
-     * Returns true if the delayed refresh in the corresponding bank reach the
-     * threshold
-     *
-     * NeedRefresh() has three functions:
-     *  1) it returns false when no refresh is used (p->UseRefresh = false)
-     *  2) it returns false if the delayed refresh counter does not
-     *  reach the threshold, which provides the flexibility for
-     *  fine-granularity refresh
-     *  3) it automatically find the bank group the argument "bank"
-     *  specifies and return the result
-     */
-    bool NeedRefresh(const ncounter_t, const ncounter_t);
-
-    /*
-     * Returns true if ALL command queues in the bank group are empty
-     * it simply checks all banks in the refresh bank group whether their
-     * command queues are empty. the result is the union of each check
-     */
-    bool IsRefreshBankQueueEmpty(const ncounter_t, const ncounter_t);
-
-    /*
-     * Sets the refresh flag for a given bank group
-     */
-    void SetRefresh(const ncounter_t, const ncounter_t);
-
-    /*
-     * Resets the refresh flag for a given bank group
-     */
-    void ResetRefresh(const ncounter_t, const ncounter_t);
-
-    /*
-     * Resets the refresh queued flag for a given bank group
-     */
-    void ResetRefreshQueued(const ncounter_t bank, const ncounter_t rank);
-
-    /*
-     * Increments the delayedRefreshCounter in a given bank group
-     */
-    void IncrementRefreshCounter(const ncounter_t, const ncounter_t);
-
-    /*
-     * Decrements the delayedRefreshCounter in a given bank group
-     */
-    void DecrementRefreshCounter(const ncounter_t, const ncounter_t);
-
-    /*
-     * Issues REFRESH command if necessary
-     */
-    virtual bool HandleRefresh();
-
-    /*
      * Checks whether any all command queues in the rank are empty
      *
      * RankQueueEmpty() check all command queues in the given rank to see
@@ -248,6 +199,7 @@ class MemoryController : public NVMObject {
     bool handleCachedRequest(NVMainRequest* req);
 
     friend class RequestFinder;
+    friend class RefreshHandler;
 };
 
 }; // namespace NVM

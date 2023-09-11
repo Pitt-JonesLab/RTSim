@@ -183,22 +183,15 @@ void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
 }
 
 bool MemoryController::TransactionAvailable(ncounter_t queueId) {
-    bool rv = false;
-
-    for (ncounter_t queueIdx = 0; queueIdx < transactionQueueCount;
-         queueIdx++) {
-        std::list<NVMainRequest*>::iterator it;
-
-        for (it = transactionQueues[queueIdx].begin();
-             it != transactionQueues[queueIdx].end(); it++) {
-            if (GetCommandQueueId((*it)->address) == queueId) {
-                rv = true;
-                break;
-            }
-        }
+    for (int i = 0; i < transactionQueueCount; i++) {
+        auto transaction =
+            std::find_if(transactionQueues[i].begin(),
+                         transactionQueues[i].end(), [&](NVMainRequest* req) {
+                             return GetCommandQueueId(req->address) == queueId;
+                         });
+        if (transaction != transactionQueues[i].end()) return true;
     }
-
-    return rv;
+    return false;
 }
 
 void MemoryController::ScheduleCommandWake() {
@@ -234,19 +227,6 @@ void MemoryController::CommandQueueCallback(void*) {
     }
 
     CycleCommandQueues();
-
-    GetChild()->Cycle(realSteps);
-}
-
-void MemoryController::RefreshCallback(void* data) {
-    NVMainRequest* request = reinterpret_cast<NVMainRequest*>(data);
-
-    ncycle_t realSteps = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
-    lastCommandWake = GetEventQueue()->GetCurrentCycle();
-    wakeupCount++;
-
-    ProcessRefreshPulse(request);
-    HandleRefresh();
 
     GetChild()->Cycle(realSteps);
 }
@@ -370,6 +350,7 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
     activeRow = SubArrayCounter(p, conf, p->ROWS);
     activeMuxedRow = SubArrayCounter(p, conf, p->ROWS);
     rankPowerDown = new bool[p->RANKS];
+    refreshHandler = RefreshHandler(this, p, GetEventQueue());
 
     for (ncounter_t i = 0; i < p->RANKS; i++) {
         activateQueued[i] = new bool[p->BANKS];
@@ -432,124 +413,18 @@ void MemoryController::RegisterStats() {
     AddStat(wakeupCount);
 }
 
-bool MemoryController::NeedRefresh(const ncounter_t bank, const uint64_t rank) {
-    bool rv = false;
+/*REFRESH STUFF*/
+void MemoryController::RefreshCallback(void* data) {
+    NVMainRequest* request = reinterpret_cast<NVMainRequest*>(data);
 
-    if (p->UseRefresh)
-        if (delayedRefreshCounter[rank][bank / p->BanksPerRefresh] >=
-            p->DelayedRefreshThreshold)
-            rv = true;
+    ncycle_t realSteps = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
+    lastCommandWake = GetEventQueue()->GetCurrentCycle();
+    wakeupCount++;
 
-    return rv;
-}
+    ProcessRefreshPulse(request);
+    refreshHandler.HandleRefresh();
 
-void MemoryController::SetRefresh(const ncounter_t bank, const uint64_t rank) {
-    ncounter_t bankHead = (bank / p->BanksPerRefresh) * p->BanksPerRefresh;
-
-    for (ncounter_t i = 0; i < p->BanksPerRefresh; i++)
-        bankNeedRefresh[rank][bankHead + i] = true;
-}
-
-void MemoryController::ResetRefresh(const ncounter_t bank,
-                                    const uint64_t rank) {
-    ncounter_t bankHead = (bank / p->BanksPerRefresh) * p->BanksPerRefresh;
-
-    for (ncounter_t i = 0; i < p->BanksPerRefresh; i++)
-        bankNeedRefresh[rank][bankHead + i] = false;
-}
-
-void MemoryController::ResetRefreshQueued(const ncounter_t bank,
-                                          const ncounter_t rank) {
-    ncounter_t bankHead = (bank / p->BanksPerRefresh) * p->BanksPerRefresh;
-
-    for (ncounter_t i = 0; i < p->BanksPerRefresh; i++) {
-        assert(refreshQueued[rank][bankHead + i]);
-        refreshQueued[rank][bankHead + i] = false;
-    }
-}
-
-void MemoryController::IncrementRefreshCounter(const ncounter_t bank,
-                                               const uint64_t rank) {
-    ncounter_t bankGroupID = bank / p->BanksPerRefresh;
-
-    delayedRefreshCounter[rank][bankGroupID]++;
-}
-
-void MemoryController::DecrementRefreshCounter(const ncounter_t bank,
-                                               const uint64_t rank) {
-    ncounter_t bankGroupID = bank / p->BanksPerRefresh;
-
-    delayedRefreshCounter[rank][bankGroupID]--;
-}
-
-bool MemoryController::HandleRefresh() {
-    for (ncounter_t rankIdx = 0; rankIdx < p->RANKS; rankIdx++) {
-        ncounter_t i = (nextRefreshRank + rankIdx) % p->RANKS;
-
-        for (ncounter_t bankIdx = 0; bankIdx < m_refreshBankNum; bankIdx++) {
-            ncounter_t j =
-                (nextRefreshBank + bankIdx * p->BanksPerRefresh) % p->BANKS;
-            FailReason fail;
-
-            if (NeedRefresh(j, i)) {
-                NVMainRequest* cmdRefresh =
-                    reqMaker.makeRefreshRequest(0, 0, j, i, id, 0);
-
-                if (p->UsePrecharge) {
-                    for (ncounter_t tmpBank = 0; tmpBank < p->BanksPerRefresh;
-                         tmpBank++) {
-                        ncounter_t refBank = (tmpBank + j) % p->BANKS;
-                        ncounter_t queueId = GetCommandQueueId(
-                            NVMAddress(0, 0, refBank, i, 0, 0));
-
-                        if (activateQueued[i][refBank] == true) {
-                            NVMainRequest* cmdRefPre =
-                                reqMaker.makePrechargeAllRequest(0, 0, refBank,
-                                                                 i, id, 0);
-
-                            commandQueues[queueId].push_back(cmdRefPre);
-                            activeSubArrays.clear(i, refBank);
-                            activeRow.clear(i, refBank, p->ROWS);
-                            activeMuxedRow.clear(i, refBank, p->ROWS);
-                            activateQueued[i][refBank] = false;
-                        }
-                    }
-                }
-
-                ncounter_t queueId =
-                    GetCommandQueueId(NVMAddress(0, 0, j, i, 0, 0));
-
-                cmdRefresh->issueCycle = GetEventQueue()->GetCurrentCycle();
-                commandQueues[queueId].push_back(cmdRefresh);
-
-                for (ncounter_t tmpBank = 0; tmpBank < p->BanksPerRefresh;
-                     tmpBank++) {
-                    ncounter_t refBank = (tmpBank + j) % p->BANKS;
-
-                    refreshQueued[i][refBank] = true;
-                }
-
-                DecrementRefreshCounter(j, i);
-
-                if (!NeedRefresh(j, i)) ResetRefresh(j, i);
-
-                nextRefreshBank += p->BanksPerRefresh;
-                if (nextRefreshBank >= p->BANKS) {
-                    nextRefreshBank = 0;
-                    nextRefreshRank++;
-
-                    if (nextRefreshRank == p->RANKS) nextRefreshRank = 0;
-                }
-
-                handledRefresh = GetEventQueue()->GetCurrentCycle();
-
-                ScheduleCommandWake();
-
-                return true;
-            }
-        }
-    }
-    return false;
+    GetChild()->Cycle(realSteps);
 }
 
 void MemoryController::ProcessRefreshPulse(NVMainRequest* refresh) {
@@ -558,29 +433,15 @@ void MemoryController::ProcessRefreshPulse(NVMainRequest* refresh) {
     ncounter_t rank, bank;
     refresh->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
-    IncrementRefreshCounter(bank, rank);
+    refreshHandler.IncrementRefreshCounter(bank, rank);
 
-    if (NeedRefresh(bank, rank)) SetRefresh(bank, rank);
+    if (refreshHandler.NeedRefresh(bank, rank))
+        refreshHandler.SetRefresh(bank, rank);
 
     GetEventQueue()->InsertCallback(
         this, (CallbackPtr) &MemoryController::RefreshCallback,
         GetEventQueue()->GetCurrentCycle() + m_tREFI,
         reinterpret_cast<void*>(refresh), refreshPriority);
-}
-
-bool MemoryController::IsRefreshBankQueueEmpty(const ncounter_t bank,
-                                               const uint64_t rank) {
-    ncounter_t bankHead = (bank / p->BanksPerRefresh) * p->BanksPerRefresh;
-
-    for (ncounter_t i = 0; i < p->BanksPerRefresh; i++) {
-        ncounter_t queueId =
-            GetCommandQueueId(NVMAddress(0, 0, bankHead + i, rank, 0, 0));
-        if (!EffectivelyEmpty(queueId)) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 void MemoryController::PowerDown(const ncounter_t& rankId) {
@@ -629,31 +490,23 @@ unsigned int MemoryController::GetID() { return this->id; }
 
 bool MemoryController::IsLastRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest* request) {
-    bool rv = true;
+    if (p->ClosePage == 0) return false;
 
-    if (p->ClosePage == 0) {
-        rv = false;
-    } else if (p->ClosePage == 1) {
-        ncounter_t mRank, mBank, mRow, mSubArray;
-        request->address.GetTranslatedAddress(&mRow, NULL, &mBank, &mRank, NULL,
-                                              &mSubArray);
-        std::list<NVMainRequest*>::iterator it;
+    ncounter_t mRank, mBank, mRow, mSubArray;
+    request->address.GetTranslatedAddress(&mRow, NULL, &mBank, &mRank, NULL,
+                                          &mSubArray);
+    auto reqInQueue =
+        std::find_if(transactionQueue.begin(), transactionQueue.end(),
+                     [&](NVMainRequest* req) {
+                         ncounter_t rank, bank, row, subarray;
+                         req->address.GetTranslatedAddress(
+                             &row, NULL, &bank, &rank, NULL, &subarray);
 
-        for (it = transactionQueue.begin(); it != transactionQueue.end();
-             it++) {
-            ncounter_t rank, bank, row, subarray;
+                         return (rank == mRank && bank == mBank &&
+                                 row == mRow && subarray == mSubArray);
+                     });
 
-            (*it)->address.GetTranslatedAddress(&row, NULL, &bank, &rank, NULL,
-                                                &subarray);
-            if (rank == mRank && bank == mBank && row == mRow &&
-                subarray == mSubArray) {
-                rv = false;
-                break;
-            }
-        }
-    }
-
-    return rv;
+    return reqInQueue == transactionQueue.end();
 }
 
 bool MemoryController::bankIsActivated(NVMainRequest* req) {
@@ -906,8 +759,8 @@ void MemoryController::CycleCommandQueues() {
             queueHead->flags |= NVMainRequest::FLAG_ISSUED;
 
             if (queueHead->type == REFRESH)
-                ResetRefreshQueued(queueHead->address.GetBank(),
-                                   queueHead->address.GetRank());
+                refreshHandler.ResetRefreshQueued(queueHead->address.GetBank(),
+                                                  queueHead->address.GetRank());
 
             if (GetEventQueue()->GetCurrentCycle() != lastIssueCycle)
                 lastIssueCycle = GetEventQueue()->GetCurrentCycle();
@@ -999,10 +852,10 @@ ncycle_t MemoryController::NextIssuable(NVMainRequest*) {
         for (ncounter_t bankIdx = 0; bankIdx < p->BANKS; bankIdx++) {
             ncounter_t queueIdx =
                 GetCommandQueueId(NVMAddress(0, 0, bankIdx, rankIdx, 0, 0));
-            if (NeedRefresh(bankIdx, rankIdx) &&
-                IsRefreshBankQueueEmpty(bankIdx, rankIdx)) {
+            if (refreshHandler.NeedRefresh(bankIdx, rankIdx) &&
+                refreshHandler.IsRefreshBankQueueEmpty(bankIdx, rankIdx)) {
                 if (lastIssueCycle != GetEventQueue()->GetCurrentCycle())
-                    HandleRefresh();
+                    refreshHandler.HandleRefresh();
                 else nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
             }
 
