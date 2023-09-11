@@ -80,7 +80,6 @@ MemoryController::MemoryController() : reqMaker(this), reqFinder(this) {
 
     starvationThreshold = 4;
     subArrayNum = 1;
-    delayedRefreshCounter = NULL;
 
     curQueue = 0;
     nextRefreshRank = 0;
@@ -96,15 +95,6 @@ MemoryController::~MemoryController() {
     }
 
     delete[] bankNeedRefresh;
-    delete[] rankPowerDown;
-
-    if (p->UseRefresh) {
-        for (ncounter_t i = 0; i < p->RANKS; i++) {
-            delete[] delayedRefreshCounter[i];
-        }
-    }
-
-    delete[] delayedRefreshCounter;
 }
 
 void MemoryController::InitQueues(unsigned int numQueues) {
@@ -325,14 +315,13 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
     activeRow = SubArrayCounter(p, conf, p->ROWS);
     activeMuxedRow = SubArrayCounter(p, conf, p->ROWS);
     bankActivated = BankCounter(p);
-    rankPowerDown = new bool[p->RANKS];
+    rankNeedsPowerDown = std::vector<bool>(p->RANKS, false);
     refreshHandler = RefreshHandler(this, p, GetEventQueue());
 
     for (ncounter_t i = 0; i < p->RANKS; i++) {
         refreshQueued[i] = new bool[p->BANKS];
 
-        if (p->UseLowPower) rankPowerDown[i] = p->InitPD;
-        else rankPowerDown[i] = false;
+        if (p->UseLowPower) rankNeedsPowerDown[i] = p->InitPD;
 
         for (ncounter_t j = 0; j < p->BANKS; j++) {
             refreshQueued[i][j] = false;
@@ -347,8 +336,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         }
     }
 
-    delayedRefreshCounter = new ncounter_t*[p->RANKS];
-
     if (p->UseRefresh) {
         assert(p->BanksPerRefresh <= p->BANKS);
         assert(p->BanksPerRefresh != 0);
@@ -359,10 +346,8 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         ncycle_t m_refreshSlice = m_tREFI / (p->RANKS * m_refreshBankNum);
 
         for (ncounter_t i = 0; i < p->RANKS; i++) {
-            delayedRefreshCounter[i] = new ncounter_t[m_refreshBankNum];
 
             for (ncounter_t j = 0; j < m_refreshBankNum; j++) {
-                delayedRefreshCounter[i][j] = 0;
 
                 ncounter_t refreshBankHead = j * p->BanksPerRefresh;
                 NVMainRequest* refreshPulse = reqMaker.makeRefreshRequest(
@@ -422,7 +407,7 @@ void MemoryController::PowerDown(const ncounter_t& rankId) {
 
     if (RankQueueEmpty(rankId) && GetChild()->IsIssuable(powerdownRequest)) {
         GetChild()->IssueCommand(powerdownRequest);
-        rankPowerDown[rankId] = true;
+        rankNeedsPowerDown[rankId] = true;
     } else {
         delete powerdownRequest;
     }
@@ -434,7 +419,7 @@ void MemoryController::PowerUp(const ncounter_t& rankId) {
     if (RankQueueEmpty(rankId) == false &&
         GetChild()->IsIssuable(powerupRequest)) {
         GetChild()->IssueCommand(powerupRequest);
-        rankPowerDown[rankId] = false;
+        rankNeedsPowerDown[rankId] = false;
     } else {
         delete powerupRequest;
     }

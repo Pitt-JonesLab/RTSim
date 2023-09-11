@@ -1,6 +1,7 @@
 #pragma once
 
 #include "include/NVMTypes.h"
+#include "src/BankCounter.h"
 #include "src/EventQueue.h"
 #include "src/Params.h"
 
@@ -63,5 +64,7 @@ class RefreshHandler {
     MemoryController* parent;
     Params* params;
     EventQueue* parentQueue;
+
+    BankCounter delayedRefreshCounter;
 };
 } // namespace NVM

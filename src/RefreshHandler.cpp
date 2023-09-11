@@ -1,16 +1,9 @@
 #include "src/RefreshHandler.h"
 
+#include "include/NVMAddress.h"
 #include "src/MemoryController.h"
 
 using namespace NVM;
-
-/*
-delayedRefreshCounter
-bankNeedRefresh
-refreshQueued
-nextRefreshRank
-m_refreshBankNum
-*/
 
 RefreshHandler::RefreshHandler() {}
 
@@ -18,14 +11,15 @@ RefreshHandler::RefreshHandler(MemoryController* parent, Params* params,
                                EventQueue* parentQueue) :
     parent(parent),
     params(params),
-    parentQueue(parentQueue) {}
+    parentQueue(parentQueue),
+    delayedRefreshCounter(params) {}
 
 bool RefreshHandler::NeedRefresh(const ncounter_t bank, const uint64_t rank) {
     bool rv = false;
 
     if (params->UseRefresh)
-        if (parent
-                ->delayedRefreshCounter[rank][bank / params->BanksPerRefresh] >=
+        if (delayedRefreshCounter[NVMAddress(
+                0, 0, bank / params->BanksPerRefresh, rank, 0, 0)] >=
             params->DelayedRefreshThreshold)
             rv = true;
 
@@ -63,14 +57,14 @@ void RefreshHandler::IncrementRefreshCounter(const ncounter_t bank,
                                              const uint64_t rank) {
     ncounter_t bankGroupID = bank / params->BanksPerRefresh;
 
-    parent->delayedRefreshCounter[rank][bankGroupID]++;
+    delayedRefreshCounter[NVMAddress(0, 0, bankGroupID, rank, 0, 0)]++;
 }
 
 void RefreshHandler::DecrementRefreshCounter(const ncounter_t bank,
                                              const uint64_t rank) {
     ncounter_t bankGroupID = bank / params->BanksPerRefresh;
 
-    parent->delayedRefreshCounter[rank][bankGroupID]--;
+    delayedRefreshCounter[NVMAddress(0, 0, bankGroupID, rank, 0, 0)]--;
 }
 
 bool RefreshHandler::HandleRefresh() {

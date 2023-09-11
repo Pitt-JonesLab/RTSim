@@ -118,14 +118,12 @@ class MemoryController : public NVMObject {
     bool** refreshQueued;
     SubArrayCounter activeMuxedRow;
     ncounter_t subArrayNum;
-    bool* rankPowerDown;
+    std::vector<bool> rankNeedsPowerDown;
     ncounter_t id;
     ncounter_t simulation_cycles; // Stats
-    ncounter_t**
-        delayedRefreshCounter; // Record how many refresh should be handled
-    bool** bankNeedRefresh;    // indicate whether the bank need to be refreshed
-                               // immediately
-    ncycle_t m_tREFI;          // indicate how long a bank should be refreshed
+    bool** bankNeedRefresh; // indicate whether the bank need to be refreshed
+                            // immediately
+    ncycle_t m_tREFI;       // indicate how long a bank should be refreshed
     ncounter_t
         m_refreshBankNum; // indicate the number of bank groups for refresh
     ncounter_t curQueue;  // curQueue records the starting index for queue
