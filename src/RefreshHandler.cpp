@@ -12,7 +12,9 @@ RefreshHandler::RefreshHandler(MemoryController* parent, Params* params,
     parent(parent),
     params(params),
     parentQueue(parentQueue),
-    delayedRefreshCounter(params) {}
+    delayedRefreshCounter(params),
+    needsRefresh(params),
+    queued(params) {}
 
 bool RefreshHandler::NeedRefresh(const ncounter_t bank, const uint64_t rank) {
     bool rv = false;
@@ -31,7 +33,7 @@ void RefreshHandler::SetRefresh(const ncounter_t bank, const uint64_t rank) {
         (bank / params->BanksPerRefresh) * params->BanksPerRefresh;
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++)
-        parent->bankNeedRefresh[rank][bankHead + i] = true;
+        needsRefresh[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = true;
 }
 
 void RefreshHandler::ResetRefresh(const ncounter_t bank, const uint64_t rank) {
@@ -39,7 +41,7 @@ void RefreshHandler::ResetRefresh(const ncounter_t bank, const uint64_t rank) {
         (bank / params->BanksPerRefresh) * params->BanksPerRefresh;
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++)
-        parent->bankNeedRefresh[rank][bankHead + i] = false;
+        needsRefresh[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = false;
 }
 
 void RefreshHandler::ResetRefreshQueued(const ncounter_t bank,
@@ -49,7 +51,7 @@ void RefreshHandler::ResetRefreshQueued(const ncounter_t bank,
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++) {
         // assert(refreshQueued[rank][bankHead + i]);
-        parent->refreshQueued[rank][bankHead + i] = false;
+        queued[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = false;
     }
 }
 
@@ -111,7 +113,7 @@ bool RefreshHandler::HandleRefresh() {
                      tmpBank++) {
                     ncounter_t refBank = (tmpBank + j) % params->BANKS;
 
-                    parent->refreshQueued[i][refBank] = true;
+                    queued[NVMAddress(0, 0, refBank, i, 0, 0)] = true;
                 }
 
                 DecrementRefreshCounter(j, i);
@@ -168,4 +170,10 @@ bool RefreshHandler::IsRefreshBankQueueEmpty(const ncounter_t bank,
     }
 
     return true;
+}
+
+bool RefreshHandler::refreshQueued(NVMainRequest* req) { return queued[req]; }
+
+bool RefreshHandler::bankNeedsRefresh(NVMainRequest* req) {
+    return needsRefresh[req];
 }

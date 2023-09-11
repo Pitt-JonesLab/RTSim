@@ -43,8 +43,8 @@ bool RequestFinder::FindStarvedRequest(
         ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
 
         return (owner->bankActivated[req] && (!owner->rowIsActivated(req)) &&
-                !owner->bankNeedRefresh[rank][bank] &&
-                !owner->refreshQueued[rank][bank] &&
+                !owner->refreshHandler.bankNeedsRefresh(req) &&
+                !owner->refreshHandler.refreshQueued(req) &&
                 owner->starvationCounters[req] >= owner->starvationThreshold &&
                 req->arrivalCycle !=
                     owner->GetEventQueue()->GetCurrentCycle() &&
@@ -117,8 +117,10 @@ bool RequestFinder::FindWriteStalledRead(
         testActivate->flags |= NVMainRequest::FLAG_PRIORITY;
 
         bool good =
-            (req->type == READ && !owner->bankNeedRefresh[rank][bank] &&
-             !owner->refreshQueued[rank][bank] && writingArray->IsWriting() &&
+            (req->type == READ &&
+             !owner->refreshHandler.bankNeedsRefresh(req) &&
+             !owner->refreshHandler.refreshQueued(req) &&
+             writingArray->IsWriting() &&
              (owner->GetChild()->IsIssuable(req) ||
               owner->GetChild()->IsIssuable(testActivate)) &&
              req->arrivalCycle != owner->GetEventQueue()->GetCurrentCycle() &&
@@ -150,8 +152,8 @@ bool RequestFinder::FindRowBufferHit(
         ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
 
         return (owner->bankActivated[req] && owner->rowIsActivated(req) &&
-                !owner->bankNeedRefresh[rank][bank] &&
-                !owner->refreshQueued[rank][bank] &&
+                !owner->refreshHandler.bankNeedsRefresh(req) &&
+                !owner->refreshHandler.refreshQueued(req) &&
                 req->arrivalCycle !=
                     owner->GetEventQueue()->GetCurrentCycle() &&
                 owner->commandQueues.isEmpty(req->address) && pred(req));
@@ -179,8 +181,8 @@ bool RequestFinder::FindRTMRowBufferHit(
         ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
 
         return (owner->bankActivated[req] && owner->rowIsActivated(req) &&
-                !owner->bankNeedRefresh[rank][bank] &&
-                !owner->refreshQueued[rank][bank] &&
+                !owner->refreshHandler.bankNeedsRefresh(req) &&
+                !owner->refreshHandler.refreshQueued(req) &&
                 req->arrivalCycle !=
                     owner->GetEventQueue()->GetCurrentCycle() &&
                 owner->commandQueues.isEmpty(req->address) && pred(req));
@@ -206,12 +208,13 @@ bool RequestFinder::FindOldestReadyRequest(
         ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
-        return (
-            owner->bankActivated[req] && !owner->bankNeedRefresh[rank][bank] &&
-            !owner->refreshQueued[rank][bank] &&
-            owner->commandQueues.isEmpty(req->address) &&
-            req->arrivalCycle != owner->GetEventQueue()->GetCurrentCycle() &&
-            pred(req));
+        return (owner->bankActivated[req] &&
+                !owner->refreshHandler.bankNeedsRefresh(req) &&
+                !owner->refreshHandler.refreshQueued(req) &&
+                owner->commandQueues.isEmpty(req->address) &&
+                req->arrivalCycle !=
+                    owner->GetEventQueue()->GetCurrentCycle() &&
+                pred(req));
     };
 
     *oldestRequest = searchForTransaction(transactionQueue, isOldest);
@@ -234,12 +237,13 @@ bool RequestFinder::FindClosedBankRequest(
         ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
-        return (
-            !owner->bankActivated[req] && !owner->bankNeedRefresh[rank][bank] &&
-            !owner->refreshQueued[rank][bank] &&
-            owner->commandQueues.isEmpty(req->address) &&
-            req->arrivalCycle != owner->GetEventQueue()->GetCurrentCycle() &&
-            pred(req));
+        return (!owner->bankActivated[req] &&
+                !owner->refreshHandler.bankNeedsRefresh(req) &&
+                !owner->refreshHandler.refreshQueued(req) &&
+                owner->commandQueues.isEmpty(req->address) &&
+                req->arrivalCycle !=
+                    owner->GetEventQueue()->GetCurrentCycle() &&
+                pred(req));
     };
 
     *closedRequest = searchForTransaction(transactionQueue, isClosed);

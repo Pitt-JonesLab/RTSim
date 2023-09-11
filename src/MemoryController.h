@@ -68,7 +68,9 @@ class MemoryController : public NVMObject {
     public:
     // Public Functions
     MemoryController();
-    ~MemoryController();
+
+    ~MemoryController() {}
+
     virtual bool RequestComplete(NVMainRequest* request);
     virtual bool IsIssuable(NVMainRequest* request, FailReason* fail);
     ncycle_t NextIssuable(NVMainRequest* request);
@@ -115,15 +117,12 @@ class MemoryController : public NVMObject {
     ncounter_t commandQueueCount;
     ncounter_t transactionQueueCount;
     QueueModel queueModel;
-    bool** refreshQueued;
     SubArrayCounter activeMuxedRow;
     ncounter_t subArrayNum;
     std::vector<bool> rankNeedsPowerDown;
     ncounter_t id;
     ncounter_t simulation_cycles; // Stats
-    bool** bankNeedRefresh; // indicate whether the bank need to be refreshed
-                            // immediately
-    ncycle_t m_tREFI;       // indicate how long a bank should be refreshed
+    ncycle_t m_tREFI; // indicate how long a bank should be refreshed
     ncounter_t
         m_refreshBankNum; // indicate the number of bank groups for refresh
     ncounter_t curQueue;  // curQueue records the starting index for queue

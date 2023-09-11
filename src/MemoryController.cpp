@@ -88,15 +88,6 @@ MemoryController::MemoryController() : reqMaker(this), reqFinder(this) {
     handledRefresh = std::numeric_limits<ncycle_t>::max();
 }
 
-MemoryController::~MemoryController() {
-    for (ncounter_t i = 0; i < p->RANKS; i++) {
-        delete[] bankNeedRefresh[i];
-        delete[] refreshQueued[i];
-    }
-
-    delete[] bankNeedRefresh;
-}
-
 void MemoryController::InitQueues(unsigned int numQueues) {
     if (transactionQueues != NULL) delete[] transactionQueues;
 
@@ -309,32 +300,15 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         }
     }
 
-    refreshQueued = new bool*[p->RANKS];
     starvationCounters = SubArrayCounter(p, conf);
     activeSubArrays = SubArrayCounter(p, conf);
     activeRow = SubArrayCounter(p, conf, p->ROWS);
     activeMuxedRow = SubArrayCounter(p, conf, p->ROWS);
     bankActivated = BankCounter(p);
-    rankNeedsPowerDown = std::vector<bool>(p->RANKS, false);
+    if (p->UseLowPower)
+        rankNeedsPowerDown = std::vector<bool>(p->RANKS, p->InitPD);
+    else rankNeedsPowerDown = std::vector<bool>(p->RANKS, false);
     refreshHandler = RefreshHandler(this, p, GetEventQueue());
-
-    for (ncounter_t i = 0; i < p->RANKS; i++) {
-        refreshQueued[i] = new bool[p->BANKS];
-
-        if (p->UseLowPower) rankNeedsPowerDown[i] = p->InitPD;
-
-        for (ncounter_t j = 0; j < p->BANKS; j++) {
-            refreshQueued[i][j] = false;
-        }
-    }
-
-    bankNeedRefresh = new bool*[p->RANKS];
-    for (ncounter_t i = 0; i < p->RANKS; i++) {
-        bankNeedRefresh[i] = new bool[p->BANKS];
-        for (ncounter_t j = 0; j < p->BANKS; j++) {
-            bankNeedRefresh[i][j] = false;
-        }
-    }
 
     if (p->UseRefresh) {
         assert(p->BanksPerRefresh <= p->BANKS);

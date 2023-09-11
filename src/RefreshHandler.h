@@ -60,11 +60,15 @@ class RefreshHandler {
      */
     void ProcessRefreshPulse(NVMainRequest*);
 
+    bool refreshQueued(NVMainRequest*);
+
+    bool bankNeedsRefresh(NVMainRequest*);
+
     private:
     MemoryController* parent;
     Params* params;
     EventQueue* parentQueue;
 
-    BankCounter delayedRefreshCounter;
+    BankCounter delayedRefreshCounter, needsRefresh, queued;
 };
 } // namespace NVM
