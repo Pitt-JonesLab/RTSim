@@ -92,29 +92,26 @@ bool RefreshHandler::HandleRefresh() {
                     for (ncounter_t tmpBank = 0;
                          tmpBank < params->BanksPerRefresh; tmpBank++) {
                         ncounter_t refBank = (tmpBank + j) % params->BANKS;
-                        ncounter_t queueId = parent->GetCommandQueueId(
-                            NVMAddress(0, 0, refBank, i, 0, 0));
 
-                        if (parent->activateQueued[i][refBank] == true) {
+                        if (parent->bankActivated[NVMAddress(0, 0, refBank, i,
+                                                             0, 0)] == true) {
                             NVMainRequest* cmdRefPre =
                                 parent->reqMaker.makePrechargeAllRequest(
                                     0, 0, refBank, i, parent->id, 0);
 
-                            parent->commandQueues[queueId].push_back(cmdRefPre);
+                            parent->commandQueues.enqueue(cmdRefPre);
                             parent->activeSubArrays.clear(i, refBank);
                             parent->activeRow.clear(i, refBank, params->ROWS);
                             parent->activeMuxedRow.clear(i, refBank,
                                                          params->ROWS);
-                            parent->activateQueued[i][refBank] = false;
+                            parent->bankActivated[NVMAddress(0, 0, refBank, i,
+                                                             0, 0)] = false;
                         }
                     }
                 }
 
-                ncounter_t queueId =
-                    parent->GetCommandQueueId(NVMAddress(0, 0, j, i, 0, 0));
-
                 cmdRefresh->issueCycle = parentQueue->GetCurrentCycle();
-                parent->commandQueues[queueId].push_back(cmdRefresh);
+                parent->commandQueues.enqueue(cmdRefresh);
 
                 for (ncounter_t tmpBank = 0; tmpBank < params->BanksPerRefresh;
                      tmpBank++) {
@@ -171,7 +168,7 @@ bool RefreshHandler::IsRefreshBankQueueEmpty(const ncounter_t bank,
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++) {
         ncounter_t queueId = parent->GetCommandQueueId(
             NVMAddress(0, 0, bankHead + i, rank, 0, 0));
-        if (!parent->EffectivelyEmpty(queueId)) {
+        if (!parent->commandQueues.effectivelyEmpty(queueId)) {
             return false;
         }
     }

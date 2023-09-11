@@ -45,7 +45,6 @@
 #include <iostream>
 #include <sstream>
 
-
 using namespace NVM;
 
 DRAMCache::DRAMCache() {
@@ -221,7 +220,7 @@ bool DRAMCache::IssueFunctional(NVMainRequest* req) {
 bool DRAMCache::RequestComplete(NVMainRequest* req) {
     bool rv = false;
 
-    if (req->type == REFRESH) ProcessRefreshPulse(req);
+    if (req->type == REFRESH) refreshHandler.ProcessRefreshPulse(req);
     else if (req->owner == this) {
         delete req;
         rv = true;

@@ -45,6 +45,8 @@
 
 #include "include/NVMainRequest.h"
 #include "src/AddressTranslator.h"
+#include "src/BankCounter.h"
+#include "src/CommandQueues.h"
 #include "src/Config.h"
 #include "src/Interconnect.h"
 #include "src/NVMObject.h"
@@ -80,8 +82,8 @@ class MemoryController : public NVMObject {
     protected:
     ncounter_t psInterval;
     std::list<NVMainRequest*>* transactionQueues;
-    std::deque<NVMainRequest*>* commandQueues;
-    bool** activateQueued;
+    CommandQueues commandQueues;
+    BankCounter bankActivated;
     SubArrayCounter activeRow;
     SubArrayCounter starvationCounters;
     ncounter_t starvationThreshold;
@@ -105,16 +107,7 @@ class MemoryController : public NVMObject {
     bool IssueMemoryCommands(NVMainRequest* req);
     void CycleCommandQueues();
 
-    /*
-     * Increments the delayedRefreshCounter and generate the next
-     * refresh pulse
-     */
-    void ProcessRefreshPulse(NVMainRequest*);
-
     private:
-    enum QueueModel { PerRankQueues, PerBankQueues, PerSubArrayQueues };
-
-    // Private Vars
     SubArrayCounter activeSubArrays;
     ncycle_t lastCommandWake;
     ncounter_t wakeupCount;
@@ -182,11 +175,6 @@ class MemoryController : public NVMObject {
     void PowerDown(const ncounter_t&);
 
     void PowerUp(const ncounter_t&);
-
-    /*
-     * Checks if a command queue is empty or will be cleaned up.
-     */
-    bool EffectivelyEmpty(const ncounter_t&);
 
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);

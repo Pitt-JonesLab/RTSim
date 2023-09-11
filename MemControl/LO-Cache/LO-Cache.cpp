@@ -254,7 +254,7 @@ bool LO_Cache::RequestComplete(NVMainRequest* req) {
     bool rv = false;
 
     if (req->type == REFRESH) {
-        ProcessRefreshPulse(req);
+        refreshHandler.ProcessRefreshPulse(req);
     } else if (req->owner == this) {
         if (req->tag == DRC_FILL) {
             /* Install the missed request */

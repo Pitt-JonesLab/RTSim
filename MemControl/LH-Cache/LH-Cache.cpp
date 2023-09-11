@@ -284,7 +284,7 @@ bool LH_Cache::RequestComplete(NVMainRequest* req) {
 
         /* If it is a hit, issue a request to the bank for the cache line */
         if (!miss) {
-            commandQueues[queueId].push_back(MakeDRCRequest(req));
+            commandQueues.enqueue(MakeDRCRequest(req));
 
             drcHits++;
         }
@@ -363,7 +363,7 @@ bool LH_Cache::RequestComplete(NVMainRequest* req) {
                               &measuredHitQueueLatencies);
     }
 
-    if (req->type == REFRESH) ProcessRefreshPulse(req);
+    if (req->type == REFRESH) refreshHandler.ProcessRefreshPulse(req);
     else if (req->owner == this) {
         delete req;
         rv = true;
@@ -504,46 +504,46 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
     req->address.GetTranslatedAddress(&row, NULL, &bank, &rank, NULL,
                                       &subarray);
 
-    if (!activateQueued[rank][bank] && commandQueues[queueId].empty()) {
+    if (!bankActivated[req] && commandQueues.isEmpty(req->address)) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
-        activateQueued[rank][bank] = true;
+        bankActivated[req] = true;
         activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD3));
+        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
-    } else if (activateQueued[rank][bank] && activeRow[req] != row &&
-               commandQueues[queueId].empty()) {
+    } else if (bankActivated[req] && activeRow[req] != row &&
+               commandQueues.isEmpty(req->address)) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
-        activateQueued[rank][bank] = true;
+        bankActivated[req] = true;
         activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(reqMaker.makePrechargeRequest(req));
-        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD3));
+        commandQueues.enqueue(reqMaker.makePrechargeRequest(req));
+        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
-    } else if (activateQueued[rank][bank] && activeRow[req] == row) {
+    } else if (bankActivated[req] && activeRow[req] == row) {
         starvationCounters.increment(req);
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues[queueId].push_back(MakeTagRequest(req, DRC_TAGREAD3));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
+        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
@@ -562,41 +562,41 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
     req->address.GetTranslatedAddress(&row, NULL, &bank, &rank, NULL,
                                       &subarray);
 
-    if (!activateQueued[rank][bank] && commandQueues[queueId].empty()) {
+    if (!bankActivated[req] && commandQueues.isEmpty(req->address)) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
-        activateQueued[rank][bank] = true;
+        bankActivated[req] = true;
         activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
-        commandQueues[queueId].push_back(MakeTagWriteRequest(req));
-        commandQueues[queueId].push_back(req);
+        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
+        commandQueues.enqueue(MakeTagWriteRequest(req));
+        commandQueues.enqueue(req);
 
         rv = true;
-    } else if (activateQueued[rank][bank] && activeRow[req] != row &&
-               commandQueues[queueId].empty()) {
+    } else if (bankActivated[req] && activeRow[req] != row &&
+               commandQueues.isEmpty(req->address)) {
         /* Any activate will request the starvation counter */
         starvationCounters.clear(req);
-        activateQueued[rank][bank] = true;
+        bankActivated[req] = true;
         activeRow[req] = row;
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(reqMaker.makePrechargeRequest(req));
-        commandQueues[queueId].push_back(reqMaker.makeActivateRequest(req));
-        commandQueues[queueId].push_back(MakeTagWriteRequest(req));
-        commandQueues[queueId].push_back(req);
+        commandQueues.enqueue(reqMaker.makePrechargeRequest(req));
+        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
+        commandQueues.enqueue(MakeTagWriteRequest(req));
+        commandQueues.enqueue(req);
 
         rv = true;
-    } else if (activateQueued[rank][bank] && activeRow[req] == row) {
+    } else if (bankActivated[req] && activeRow[req] == row) {
         starvationCounters.increment(req);
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues[queueId].push_back(MakeTagWriteRequest(req));
-        commandQueues[queueId].push_back(req);
+        commandQueues.enqueue(MakeTagWriteRequest(req));
+        commandQueues.enqueue(req);
 
         rv = true;
     } else {
