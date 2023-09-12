@@ -65,9 +65,7 @@
 
 using namespace NVM;
 
-bool WasIssued(NVMainRequest* request) {
-    return (request->flags & NVMainRequest::FLAG_ISSUED);
-}
+/**************************PUBLIC FUNCTIONS*****************************/
 
 MemoryController::MemoryController() : reqMaker(this), reqFinder(this) {
     transactionQueues = NULL;
@@ -88,13 +86,41 @@ MemoryController::MemoryController() : reqMaker(this), reqFinder(this) {
     handledRefresh = std::numeric_limits<ncycle_t>::max();
 }
 
-void MemoryController::InitQueues(unsigned int numQueues) {
-    if (transactionQueues != NULL) delete[] transactionQueues;
+bool MemoryController::RequestComplete(NVMainRequest* request) {
+    if (request->owner == this) {
+        delete request;
+        return true;
+    }
+    return GetParent()->RequestComplete(request);
+}
 
-    transactionQueues = new NVMTransactionQueue[numQueues];
-    transactionQueueCount = numQueues;
+bool MemoryController::IsIssuable(NVMainRequest*, FailReason*) { return true; }
 
-    for (unsigned int i = 0; i < numQueues; i++) transactionQueues[i].clear();
+ncycle_t MemoryController::NextIssuable(NVMainRequest*) {
+    if (refreshHandler.canRefresh() &&
+        lastIssueCycle != GetEventQueue()->GetCurrentCycle())
+        refreshHandler.HandleRefresh();
+
+    ncycle_t nextWakeup = std::numeric_limits<ncycle_t>::max();
+    for (auto* head : commandQueues) {
+        nextWakeup = std::min(nextWakeup, GetChild()->NextIssuable(head));
+    }
+    return std::max(nextWakeup, GetEventQueue()->GetCurrentCycle() + 1);
+}
+
+void MemoryController::RegisterStats() {
+    AddStat(simulation_cycles);
+    AddStat(wakeupCount);
+}
+
+void MemoryController::CalculateStats() {
+    ncycle_t syncCycles = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
+    GetChild()->Cycle(syncCycles);
+
+    simulation_cycles = GetEventQueue()->GetCurrentCycle();
+
+    GetChild()->CalculateStats();
+    GetDecoder()->CalculateStats();
 }
 
 void MemoryController::Cycle(ncycle_t) {
@@ -111,106 +137,6 @@ void MemoryController::Cycle(ncycle_t) {
             return;
         }
     }
-}
-
-void MemoryController::Prequeue(ncounter_t queueNum, NVMainRequest* request) {
-    assert(queueNum < transactionQueueCount);
-
-    transactionQueues[queueNum].push_front(request);
-}
-
-void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
-    ncounter_t channel, rank, bank, row, col, subarray;
-
-    GetDecoder()->Translate(request->address.GetPhysicalAddress(), &row, &col,
-                            &bank, &rank, &channel, &subarray);
-    channel = request->address.GetChannel();
-    request->address.SetTranslatedAddress(row, col, bank, rank, channel,
-                                          subarray);
-
-    assert(queueNum < transactionQueueCount);
-
-    transactionQueues[queueNum].push_back(request);
-
-    ncounter_t queueId = GetCommandQueueId(request->address);
-
-    if (commandQueues.effectivelyEmpty(queueId)) {
-        ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle();
-
-        if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup) ==
-            NULL) {
-            GetEventQueue()->InsertEvent(EventCycle, this, nextWakeup, NULL,
-                                         transactionQueuePriority);
-        }
-    }
-}
-
-bool MemoryController::TransactionAvailable(ncounter_t queueId) {
-    for (int i = 0; i < transactionQueueCount; i++) {
-        auto transaction =
-            std::find_if(transactionQueues[i].begin(),
-                         transactionQueues[i].end(), [&](NVMainRequest* req) {
-                             return GetCommandQueueId(req->address) == queueId;
-                         });
-        if (transaction != transactionQueues[i].end()) return true;
-    }
-    return false;
-}
-
-void MemoryController::ScheduleCommandWake() {
-    ncycle_t nextWakeup = NextIssuable(NULL);
-
-    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
-        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
-        NULL, commandQueuePriority);
-
-    if (!nextWakeupScheduled) {
-        GetEventQueue()->InsertCallback(
-            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
-            nextWakeup, NULL, commandQueuePriority);
-    }
-}
-
-void MemoryController::CommandQueueCallback(void*) {
-    ncycle_t realSteps = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
-    lastCommandWake = GetEventQueue()->GetCurrentCycle();
-
-    ncycle_t nextWakeup = NextIssuable(NULL);
-    wakeupCount++;
-
-    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
-        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
-        NULL, commandQueuePriority);
-
-    if (!nextWakeupScheduled &&
-        nextWakeup != std::numeric_limits<ncycle_t>::max()) {
-        GetEventQueue()->InsertCallback(
-            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
-            nextWakeup, NULL, commandQueuePriority);
-    }
-
-    CycleCommandQueues();
-
-    GetChild()->Cycle(realSteps);
-}
-
-void MemoryController::CleanupCallback(void*) { commandQueues.removeIssued(); }
-
-bool MemoryController::RequestComplete(NVMainRequest* request) {
-    if (request->owner == this) {
-        delete request;
-    } else {
-        return GetParent()->RequestComplete(request);
-    }
-
-    return true;
-}
-
-bool MemoryController::IsIssuable(NVMainRequest*, FailReason*) { return true; }
-
-void MemoryController::SetMappingScheme() {
-    GetDecoder()->GetTranslationMethod()->SetAddressMappingScheme(
-        p->AddressMappingScheme);
 }
 
 void MemoryController::SetConfig(Config* conf, bool createChildren) {
@@ -341,9 +267,107 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
     SetDebugName("MemoryController", conf);
 }
 
-void MemoryController::RegisterStats() {
-    AddStat(simulation_cycles);
-    AddStat(wakeupCount);
+void MemoryController::SetID(unsigned int id) { this->id = id; }
+
+unsigned int MemoryController::GetID() { return this->id; }
+
+/*****************************************************************/
+
+void MemoryController::InitQueues(unsigned int numQueues) {
+    if (transactionQueues != NULL) delete[] transactionQueues;
+
+    transactionQueues = new NVMTransactionQueue[numQueues];
+    transactionQueueCount = numQueues;
+
+    for (unsigned int i = 0; i < numQueues; i++) transactionQueues[i].clear();
+}
+
+void MemoryController::Prequeue(ncounter_t queueNum, NVMainRequest* request) {
+    assert(queueNum < transactionQueueCount);
+
+    transactionQueues[queueNum].push_front(request);
+}
+
+void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
+    ncounter_t channel, rank, bank, row, col, subarray;
+
+    GetDecoder()->Translate(request->address.GetPhysicalAddress(), &row, &col,
+                            &bank, &rank, &channel, &subarray);
+    channel = request->address.GetChannel();
+    request->address.SetTranslatedAddress(row, col, bank, rank, channel,
+                                          subarray);
+
+    assert(queueNum < transactionQueueCount);
+
+    transactionQueues[queueNum].push_back(request);
+
+    ncounter_t queueId = GetCommandQueueId(request->address);
+
+    if (commandQueues.effectivelyEmpty(queueId)) {
+        ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle();
+
+        if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup) ==
+            NULL) {
+            GetEventQueue()->InsertEvent(EventCycle, this, nextWakeup, NULL,
+                                         transactionQueuePriority);
+        }
+    }
+}
+
+bool MemoryController::TransactionAvailable(ncounter_t queueId) {
+    for (int i = 0; i < transactionQueueCount; i++) {
+        auto transaction =
+            std::find_if(transactionQueues[i].begin(),
+                         transactionQueues[i].end(), [&](NVMainRequest* req) {
+                             return GetCommandQueueId(req->address) == queueId;
+                         });
+        if (transaction != transactionQueues[i].end()) return true;
+    }
+    return false;
+}
+
+void MemoryController::ScheduleCommandWake() {
+    ncycle_t nextWakeup = NextIssuable(NULL);
+
+    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
+        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
+        NULL, commandQueuePriority);
+
+    if (!nextWakeupScheduled) {
+        GetEventQueue()->InsertCallback(
+            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
+            nextWakeup, NULL, commandQueuePriority);
+    }
+}
+
+void MemoryController::CommandQueueCallback(void*) {
+    ncycle_t realSteps = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
+    lastCommandWake = GetEventQueue()->GetCurrentCycle();
+
+    ncycle_t nextWakeup = NextIssuable(NULL);
+    wakeupCount++;
+
+    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
+        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
+        NULL, commandQueuePriority);
+
+    if (!nextWakeupScheduled &&
+        nextWakeup != std::numeric_limits<ncycle_t>::max()) {
+        GetEventQueue()->InsertCallback(
+            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
+            nextWakeup, NULL, commandQueuePriority);
+    }
+
+    CycleCommandQueues();
+
+    GetChild()->Cycle(realSteps);
+}
+
+void MemoryController::CleanupCallback(void*) { commandQueues.removeIssued(); }
+
+void MemoryController::SetMappingScheme() {
+    GetDecoder()->GetTranslationMethod()->SetAddressMappingScheme(
+        p->AddressMappingScheme);
 }
 
 void MemoryController::RefreshCallback(void* data) {
@@ -358,50 +382,6 @@ void MemoryController::RefreshCallback(void* data) {
 
     GetChild()->Cycle(realSteps);
 }
-
-void MemoryController::PowerDown(const ncounter_t& rankId) {
-    OpType pdOp = POWERDOWN_PDPF;
-    if (p->PowerDownMode == "SLOWEXIT") pdOp = POWERDOWN_PDPS;
-    else if (p->PowerDownMode == "FASTEXIT") pdOp = POWERDOWN_PDPF;
-    else std::cerr << "NVMain Error: Undefined low power mode" << std::endl;
-
-    NVMainRequest* powerdownRequest =
-        reqMaker.makePowerdownRequest(pdOp, id, rankId);
-
-    NVMObject* child;
-    FindChildType(powerdownRequest, Rank, child);
-    Rank* pdRank = dynamic_cast<Rank*>(child);
-
-    if (pdRank->Idle() == false) {
-        delete powerdownRequest;
-
-        pdOp = POWERDOWN_PDA;
-        powerdownRequest = reqMaker.makePowerdownRequest(pdOp, id, rankId);
-    }
-
-    if (RankQueueEmpty(rankId) && GetChild()->IsIssuable(powerdownRequest)) {
-        GetChild()->IssueCommand(powerdownRequest);
-        rankNeedsPowerDown[rankId] = true;
-    } else {
-        delete powerdownRequest;
-    }
-}
-
-void MemoryController::PowerUp(const ncounter_t& rankId) {
-    NVMainRequest* powerupRequest = reqMaker.makePowerupRequest(rankId, id);
-
-    if (RankQueueEmpty(rankId) == false &&
-        GetChild()->IsIssuable(powerupRequest)) {
-        GetChild()->IssueCommand(powerupRequest);
-        rankNeedsPowerDown[rankId] = false;
-    } else {
-        delete powerupRequest;
-    }
-}
-
-void MemoryController::SetID(unsigned int id) { this->id = id; }
-
-unsigned int MemoryController::GetID() { return this->id; }
 
 bool MemoryController::IsLastRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest* request) {
@@ -548,11 +528,11 @@ void MemoryController::handleActivate(NVMainRequest* req) {
     auto queueId = GetCommandQueueId(req->address);
     auto row = req->address.GetRow();
 
-    if (!bankIsActivated(req) && commandQueues.isEmpty(req->address)) {
+    if (!bankIsActivated(req) && commandQueues.effectivelyEmpty(req->address)) {
         enqueueActivate(req);
         std::cout << "Memory Controller - Activated bank " << bank << std::endl;
     } else if (bankActivated[req] && !rowIsActivated(req) &&
-               commandQueues.isEmpty(req->address)) {
+               commandQueues.effectivelyEmpty(req->address)) {
         closeRow(req);
         enqueueActivate(req);
         std::cout << "Memory Controller switched to row " << row << std::endl;
@@ -639,6 +619,7 @@ void MemoryController::CycleCommandQueues() {
                                              transactionQueuePriority);
             }
         }
+        // commandQueues.pop(req->address);
 
         MoveCurrentQueue();
         return;
@@ -668,53 +649,8 @@ ncounter_t MemoryController::GetCommandQueueId(NVMAddress addr) {
     return queueId;
 }
 
-ncycle_t MemoryController::NextIssuable(NVMainRequest*) {
-    ncycle_t nextWakeup = std::numeric_limits<ncycle_t>::max();
-
-    for (ncounter_t rankIdx = 0; rankIdx < p->RANKS; rankIdx++) {
-        for (ncounter_t bankIdx = 0; bankIdx < p->BANKS; bankIdx++) {
-            NVMAddress bankAddr(0, 0, bankIdx, rankIdx, 0, 0);
-            if (refreshHandler.NeedRefresh(bankIdx, rankIdx) &&
-                refreshHandler.IsRefreshBankQueueEmpty(bankIdx, rankIdx)) {
-                if (lastIssueCycle != GetEventQueue()->GetCurrentCycle())
-                    refreshHandler.HandleRefresh();
-                else nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
-            }
-
-            NVMainRequest* queueHead = commandQueues.peek(bankAddr);
-            if (!queueHead) continue;
-
-            nextWakeup = MIN(nextWakeup, GetChild()->NextIssuable(queueHead));
-        }
-    }
-
-    if (nextWakeup <= GetEventQueue()->GetCurrentCycle())
-        nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
-
-    return nextWakeup;
-}
-
-bool MemoryController::RankQueueEmpty(const ncounter_t& rankId) {
-    for (ncounter_t i = 0; i < p->BANKS; i++) {
-        if (!commandQueues.isEmpty(NVMAddress(0, 0, i, rankId, 0, 0))) {
-            return false;
-        }
-    }
-    return true;
-}
-
 void MemoryController::MoveCurrentQueue() {
     if (p->ScheduleScheme != 0) {
         curQueue = (curQueue + 1) % commandQueueCount;
     }
-}
-
-void MemoryController::CalculateStats() {
-    ncycle_t syncCycles = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
-    GetChild()->Cycle(syncCycles);
-
-    simulation_cycles = GetEventQueue()->GetCurrentCycle();
-
-    GetChild()->CalculateStats();
-    GetDecoder()->CalculateStats();
 }

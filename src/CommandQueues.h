@@ -21,6 +21,7 @@ struct QueueHeadIterator {
     NVMainRequest* operator*();
     bool operator==(QueueHeadIterator rhs) const;
     bool operator!=(QueueHeadIterator rhs) const;
+    ptrdiff_t operator-(QueueHeadIterator rhs) const;
 
     using difference_type = ptrdiff_t;
     using value_type = NVMainRequest*;
@@ -38,6 +39,7 @@ class CommandQueues {
     void setNumQueues(size_t numQueues);
 
     bool effectivelyEmpty(size_t i);
+    bool effectivelyEmpty(NVMAddress addr);
     void removeIssued();
 
     void enqueue(NVMainRequest* req);
@@ -46,6 +48,7 @@ class CommandQueues {
     size_t size(NVMAddress addr);
 
     NVMainRequest* peek(NVMAddress addr);
+    NVMainRequest* pop(NVMAddress addr);
 
     void checkForDeadlock(ncycle_t currentCycle);
 

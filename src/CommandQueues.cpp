@@ -39,6 +39,16 @@ bool QueueHeadIterator::operator!=(QueueHeadIterator rhs) const {
     return !(*this == rhs);
 }
 
+ptrdiff_t QueueHeadIterator::operator-(QueueHeadIterator rhs) const {
+    auto copy = *this;
+    ptrdiff_t diff = 0;
+    while (copy != rhs) {
+        ++copy;
+        diff++;
+    }
+    return diff;
+}
+
 CommandQueues::CommandQueues() {}
 
 bool wasIssued(NVMainRequest* req) {
@@ -52,6 +62,10 @@ bool CommandQueues::effectivelyEmpty(size_t i) {
         (queues[i].size() == 1) && (wasIssued(queues[i].at(0)));
 
     return (queues[i].empty() || effectivelyEmpty);
+}
+
+bool CommandQueues::effectivelyEmpty(NVMAddress addr) {
+    return effectivelyEmpty(getQueueIndex(addr));
 }
 
 void CommandQueues::setConfig(Config* config) {
@@ -122,6 +136,12 @@ bool CommandQueues::isEmpty(NVMAddress addr) {
 NVMainRequest* CommandQueues::peek(NVMAddress addr) {
     if (isEmpty(addr)) return nullptr;
     return queues[getQueueIndex(addr)][0];
+}
+
+NVMainRequest* CommandQueues::pop(NVMAddress addr) {
+    auto front = peek(addr);
+    if (front) queues[getQueueIndex(addr)].pop_front();
+    return front;
 }
 
 void CommandQueues::checkForDeadlock(ncycle_t currentCycle) {

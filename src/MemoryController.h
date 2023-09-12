@@ -161,18 +161,6 @@ class MemoryController : public NVMObject {
      */
     void MoveCurrentQueue();
 
-    /*
-     * Checks whether any all command queues in the rank are empty
-     *
-     * RankQueueEmpty() check all command queues in the given rank to see
-     * whether they are empty, return true if all queues are empty
-     */
-    bool RankQueueEmpty(const ncounter_t&);
-
-    void PowerDown(const ncounter_t&);
-
-    void PowerUp(const ncounter_t&);
-
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);
     void handleActivate(NVMainRequest* req);

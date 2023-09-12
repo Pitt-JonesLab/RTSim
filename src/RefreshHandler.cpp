@@ -13,7 +13,7 @@ RefreshHandler::RefreshHandler(MemoryController* parent, Params* params,
     params(params),
     parentQueue(parentQueue),
     delayedRefreshCounter(params),
-    needsRefresh(params),
+    needsRefreshCounter(params),
     queued(params) {}
 
 bool RefreshHandler::NeedRefresh(const ncounter_t bank, const uint64_t rank) {
@@ -33,7 +33,7 @@ void RefreshHandler::SetRefresh(const ncounter_t bank, const uint64_t rank) {
         (bank / params->BanksPerRefresh) * params->BanksPerRefresh;
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++)
-        needsRefresh[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = true;
+        needsRefreshCounter[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = true;
 }
 
 void RefreshHandler::ResetRefresh(const ncounter_t bank, const uint64_t rank) {
@@ -41,7 +41,7 @@ void RefreshHandler::ResetRefresh(const ncounter_t bank, const uint64_t rank) {
         (bank / params->BanksPerRefresh) * params->BanksPerRefresh;
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++)
-        needsRefresh[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = false;
+        needsRefreshCounter[NVMAddress(0, 0, bankHead + i, rank, 0, 0)] = false;
 }
 
 void RefreshHandler::ResetRefreshQueued(const ncounter_t bank,
@@ -175,5 +175,30 @@ bool RefreshHandler::IsRefreshBankQueueEmpty(const ncounter_t bank,
 bool RefreshHandler::refreshQueued(NVMainRequest* req) { return queued[req]; }
 
 bool RefreshHandler::bankNeedsRefresh(NVMainRequest* req) {
-    return needsRefresh[req];
+    return needsRefreshCounter[req];
+}
+
+bool RefreshHandler::needsRefresh(NVMAddress address) {
+    return needsRefreshCounter[address];
+}
+
+bool RefreshHandler::canRefresh(NVMAddress address) {
+    ncounter_t bankHead =
+        (address.GetBank() / params->BanksPerRefresh) * params->BanksPerRefresh;
+
+    for (ncounter_t i = 0; i < params->BanksPerRefresh; i++) {
+        auto bankAddr = NVMAddress(0, 0, bankHead + i, address.GetRank(), 0, 0);
+        if (!parent->commandQueues.effectivelyEmpty(bankAddr)) {
+            return false;
+        }
+    }
+
+    return needsRefreshCounter[address];
+}
+
+bool RefreshHandler::canRefresh() {
+    for (int i = 0; i < params->RANKS; i++)
+        for (int j = 0; j < params->BANKS; j += params->BanksPerRefresh)
+            if (canRefresh(NVMAddress(0, 0, j, i, 0, 0))) return true;
+    return false;
 }

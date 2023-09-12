@@ -24,6 +24,13 @@ class RefreshHandler {
      */
     bool IsRefreshBankQueueEmpty(const ncounter_t, const ncounter_t);
 
+    bool needsRefresh(NVMAddress address);
+
+    bool canRefresh(NVMAddress address);
+
+    // True if any bank group can refresh
+    bool canRefresh();
+
     /*
      * Sets the refresh flag for a given bank group
      */
@@ -69,6 +76,6 @@ class RefreshHandler {
     Params* params;
     EventQueue* parentQueue;
 
-    BankCounter delayedRefreshCounter, needsRefresh, queued;
+    BankCounter delayedRefreshCounter, needsRefreshCounter, queued;
 };
 } // namespace NVM
