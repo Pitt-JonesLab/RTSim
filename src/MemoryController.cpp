@@ -124,7 +124,6 @@ void MemoryController::CalculateStats() {
 }
 
 void MemoryController::Cycle(ncycle_t) {
-    bool scheduled = false;
     ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
 
     if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup)) return;
@@ -192,7 +191,6 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         memory->SetParent(this);
         AddChild(memory);
 
-        std::cout << '1';
         memory->SetConfig(conf, createChildren);
         memory->RegisterStats();
 
@@ -301,9 +299,7 @@ void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
 
     transactionQueues[queueNum].push_back(request);
 
-    ncounter_t queueId = GetCommandQueueId(request->address);
-
-    if (commandQueues.effectivelyEmpty(queueId)) {
+    if (commandQueues.effectivelyEmpty(request->address)) {
         ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle();
 
         if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup) ==
