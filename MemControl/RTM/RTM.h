@@ -51,7 +51,6 @@ namespace NVM {
 class RTM : public MemoryController {
     public:
     RTM();
-    ~RTM();
 
     /*
      *  This method is called whenever a new transaction from the processor
@@ -64,15 +63,14 @@ class RTM : public MemoryController {
      */
     bool IssueCommand(NVMainRequest* req);
 
-    bool IsIssuable(NVMainRequest* request, FailReason* fail = NULL);
-    bool RequestComplete(NVMainRequest* request);
+    bool IsIssuable(NVMainRequest* request, FailReason* fail = NULL) override;
+    bool RequestComplete(NVMainRequest* request) override;
 
-    void SetConfig(Config* conf, bool createChildren = true);
+    void SetConfig(Config* conf, bool createChildren = true) override;
 
-    void Cycle(ncycle_t steps);
+    void Cycle(ncycle_t steps) override;
 
-    void RegisterStats();
-    void CalculateStats();
+    void RegisterStats() override;
 
     private:
     NVMTransactionQueue* memQueue;
