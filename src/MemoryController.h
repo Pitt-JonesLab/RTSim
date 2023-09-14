@@ -114,16 +114,11 @@ class MemoryController : public NVMObject {
     ncycle_t lastIssueCycle;
     ncounter_t transactionQueueCount;
     SubArrayCounter activeMuxedRow;
-    std::vector<bool> rankNeedsPowerDown;
     ncounter_t id;
     ncounter_t simulation_cycles; // Stats
-    ncycle_t m_tREFI; // indicate how long a bank should be refreshed
-    ncounter_t
-        m_refreshBankNum; // indicate the number of bank groups for refresh
-    ncounter_t curQueue;  // curQueue records the starting index for queue
-                          // round-robin level scheduling
-    ncycle_t handledRefresh;
-    ncounter_t nextRefreshRank, nextRefreshBank; // next Refresh rank and bank
+    ncounter_t curQueue; // curQueue records the starting index for queue
+                         // round-robin level scheduling
+
     /*
      *  If the transaction queue has higher priority, it is possible for a
      *  transaction to be inserted into the command queue AND issued in the

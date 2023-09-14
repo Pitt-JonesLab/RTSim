@@ -79,10 +79,6 @@ MemoryController::MemoryController() : reqFinder(this) {
     starvationThreshold = 4;
 
     curQueue = 0;
-    nextRefreshRank = 0;
-    nextRefreshBank = 0;
-
-    handledRefresh = std::numeric_limits<ncycle_t>::max();
 }
 
 bool MemoryController::RequestComplete(NVMainRequest* request) {
@@ -458,7 +454,7 @@ void MemoryController::queueCallback(ncycle_t cycle, CallbackPtr callback,
 }
 
 void MemoryController::CycleCommandQueues() {
-    if (handledRefresh == GetEventQueue()->GetCurrentCycle() ||
+    if (refreshHandler.getLastRefresh() == GetEventQueue()->GetCurrentCycle() ||
         lastIssueCycle == GetEventQueue()->GetCurrentCycle()) {
         return;
     }

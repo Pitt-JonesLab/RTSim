@@ -71,6 +71,8 @@ class RefreshHandler {
 
     bool bankNeedsRefresh(NVMainRequest*);
 
+    ncycle_t getLastRefresh();
+
     private:
     MemoryController* parent;
     Params* params;
@@ -78,6 +80,7 @@ class RefreshHandler {
 
     BankCounter delayedRefreshCounter, needsRefreshCounter, queued;
     ncounter_t m_refreshBankNum;
-    ncycle_t m_tREFI;
+    ncycle_t m_tREFI, lastRefresh;
+    ncounter_t nextRefreshRank, nextRefreshBank;
 };
 } // namespace NVM

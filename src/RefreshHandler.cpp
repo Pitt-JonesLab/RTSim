@@ -3,6 +3,9 @@
 #include "include/NVMAddress.h"
 #include "src/MemoryController.h"
 
+#include <limits>
+#include <numeric>
+
 using namespace NVM;
 
 RefreshHandler::RefreshHandler() {}
@@ -14,7 +17,10 @@ RefreshHandler::RefreshHandler(MemoryController* parent, Params* params,
     parentQueue(parentQueue),
     delayedRefreshCounter(params),
     needsRefreshCounter(params),
-    queued(params) {
+    queued(params),
+    nextRefreshRank(0),
+    nextRefreshBank(0),
+    lastRefresh(std::numeric_limits<ncycle_t>::max()) {
     if (params->UseRefresh) {
         m_refreshBankNum = params->BANKS / params->BanksPerRefresh;
         m_tREFI = params->tREFW / (params->ROWS / params->RefreshRows);
@@ -99,11 +105,11 @@ void RefreshHandler::DecrementRefreshCounter(const ncounter_t bank,
 
 bool RefreshHandler::HandleRefresh() {
     for (ncounter_t rankIdx = 0; rankIdx < params->RANKS; rankIdx++) {
-        ncounter_t i = (parent->nextRefreshRank + rankIdx) % params->RANKS;
+        ncounter_t i = (nextRefreshRank + rankIdx) % params->RANKS;
 
         for (ncounter_t bankIdx = 0; bankIdx < m_refreshBankNum; bankIdx++) {
             ncounter_t j =
-                (parent->nextRefreshBank + bankIdx * params->BanksPerRefresh) %
+                (nextRefreshBank + bankIdx * params->BanksPerRefresh) %
                 params->BANKS;
             FailReason fail;
 
@@ -157,16 +163,15 @@ bool RefreshHandler::HandleRefresh() {
 
                 if (!NeedRefresh(j, i)) ResetRefresh(j, i);
 
-                parent->nextRefreshBank += params->BanksPerRefresh;
-                if (parent->nextRefreshBank >= params->BANKS) {
-                    parent->nextRefreshBank = 0;
-                    parent->nextRefreshRank++;
+                nextRefreshBank += params->BanksPerRefresh;
+                if (nextRefreshBank >= params->BANKS) {
+                    nextRefreshBank = 0;
+                    nextRefreshRank++;
 
-                    if (parent->nextRefreshRank == params->RANKS)
-                        parent->nextRefreshRank = 0;
+                    if (nextRefreshRank == params->RANKS) nextRefreshRank = 0;
                 }
 
-                parent->handledRefresh = parentQueue->GetCurrentCycle();
+                lastRefresh = parentQueue->GetCurrentCycle();
 
                 parent->ScheduleCommandWake();
 
@@ -176,6 +181,8 @@ bool RefreshHandler::HandleRefresh() {
     }
     return false;
 }
+
+ncycle_t RefreshHandler::getLastRefresh() { return lastRefresh; }
 
 void RefreshHandler::ProcessRefreshPulse(NVMainRequest* refresh) {
     // assert(refresh->type == REFRESH);
