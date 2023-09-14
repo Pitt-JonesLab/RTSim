@@ -101,6 +101,8 @@ bool NVMAddress::IsTranslated() { return translated; }
 
 bool NVMAddress::HasPhysicalAddress() { return hasPhysicalAddress; }
 
+void NVMAddress::setRow(uint64_t addrRow) { row = addrRow; }
+
 /*
 NVMAddress& NVMAddress::operator=( const NVMAddress& m )
 {

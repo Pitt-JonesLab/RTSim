@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cassert>
 #include <limits>
+#include <numeric>
 
 using namespace NVM;
 
@@ -62,6 +63,13 @@ bool CommandQueues::effectivelyEmpty(size_t i) {
         (queues[i].size() == 1) && (wasIssued(queues[i].at(0)));
 
     return (queues[i].empty() || effectivelyEmpty);
+}
+
+bool CommandQueues::effectivelyEmpty() {
+    std::vector<size_t> indices(queues.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    return std::all_of(indices.begin(), indices.end(),
+                       [&](auto i) { return effectivelyEmpty(i); });
 }
 
 bool CommandQueues::effectivelyEmpty(NVMAddress addr) {
@@ -170,6 +178,8 @@ void CommandQueues::checkForDeadlock(ncycle_t currentCycle) {
         }
     }
 }
+
+size_t CommandQueues::size() { return queues.size(); }
 
 size_t CommandQueues::size(NVMAddress addr) {
     return queues[getQueueIndex(addr)].size();

@@ -39,12 +39,14 @@ class CommandQueues {
     void setNumQueues(size_t numQueues);
 
     bool effectivelyEmpty(size_t i);
+    bool effectivelyEmpty();
     bool effectivelyEmpty(NVMAddress addr);
     void removeIssued();
 
     void enqueue(NVMainRequest* req);
 
     bool isEmpty(NVMAddress addr);
+    size_t size();
     size_t size(NVMAddress addr);
 
     NVMainRequest* peek(NVMAddress addr);

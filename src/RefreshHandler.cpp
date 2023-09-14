@@ -14,7 +14,35 @@ RefreshHandler::RefreshHandler(MemoryController* parent, Params* params,
     parentQueue(parentQueue),
     delayedRefreshCounter(params),
     needsRefreshCounter(params),
-    queued(params) {}
+    queued(params) {
+    if (params->UseRefresh) {
+        m_refreshBankNum = params->BANKS / params->BanksPerRefresh;
+        m_tREFI = params->tREFW / (params->ROWS / params->RefreshRows);
+        ncycle_t m_refreshSlice = m_tREFI / (params->RANKS * m_refreshBankNum);
+
+        for (ncounter_t i = 0; i < params->RANKS; i++) {
+
+            for (ncounter_t j = 0; j < m_refreshBankNum; j++) {
+
+                ncounter_t refreshBankHead = j * params->BanksPerRefresh;
+                auto addr = NVMAddress(0, 0, refreshBankHead, i, parent->id, 0);
+                addr.SetPhysicalAddress(parent->GetDecoder()->ReverseTranslate(
+                    0, 0, refreshBankHead, i, parent->id, 0));
+
+                NVMainRequest* refreshPulse =
+                    parent->reqMaker.makeRefreshRequest(addr);
+                ncycle_t offset = (i * m_refreshBankNum + j) * m_refreshSlice;
+
+                parent->GetEventQueue()->InsertCallback(
+                    parent, (CallbackPtr) &MemoryController::RefreshCallback,
+                    parent->GetEventQueue()->GetCurrentCycle() + m_tREFI +
+                        offset,
+                    reinterpret_cast<void*>(refreshPulse),
+                    parent->refreshPriority);
+            }
+        }
+    }
+}
 
 bool RefreshHandler::NeedRefresh(const ncounter_t bank, const uint64_t rank) {
     bool rv = false;
@@ -73,16 +101,20 @@ bool RefreshHandler::HandleRefresh() {
     for (ncounter_t rankIdx = 0; rankIdx < params->RANKS; rankIdx++) {
         ncounter_t i = (parent->nextRefreshRank + rankIdx) % params->RANKS;
 
-        for (ncounter_t bankIdx = 0; bankIdx < parent->m_refreshBankNum;
-             bankIdx++) {
+        for (ncounter_t bankIdx = 0; bankIdx < m_refreshBankNum; bankIdx++) {
             ncounter_t j =
                 (parent->nextRefreshBank + bankIdx * params->BanksPerRefresh) %
                 params->BANKS;
             FailReason fail;
 
             if (NeedRefresh(j, i)) {
-                NVMainRequest* cmdRefresh = parent->reqMaker.makeRefreshRequest(
-                    0, 0, j, i, parent->id, 0);
+                auto addr = NVMAddress(0, 0, j, i, parent->id, 0);
+                addr.SetPhysicalAddress(parent->GetDecoder()->ReverseTranslate(
+                    0, 0, j, i, parent->id, 0));
+
+                NVMainRequest* cmdRefresh =
+                    parent->reqMaker.makeRefreshRequest(addr);
+                cmdRefresh->owner = parent;
 
                 if (params->UsePrecharge) {
                     for (ncounter_t tmpBank = 0;
@@ -91,11 +123,18 @@ bool RefreshHandler::HandleRefresh() {
 
                         if (parent->bankActivated[NVMAddress(0, 0, refBank, i,
                                                              0, 0)] == true) {
+                            auto preAddr =
+                                NVMAddress(0, 0, refBank, i, parent->id, 0);
+                            preAddr.SetPhysicalAddress(
+                                parent->GetDecoder()->ReverseTranslate(
+                                    0, 0, refBank, i, parent->id, 0));
+
                             NVMainRequest* cmdRefPre =
                                 parent->reqMaker.makePrechargeAllRequest(
-                                    0, 0, refBank, i, parent->id, 0);
+                                    preAddr);
+                            cmdRefPre->owner = parent;
 
-                            parent->commandQueues.enqueue(cmdRefPre);
+                            parent->enqueueRequest(cmdRefPre);
                             parent->activeSubArrays.clear(i, refBank);
                             parent->activeRow.clear(i, refBank, params->ROWS);
                             parent->activeMuxedRow.clear(i, refBank,
@@ -105,9 +144,7 @@ bool RefreshHandler::HandleRefresh() {
                         }
                     }
                 }
-
-                cmdRefresh->issueCycle = parentQueue->GetCurrentCycle();
-                parent->commandQueues.enqueue(cmdRefresh);
+                parent->enqueueRequest(cmdRefresh);
 
                 for (ncounter_t tmpBank = 0; tmpBank < params->BanksPerRefresh;
                      tmpBank++) {
@@ -152,7 +189,7 @@ void RefreshHandler::ProcessRefreshPulse(NVMainRequest* refresh) {
 
     parentQueue->InsertCallback(
         parent, (CallbackPtr) &MemoryController::RefreshCallback,
-        parentQueue->GetCurrentCycle() + parent->m_tREFI,
+        parentQueue->GetCurrentCycle() + m_tREFI,
         reinterpret_cast<void*>(refresh), parent->refreshPriority);
 }
 
@@ -162,9 +199,8 @@ bool RefreshHandler::IsRefreshBankQueueEmpty(const ncounter_t bank,
         (bank / params->BanksPerRefresh) * params->BanksPerRefresh;
 
     for (ncounter_t i = 0; i < params->BanksPerRefresh; i++) {
-        ncounter_t queueId = parent->GetCommandQueueId(
-            NVMAddress(0, 0, bankHead + i, rank, 0, 0));
-        if (!parent->commandQueues.effectivelyEmpty(queueId)) {
+        if (!parent->commandQueues.effectivelyEmpty(
+                NVMAddress(0, 0, bankHead + i, rank, 0, 0))) {
             return false;
         }
     }

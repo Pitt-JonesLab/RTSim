@@ -36,7 +36,6 @@ bool RequestFinder::FindStarvedRequest(
     std::list<NVMainRequest*>& transactionQueue, NVMainRequest** starvedRequest,
     SchedulingPredicate& pred) {
     auto isStarved = [&](NVMainRequest* req) {
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         ncounter_t rank, bank, row, subarray, col;
         req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                           &subarray);
@@ -70,7 +69,6 @@ bool RequestFinder::FindCachedAddress(
         if (req->type == ROWCLONE_SRC || req->type == ROWCLONE_DEST)
             return false;
 
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         NVMainRequest* cachedRequest = owner->reqMaker.makeCachedRequest(req);
 
         bool good =
@@ -101,7 +99,6 @@ bool RequestFinder::FindWriteStalledRead(
         if (!owner->p->WritePausing) return false;
 
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                           &subarray);
         SubArray* writingArray = dynamic_cast<SubArray*>(
@@ -146,7 +143,6 @@ bool RequestFinder::FindRowBufferHit(
     SchedulingPredicate& pred) {
     auto isHit = [&](NVMainRequest* req) {
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                           &subarray);
         ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
@@ -175,7 +171,6 @@ bool RequestFinder::FindRTMRowBufferHit(
     SchedulingPredicate& pred) {
     auto isHit = [&](NVMainRequest* req) {
         ncounter_t rank, bank, row, subarray, col;
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                           &subarray);
         ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
@@ -205,7 +200,6 @@ bool RequestFinder::FindOldestReadyRequest(
     SchedulingPredicate& pred) {
     auto isOldest = [&](NVMainRequest* req) {
         ncounter_t rank, bank;
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
         return (owner->bankActivated[req] &&
@@ -234,7 +228,6 @@ bool RequestFinder::FindClosedBankRequest(
     SchedulingPredicate& pred) {
     auto isClosed = [&](NVMainRequest* req) {
         ncounter_t rank, bank;
-        ncounter_t queueId = owner->GetCommandQueueId(req->address);
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
         return (!owner->bankActivated[req] &&

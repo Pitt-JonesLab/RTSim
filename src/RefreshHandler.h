@@ -77,5 +77,7 @@ class RefreshHandler {
     EventQueue* parentQueue;
 
     BankCounter delayedRefreshCounter, needsRefreshCounter, queued;
+    ncounter_t m_refreshBankNum;
+    ncycle_t m_tREFI;
 };
 } // namespace NVM

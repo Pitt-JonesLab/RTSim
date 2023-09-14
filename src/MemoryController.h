@@ -95,30 +95,25 @@ class MemoryController : public NVMObject {
 
     void InitQueues(unsigned int numQueues);
 
-    /*
-     * Decode command queue in priority order
-     *
-     * 0 -- Fixed Scheduling from Rank0 and Bank0
-     * 1 -- Rank-first round-robin
-     * 2 -- Bank-first round-robin
-     */
-    ncounter_t GetCommandQueueId(NVMAddress addr);
-
     void Prequeue(ncounter_t queueNum, NVMainRequest* request);
     void Enqueue(ncounter_t queueNum, NVMainRequest* request);
     bool IssueMemoryCommands(NVMainRequest* req);
     void CycleCommandQueues();
+
+    bool issuedLastTransaction(NVMAddress addr);
+
+    void queueCallback(ncycle_t cycle, CallbackPtr callback, int priority);
+    void queueCycle(ncycle_t cycle);
+
+    void enqueueRequest(NVMainRequest* req);
 
     private:
     SubArrayCounter activeSubArrays;
     ncycle_t lastCommandWake;
     ncounter_t wakeupCount;
     ncycle_t lastIssueCycle;
-    ncounter_t commandQueueCount;
     ncounter_t transactionQueueCount;
-    QueueModel queueModel;
     SubArrayCounter activeMuxedRow;
-    ncounter_t subArrayNum;
     std::vector<bool> rankNeedsPowerDown;
     ncounter_t id;
     ncounter_t simulation_cycles; // Stats
@@ -156,17 +151,11 @@ class MemoryController : public NVMObject {
     virtual bool IsLastRequest(std::list<NVMainRequest*>& transactionQueue,
                                NVMainRequest* request);
 
-    /*
-     * Increments curQueue
-     */
-    void MoveCurrentQueue();
-
     bool bankIsActivated(NVMainRequest* req);
     bool rowIsActivated(NVMainRequest* req);
     void handleActivate(NVMainRequest* req);
     void enqueueActivate(NVMainRequest* req);
     void enqueueShift(NVMainRequest* req);
-    void enqueueRequest(NVMainRequest* req);
     void enqueueImplicitPrecharge(NVMainRequest* req);
     void closeRow(NVMainRequest* req);
     bool handleCachedRequest(NVMainRequest* req);

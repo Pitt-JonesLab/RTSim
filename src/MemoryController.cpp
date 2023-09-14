@@ -61,23 +61,22 @@
 #include <cstdlib>
 #include <functional>
 #include <limits>
+#include <numeric>
 #include <sstream>
 
 using namespace NVM;
 
 /**************************PUBLIC FUNCTIONS*****************************/
 
-MemoryController::MemoryController() : reqMaker(this), reqFinder(this) {
+MemoryController::MemoryController() : reqFinder(this) {
     transactionQueues = NULL;
     transactionQueueCount = 0;
-    commandQueueCount = 0;
 
     lastCommandWake = 0;
     wakeupCount = 0;
     lastIssueCycle = 0;
 
     starvationThreshold = 4;
-    subArrayNum = 1;
 
     curQueue = 0;
     nextRefreshRank = 0;
@@ -124,17 +123,12 @@ void MemoryController::CalculateStats() {
 }
 
 void MemoryController::Cycle(ncycle_t) {
-    ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
-
-    if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup)) return;
-
-    for (ncounter_t queueIdx = 0; queueIdx < commandQueueCount; queueIdx++) {
-        if (commandQueues.effectivelyEmpty(queueIdx) &&
-            TransactionAvailable(queueIdx)) {
-            GetEventQueue()->InsertEvent(EventCycle, this, nextWakeup, NULL,
-                                         transactionQueuePriority);
-            return;
-        }
+    std::vector<size_t> indices(commandQueues.size());
+    std::iota(indices.begin(), indices.end(), 0);
+    if (std::any_of(indices.begin(), indices.end(), [&](auto i) {
+            return commandQueues.effectivelyEmpty(i) && TransactionAvailable(i);
+        })) {
+        queueCycle(GetEventQueue()->GetCurrentCycle() + 1);
     }
 }
 
@@ -203,62 +197,12 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
                   (8 * 1024))
               << " KB." << std::endl;
 
-    if (conf->KeyExists("MATHeight")) {
-        subArrayNum = p->ROWS / p->MATHeight;
-    } else {
-        subArrayNum = 1;
-    }
-
-    queueModel = PerBankQueues;
-    commandQueueCount = p->RANKS * p->BANKS;
-    if (conf->KeyExists("QueueModel")) {
-        if (conf->GetString("QueueModel") == "PerRank") {
-            queueModel = PerRankQueues;
-            commandQueueCount = p->RANKS;
-        } else if (conf->GetString("QueueModel") == "PerBank") {
-            queueModel = PerBankQueues;
-            commandQueueCount = p->RANKS * p->BANKS;
-        } else if (conf->GetString("QueueModel") == "PerSubArray") {
-            queueModel = PerSubArrayQueues;
-            commandQueueCount = p->RANKS * p->BANKS * subArrayNum;
-        }
-    }
-
     starvationCounters = SubArrayCounter(p, conf);
     activeSubArrays = SubArrayCounter(p, conf);
     activeRow = SubArrayCounter(p, conf, p->ROWS);
     activeMuxedRow = SubArrayCounter(p, conf, p->ROWS);
     bankActivated = BankCounter(p);
-    if (p->UseLowPower)
-        rankNeedsPowerDown = std::vector<bool>(p->RANKS, p->InitPD);
-    else rankNeedsPowerDown = std::vector<bool>(p->RANKS, false);
     refreshHandler = RefreshHandler(this, p, GetEventQueue());
-
-    if (p->UseRefresh) {
-        assert(p->BanksPerRefresh <= p->BANKS);
-        assert(p->BanksPerRefresh != 0);
-
-        m_refreshBankNum = p->BANKS / p->BanksPerRefresh;
-        m_tREFI = p->tREFW / (p->ROWS / p->RefreshRows);
-
-        ncycle_t m_refreshSlice = m_tREFI / (p->RANKS * m_refreshBankNum);
-
-        for (ncounter_t i = 0; i < p->RANKS; i++) {
-
-            for (ncounter_t j = 0; j < m_refreshBankNum; j++) {
-
-                ncounter_t refreshBankHead = j * p->BanksPerRefresh;
-                NVMainRequest* refreshPulse = reqMaker.makeRefreshRequest(
-                    0, 0, refreshBankHead, i, id, 0);
-                ncycle_t offset = (i * m_refreshBankNum + j) * m_refreshSlice;
-
-                GetEventQueue()->InsertCallback(
-                    this, (CallbackPtr) &MemoryController::RefreshCallback,
-                    GetEventQueue()->GetCurrentCycle() + m_tREFI + offset,
-                    reinterpret_cast<void*>(refreshPulse), refreshPriority);
-            }
-        }
-    }
 
     if (p->PrintConfig) conf->Print();
 
@@ -276,14 +220,19 @@ void MemoryController::InitQueues(unsigned int numQueues) {
 
     transactionQueues = new NVMTransactionQueue[numQueues];
     transactionQueueCount = numQueues;
-
-    for (unsigned int i = 0; i < numQueues; i++) transactionQueues[i].clear();
 }
 
 void MemoryController::Prequeue(ncounter_t queueNum, NVMainRequest* request) {
     assert(queueNum < transactionQueueCount);
 
     transactionQueues[queueNum].push_front(request);
+}
+
+void MemoryController::queueCycle(ncycle_t cycle) {
+    if (GetEventQueue()->FindEvent(EventCycle, this, NULL, cycle) == NULL) {
+        GetEventQueue()->InsertEvent(EventCycle, this, cycle, NULL,
+                                     transactionQueuePriority);
+    }
 }
 
 void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
@@ -295,67 +244,37 @@ void MemoryController::Enqueue(ncounter_t queueNum, NVMainRequest* request) {
     request->address.SetTranslatedAddress(row, col, bank, rank, channel,
                                           subarray);
 
-    assert(queueNum < transactionQueueCount);
-
     transactionQueues[queueNum].push_back(request);
 
     if (commandQueues.effectivelyEmpty(request->address)) {
-        ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle();
-
-        if (GetEventQueue()->FindEvent(EventCycle, this, NULL, nextWakeup) ==
-            NULL) {
-            GetEventQueue()->InsertEvent(EventCycle, this, nextWakeup, NULL,
-                                         transactionQueuePriority);
-        }
+        queueCycle(GetEventQueue()->GetCurrentCycle());
     }
 }
 
 bool MemoryController::TransactionAvailable(ncounter_t queueId) {
     for (int i = 0; i < transactionQueueCount; i++) {
-        auto transaction =
-            std::find_if(transactionQueues[i].begin(),
-                         transactionQueues[i].end(), [&](NVMainRequest* req) {
-                             return GetCommandQueueId(req->address) == queueId;
-                         });
+        auto transaction = std::find_if(
+            transactionQueues[i].begin(), transactionQueues[i].end(),
+            [&](NVMainRequest* req) {
+                return commandQueues.getQueueIndex(req->address) == queueId;
+            });
         if (transaction != transactionQueues[i].end()) return true;
     }
     return false;
 }
 
 void MemoryController::ScheduleCommandWake() {
-    ncycle_t nextWakeup = NextIssuable(NULL);
-
-    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
-        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
-        NULL, commandQueuePriority);
-
-    if (!nextWakeupScheduled) {
-        GetEventQueue()->InsertCallback(
-            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
-            nextWakeup, NULL, commandQueuePriority);
-    }
+    queueCallback(NextIssuable(NULL),
+                  (CallbackPtr) &MemoryController::CommandQueueCallback,
+                  commandQueuePriority);
 }
 
 void MemoryController::CommandQueueCallback(void*) {
     ncycle_t realSteps = GetEventQueue()->GetCurrentCycle() - lastCommandWake;
     lastCommandWake = GetEventQueue()->GetCurrentCycle();
-
-    ncycle_t nextWakeup = NextIssuable(NULL);
     wakeupCount++;
-
-    bool nextWakeupScheduled = GetEventQueue()->FindCallback(
-        this, (CallbackPtr) &MemoryController::CommandQueueCallback, nextWakeup,
-        NULL, commandQueuePriority);
-
-    if (!nextWakeupScheduled &&
-        nextWakeup != std::numeric_limits<ncycle_t>::max()) {
-        GetEventQueue()->InsertCallback(
-            this, (CallbackPtr) &MemoryController::CommandQueueCallback,
-            nextWakeup, NULL, commandQueuePriority);
-    }
-
+    ScheduleCommandWake();
     CycleCommandQueues();
-
     GetChild()->Cycle(realSteps);
 }
 
@@ -405,27 +324,15 @@ bool MemoryController::bankIsActivated(NVMainRequest* req) {
 }
 
 bool MemoryController::handleCachedRequest(NVMainRequest* req) {
-    ncounter_t rank, bank, row, subarray, col;
-
-    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                      &subarray);
-
-    ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
-    ncounter_t queueId = GetCommandQueueId(req->address);
-
     NVMainRequest* cachedRequest = reqMaker.makeCachedRequest(req);
 
-    FailReason reason;
-    if (GetChild()->IsIssuable(cachedRequest, &reason)) {
+    if (GetChild()->IsIssuable(cachedRequest, nullptr)) {
         if (!bankActivated[req] || !rowIsActivated(req)) {
             enqueueRequest(req);
-
             delete cachedRequest;
-
             return true;
         }
     }
-
     delete cachedRequest;
     return false;
 }
@@ -436,7 +343,6 @@ bool MemoryController::rowIsActivated(NVMainRequest* req) {
     req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                       &subarray);
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
-    ncounter_t queueId = GetCommandQueueId(req->address);
 
     return activeSubArrays[req] && activeRow[req] == row &&
            activeMuxedRow[req] == muxLevel;
@@ -447,12 +353,12 @@ void MemoryController::enqueueActivate(NVMainRequest* req) {
 
     req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                       &subarray);
-    NVMainRequest* actRequest = reqMaker.makeActivateRequest(req);
+    NVMainRequest* actRequest = reqMaker.makeActivateRequest(req, this);
     SubArray* writingArray = FindChild(req, SubArray);
     actRequest->flags |= (writingArray != NULL && writingArray->IsWriting())
                              ? NVMainRequest::FLAG_PRIORITY
                              : 0;
-    commandQueues.enqueue(actRequest);
+    enqueueRequest(actRequest);
 
     ncounter_t muxLevel = static_cast<ncounter_t>(col / p->RBSize);
     bankActivated[req] = true;
@@ -463,18 +369,12 @@ void MemoryController::enqueueActivate(NVMainRequest* req) {
 }
 
 void MemoryController::enqueueShift(NVMainRequest* req) {
+    if (!p->MemIsRTM) return;
     SubArray* writingArray = FindChild(req, SubArray);
-
-    if (p->MemIsRTM) {
-        NVMainRequest* shiftRequest = reqMaker.makeShiftRequest(
-            req); // Place a shift request before the actual
-                  // read/write on the command queue
-        shiftRequest->flags |=
-            (writingArray != NULL && writingArray->IsWriting())
-                ? NVMainRequest::FLAG_PRIORITY
-                : 0;
-        commandQueues.enqueue(shiftRequest);
-    }
+    NVMainRequest* shiftRequest = reqMaker.makeShiftRequest(req, this);
+    if (writingArray != NULL && writingArray->IsWriting())
+        shiftRequest->flags |= NVMainRequest::FLAG_PRIORITY;
+    enqueueRequest(shiftRequest);
 }
 
 void MemoryController::enqueueRequest(NVMainRequest* req) {
@@ -483,55 +383,37 @@ void MemoryController::enqueueRequest(NVMainRequest* req) {
 }
 
 void MemoryController::enqueueImplicitPrecharge(NVMainRequest* req) {
-    ncounter_t rank, bank, row, subarray, col;
-
-    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                      &subarray);
-
     req->issueCycle = GetEventQueue()->GetCurrentCycle();
-    commandQueues.enqueue(reqMaker.makeImplicitPrechargeRequest(req));
+    enqueueRequest(reqMaker.convertToImplicitPrecharge(req));
     activeSubArrays.clear(req);
     activeRow.clear(req, p->ROWS);
     activeMuxedRow.clear(req, p->ROWS);
-    bool idle = true;
-    for (ncounter_t i = 0; i < subArrayNum; i++) {
-        if (activeSubArrays[req]) {
-            idle = false;
-            break;
-        }
-    }
 
-    if (idle) bankActivated[req] = false;
+    auto rank = req->address.GetRank(), bank = req->address.GetBank();
+    auto idle = std::all_of(activeSubArrays.begin(rank, bank),
+                            activeSubArrays.end(rank, bank),
+                            [](auto val) { return val == 0; });
+    if (idle) bankActivated.clear(req);
 }
 
 void MemoryController::closeRow(NVMainRequest* req) {
-    ncounter_t rank, bank, row, subarray, col;
-
-    req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
-                                      &subarray);
-    ncounter_t queueId = GetCommandQueueId(req->address);
-
     if (activeSubArrays[req] && p->UsePrecharge) {
-        commandQueues.enqueue(reqMaker.makePrechargeRequest(
-            activeRow[req], 0, bank, rank, id, subarray));
+        auto preReq = reqMaker.makePrechargeRequest(req, this);
+        preReq->address.setRow(activeRow[req]);
+        enqueueRequest(preReq);
     }
 }
 
 void MemoryController::handleActivate(NVMainRequest* req) {
-    auto rank = req->address.GetRank();
-    auto bank = req->address.GetBank();
-    auto subarray = req->address.GetSubArray();
-    auto queueId = GetCommandQueueId(req->address);
-    auto row = req->address.GetRow();
-
-    if (!bankIsActivated(req) && commandQueues.effectivelyEmpty(req->address)) {
+    if (!bankIsActivated(req)) {
         enqueueActivate(req);
-        std::cout << "Memory Controller - Activated bank " << bank << std::endl;
-    } else if (bankActivated[req] && !rowIsActivated(req) &&
-               commandQueues.effectivelyEmpty(req->address)) {
+        std::cout << "Memory Controller - Activated bank "
+                  << req->address.GetRow() << std::endl;
+    } else if (bankActivated[req] && !rowIsActivated(req)) {
         closeRow(req);
         enqueueActivate(req);
-        std::cout << "Memory Controller switched to row " << row << std::endl;
+        std::cout << "Memory Controller switched to row "
+                  << req->address.GetRow() << std::endl;
     } else if (rowIsActivated(req)) {
         starvationCounters.increment(req);
     } else {
@@ -564,6 +446,17 @@ bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
     return true;
 }
 
+bool MemoryController::issuedLastTransaction(NVMAddress addr) {
+    return commandQueues.effectivelyEmpty(addr) &&
+           TransactionAvailable(commandQueues.getQueueIndex(addr));
+}
+
+void MemoryController::queueCallback(ncycle_t cycle, CallbackPtr callback,
+                                     int priority) {
+    if (!GetEventQueue()->FindCallback(this, callback, cycle, NULL, priority))
+        GetEventQueue()->InsertCallback(this, callback, cycle, NULL, priority);
+}
+
 void MemoryController::CycleCommandQueues() {
     if (handledRefresh == GetEventQueue()->GetCurrentCycle() ||
         lastIssueCycle == GetEventQueue()->GetCurrentCycle()) {
@@ -574,79 +467,33 @@ void MemoryController::CycleCommandQueues() {
                      [&](NVMainRequest* req) {
                          return GetChild()->IsIssuable(req, nullptr);
                      });
-    if (reqToIssueIt != commandQueues.end(curQueue)) {
-        auto req = *reqToIssueIt;
-
-        auto row = req->address.GetRow();
-
-        std::cout << GetEventQueue()->GetCurrentCycle()
-                  << " MemoryController: Issued request type " << req->type
-                  << " for address 0x" << std::hex
-                  << req->address.GetPhysicalAddress() << std::dec << " row "
-                  << row << std::endl;
-
-        GetChild()->IssueCommand(req);
-
-        req->flags |= NVMainRequest::FLAG_ISSUED;
-
-        if (req->type == REFRESH)
-            refreshHandler.ResetRefreshQueued(req->address.GetBank(),
-                                              req->address.GetRank());
-
-        lastIssueCycle = GetEventQueue()->GetCurrentCycle();
-
-        ncycle_t cleanupCycle = GetEventQueue()->GetCurrentCycle() + 1;
-        bool cleanupScheduled = GetEventQueue()->FindCallback(
-            this, (CallbackPtr) &MemoryController::CleanupCallback,
-            cleanupCycle, NULL, cleanupPriority);
-
-        if (!cleanupScheduled)
-            GetEventQueue()->InsertCallback(
-                this, (CallbackPtr) &MemoryController::CleanupCallback,
-                cleanupCycle, NULL, cleanupPriority);
-
-        if (commandQueues.size(req->address) == 1) {
-
-            if (TransactionAvailable(
-                    commandQueues.getQueueIndex(req->address))) {
-                ncycle_t nextWakeup = GetEventQueue()->GetCurrentCycle() + 1;
-
-                GetEventQueue()->InsertEvent(EventCycle, this, nextWakeup, NULL,
-                                             transactionQueuePriority);
-            }
-        }
-        // commandQueues.pop(req->address);
-
-        MoveCurrentQueue();
+    if (reqToIssueIt == commandQueues.end(curQueue)) {
+        commandQueues.checkForDeadlock(GetEventQueue()->GetCurrentCycle());
         return;
     }
-    commandQueues.checkForDeadlock(GetEventQueue()->GetCurrentCycle());
-}
 
-ncounter_t MemoryController::GetCommandQueueId(NVMAddress addr) {
-    ncounter_t queueId = std::numeric_limits<ncounter_t>::max();
+    auto req = *reqToIssueIt;
 
-    if (queueModel == PerRankQueues) {
-        queueId = addr.GetRank();
-    } else if (queueModel == PerBankQueues) {
-        if (p->ScheduleScheme == 1) {
-            queueId = (addr.GetBank() * p->RANKS + addr.GetRank());
-        } else if (p->ScheduleScheme == 2) {
-            queueId = (addr.GetRank() * p->BANKS + addr.GetBank());
-        }
-    } else if (queueModel == PerSubArrayQueues) {
-        // TODO: ScheduleSchemes? There are 6 possible orderings now.
-        queueId = (addr.GetRank() * p->BANKS * subArrayNum) +
-                  (addr.GetBank() * subArrayNum) + addr.GetSubArray();
-    }
+    auto row = req->address.GetRow();
+    std::cout << GetEventQueue()->GetCurrentCycle()
+              << " MemoryController: Issued request type " << req->type
+              << " for address 0x" << std::hex
+              << req->address.GetPhysicalAddress() << std::dec << " row " << row
+              << std::endl;
 
-    assert(queueId < commandQueueCount);
+    GetChild()->IssueCommand(req);
+    req->flags |= NVMainRequest::FLAG_ISSUED;
 
-    return queueId;
-}
+    if (req->type == REFRESH)
+        refreshHandler.ResetRefreshQueued(req->address.GetBank(),
+                                          req->address.GetRank());
 
-void MemoryController::MoveCurrentQueue() {
-    if (p->ScheduleScheme != 0) {
-        curQueue = (curQueue + 1) % commandQueueCount;
-    }
+    lastIssueCycle = GetEventQueue()->GetCurrentCycle();
+    queueCallback(lastIssueCycle + 1,
+                  (CallbackPtr) &MemoryController::CleanupCallback,
+                  cleanupPriority);
+    if (issuedLastTransaction(req->address)) queueCycle(lastIssueCycle + 1);
+
+    if (p->ScheduleScheme != 0)
+        curQueue = (curQueue + 1) % commandQueues.size();
 }

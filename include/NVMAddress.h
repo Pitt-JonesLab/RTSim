@@ -65,6 +65,8 @@ class NVMAddress {
     uint64_t GetChannel();
     uint64_t GetSubArray();
 
+    void setRow(uint64_t addrRow);
+
     bool IsTranslated();
     bool HasPhysicalAddress();
 

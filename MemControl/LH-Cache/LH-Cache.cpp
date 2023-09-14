@@ -272,7 +272,6 @@ bool LH_Cache::RequestComplete(NVMainRequest* req) {
         uint64_t rank, bank;
         NVMainRequest* originalRequest =
             static_cast<NVMainRequest*>(req->reqInfo);
-        ncounter_t queueId = GetCommandQueueId(req->address);
 
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, NULL, NULL);
 
@@ -284,7 +283,7 @@ bool LH_Cache::RequestComplete(NVMainRequest* req) {
 
         /* If it is a hit, issue a request to the bank for the cache line */
         if (!miss) {
-            commandQueues.enqueue(MakeDRCRequest(req));
+            enqueueRequest(MakeDRCRequest(req));
 
             drcHits++;
         }
@@ -499,7 +498,6 @@ NVMainRequest* LH_Cache::MakeTagWriteRequest(NVMainRequest* triggerRequest) {
 bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
     bool rv = false;
     uint64_t rank, bank, row, subarray;
-    ncounter_t queueId = GetCommandQueueId(req->address);
 
     req->address.GetTranslatedAddress(&row, NULL, &bank, &rank, NULL,
                                       &subarray);
@@ -512,10 +510,10 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
+        enqueueRequest(reqMaker.makeActivateRequest(req, this));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD1));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD2));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
@@ -528,11 +526,11 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(reqMaker.makePrechargeRequest(req));
-        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
+        enqueueRequest(reqMaker.makePrechargeRequest(req, this));
+        enqueueRequest(reqMaker.makeActivateRequest(req, this));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD1));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD2));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
@@ -541,9 +539,9 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD1));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD2));
-        commandQueues.enqueue(MakeTagRequest(req, DRC_TAGREAD3));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD1));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD2));
+        enqueueRequest(MakeTagRequest(req, DRC_TAGREAD3));
         bankLocked[rank][bank] = true;
 
         rv = true;
@@ -557,7 +555,6 @@ bool LH_Cache::IssueDRCCommands(NVMainRequest* req) {
 bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
     bool rv = false;
     uint64_t rank, bank, row, subarray;
-    ncounter_t queueId = GetCommandQueueId(req->address);
 
     req->address.GetTranslatedAddress(&row, NULL, &bank, &rank, NULL,
                                       &subarray);
@@ -570,9 +567,9 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
-        commandQueues.enqueue(MakeTagWriteRequest(req));
-        commandQueues.enqueue(req);
+        enqueueRequest(reqMaker.makeActivateRequest(req, this));
+        enqueueRequest(MakeTagWriteRequest(req));
+        enqueueRequest(req);
 
         rv = true;
     } else if (bankActivated[req] && activeRow[req] != row &&
@@ -584,10 +581,10 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(reqMaker.makePrechargeRequest(req));
-        commandQueues.enqueue(reqMaker.makeActivateRequest(req));
-        commandQueues.enqueue(MakeTagWriteRequest(req));
-        commandQueues.enqueue(req);
+        enqueueRequest(reqMaker.makePrechargeRequest(req, this));
+        enqueueRequest(reqMaker.makeActivateRequest(req, this));
+        enqueueRequest(MakeTagWriteRequest(req));
+        enqueueRequest(req);
 
         rv = true;
     } else if (bankActivated[req] && activeRow[req] == row) {
@@ -595,8 +592,8 @@ bool LH_Cache::IssueFillCommands(NVMainRequest* req) {
 
         req->issueCycle = GetEventQueue()->GetCurrentCycle();
 
-        commandQueues.enqueue(MakeTagWriteRequest(req));
-        commandQueues.enqueue(req);
+        enqueueRequest(MakeTagWriteRequest(req));
+        enqueueRequest(req);
 
         rv = true;
     } else {

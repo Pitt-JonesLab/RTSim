@@ -25,6 +25,12 @@ class SubArrayCounter {
     void clear(NVMainRequest* req, ncounter_t reset = 0);
     void clear(NVMAddress address, ncounter_t reset = 0);
 
+    std::vector<ncounter_t>::iterator begin();
+    std::vector<ncounter_t>::iterator begin(size_t rankNum, size_t bankNum);
+
+    std::vector<ncounter_t>::iterator end();
+    std::vector<ncounter_t>::iterator end(size_t rankNum, size_t bankNum);
+
     /*
      *   Clears all values in an entire bank
      *

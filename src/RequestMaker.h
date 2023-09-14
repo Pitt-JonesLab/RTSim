@@ -7,28 +7,23 @@ namespace NVM {
 
 class RequestMaker {
     public:
-    RequestMaker(NVMObject* owner);
+    RequestMaker();
 
-    NVMainRequest* makeShiftRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* makeImplicitPrechargeRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* makePrechargeRequest(const ncounter_t, const ncounter_t,
-                                        const ncounter_t, const ncounter_t,
-                                        const ncounter_t, const ncounter_t);
-    NVMainRequest* makePrechargeAllRequest(const ncounter_t, const ncounter_t,
-                                           const ncounter_t, const ncounter_t,
-                                           const ncounter_t, const ncounter_t);
-    NVMainRequest* makeRefreshRequest(const ncounter_t, const ncounter_t,
-                                      const ncounter_t, const ncounter_t,
-                                      const ncounter_t, const ncounter_t);
-    NVMainRequest* makePowerdownRequest(OpType pdOp, const ncounter_t rank,
-                                        const ncounter_t);
-    NVMainRequest* makePowerupRequest(const ncounter_t rank, const ncounter_t);
-    NVMainRequest* makeActivateRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* makePrechargeRequest(NVMainRequest* triggerRequest);
-    NVMainRequest* makeCachedRequest(NVMainRequest* triggerRequest);
+    NVMainRequest* makeShiftRequest(NVMainRequest* req);
+    NVMainRequest* convertToImplicitPrecharge(NVMainRequest* req);
+    NVMainRequest* makeActivateRequest(NVMainRequest* req);
+    NVMainRequest* makePrechargeRequest(NVMainRequest* req);
+    NVMainRequest* makeCachedRequest(NVMainRequest* req);
 
-    private:
-    NVMObject* owner;
+    NVMainRequest* makeShiftRequest(NVMainRequest* req, NVMObject* owner);
+    NVMainRequest* makeImplicitPrechargeRequest(NVMainRequest* req,
+                                                NVMObject* owner);
+    NVMainRequest* makeActivateRequest(NVMainRequest* req, NVMObject* owner);
+    NVMainRequest* makePrechargeRequest(NVMainRequest* req, NVMObject* owner);
+    NVMainRequest* makeCachedRequest(NVMainRequest* req, NVMObject* owner);
+
+    NVMainRequest* makePrechargeAllRequest(const NVMAddress& addr);
+    NVMainRequest* makeRefreshRequest(const NVMAddress& addr);
 };
 
 } // namespace NVM

@@ -61,3 +61,23 @@ void SubArrayCounter::clear(size_t rank, size_t bank, ncounter_t reset) {
         counters[rank * numBanks * numSubArrays + bank * numSubArrays + i] =
             reset;
 }
+
+std::vector<ncounter_t>::iterator SubArrayCounter::begin() {
+    return counters.begin();
+}
+
+std::vector<ncounter_t>::iterator SubArrayCounter::begin(size_t rankNum,
+                                                         size_t bankNum) {
+    return counters.begin() + rankNum * numBanks * numSubArrays +
+           bankNum * numSubArrays;
+}
+
+std::vector<ncounter_t>::iterator SubArrayCounter::end() {
+    return counters.end();
+}
+
+std::vector<ncounter_t>::iterator SubArrayCounter::end(size_t rankNum,
+                                                       size_t bankNum) {
+    return counters.begin() + rankNum * numBanks * numSubArrays +
+           bankNum * numSubArrays + numBanks;
+}
