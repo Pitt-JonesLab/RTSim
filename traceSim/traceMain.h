@@ -41,7 +41,7 @@
 
 namespace NVM {
 
-class TraceMain : public NVMObject {
+class TraceMain {
     public:
     /**
      * Creates a TraceMain object
@@ -63,25 +63,8 @@ class TraceMain : public NVMObject {
      */
     int RunTrace(int argc, char* argv[]);
 
-    /**
-     * Does nothing
-     *
-     * @param steps Number of cycles to simulate
-     */
-    void Cycle(ncycle_t steps);
-
-    /**
-     * Completes the given request. Throws an exception if the request is not
-     * owned by this TraceMain.
-     *
-     * @param request Pointer to the request to be completed
-     *
-     * @return Always true
-     */
-    bool RequestComplete(NVMainRequest* request);
-
     private:
-    NVMObject object;
+    NVMObject* object;
     ncounter_t outstandingRequests; // Number of remaining requests
     Config* config;                 // Configuration settings
     bool ignoreData;

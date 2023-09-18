@@ -55,6 +55,86 @@
 
 using namespace NVM;
 
+class MainObj : public NVMObject {
+    public:
+    MainObj(Config* config) {
+        outstandingRequests = 0;
+
+        SetEventQueue(new EventQueue());
+        SetGlobalEventQueue(new GlobalEventQueue());
+        SetStats(new Stats());
+        SetTagGenerator(new TagGenerator(1000));
+
+        SimInterface* simInterface = new NullInterface();
+        config->SetSimInterface(simInterface);
+        simInterface->SetConfig(config, true);
+
+        std::vector<std::string>& hookList = config->GetHooks();
+
+        for (size_t i = 0; i < hookList.size(); i++) {
+            std::cout << "Creating hook " << hookList[i] << std::endl;
+
+            NVMObject* hook = HookFactory::CreateHook(hookList[i]);
+
+            if (hook != NULL) {
+                AddHook(hook);
+                hook->SetParent(this);
+                hook->Init(config);
+            } else {
+                std::cout << "Warning: Could not create a hook named `"
+                          << hookList[i] << "'." << std::endl;
+            }
+        }
+
+        NVMain* nvmain = new NVMain();
+        AddChild(nvmain);
+        nvmain->SetParent(this);
+
+        globalEventQueue->SetFrequency(config->GetEnergy("CPUFreq") *
+                                       1000000.0);
+        globalEventQueue->AddSystem(nvmain, config);
+
+        nvmain->SetConfig(config, "defaultMemory", true);
+
+        std::cout << "traceMain (" << (void*) (this) << ")" << std::endl;
+        nvmain->PrintHierarchy();
+    }
+
+    void Cycle(ncycle_t cycles) final { globalEventQueue->Cycle(cycles); }
+
+    bool IsIssuable(NVMainRequest* req, FailReason* reason = nullptr) final {
+        return GetChild()->IsIssuable(req, reason);
+    }
+
+    bool IssueCommand(NVMainRequest* req) final {
+        auto requestCycle = req->arrivalCycle;
+        std::cout << "TraceMain - Issuing request " << requestCycle
+                  << " at cycle " << GetEventQueue()->GetCurrentCycle()
+                  << std::endl;
+        outstandingRequests++;
+        return GetChild()->IssueCommand(req);
+    }
+
+    bool Drain() final {
+        std::cout << "MainObj - Draining with " << outstandingRequests
+                  << " remaining reqs\n";
+        NVMObject::Drain();
+        return outstandingRequests == 0;
+    }
+
+    bool RequestComplete(NVMainRequest* req) final {
+        if (req->owner == this) {
+            delete req;
+            outstandingRequests--;
+            return true;
+        }
+        throw std::runtime_error("Request with no owner!");
+    }
+
+    private:
+    int outstandingRequests;
+};
+
 int main(int argc, char* argv[]) {
     TraceMain* traceRunner = new TraceMain();
 
@@ -62,19 +142,11 @@ int main(int argc, char* argv[]) {
 }
 
 TraceMain::TraceMain() {
-    SetEventQueue(new EventQueue());
-    SetGlobalEventQueue(new GlobalEventQueue());
-    SetStats(new Stats());
-    SetTagGenerator(new TagGenerator(1000));
-
     ignoreData = false;
     trace = NULL;
 }
 
-TraceMain::~TraceMain() {
-    delete config;
-    delete stats;
-}
+TraceMain::~TraceMain() { delete config; }
 
 void TraceMain::setupConfig(int argc, char* argv[]) {
     config = new Config();
@@ -98,9 +170,7 @@ void TraceMain::setupConfig(int argc, char* argv[]) {
         }
     }
 
-    SimInterface* simInterface = new NullInterface();
-    config->SetSimInterface(simInterface);
-    simInterface->SetConfig(config, true);
+    object = new MainObj(config);
 
     if (config->KeyExists("IgnoreData") &&
         config->GetString("IgnoreData") == "true") {
@@ -121,38 +191,6 @@ void TraceMain::setupConfig(int argc, char* argv[]) {
 
     if (argc == 3) simulateCycles = 0;
     else simulateCycles = atoi(argv[3]);
-}
-
-void TraceMain::setupChildren() {
-    // Add any specified hooks
-    std::vector<std::string>& hookList = config->GetHooks();
-
-    for (size_t i = 0; i < hookList.size(); i++) {
-        std::cout << "Creating hook " << hookList[i] << std::endl;
-
-        NVMObject* hook = HookFactory::CreateHook(hookList[i]);
-
-        if (hook != NULL) {
-            AddHook(hook);
-            hook->SetParent(this);
-            hook->Init(config);
-        } else {
-            std::cout << "Warning: Could not create a hook named `"
-                      << hookList[i] << "'." << std::endl;
-        }
-    }
-
-    NVMain* nvmain = new NVMain();
-    AddChild(nvmain);
-    nvmain->SetParent(this);
-
-    globalEventQueue->SetFrequency(config->GetEnergy("CPUFreq") * 1000000.0);
-    globalEventQueue->AddSystem(nvmain, config);
-
-    nvmain->SetConfig(config, "defaultMemory", true);
-
-    std::cout << "traceMain (" << (void*) (this) << ")" << std::endl;
-    nvmain->PrintHierarchy();
 }
 
 void printArgs(int argc, char* argv[]) {
@@ -177,7 +215,7 @@ NVMainRequest* TraceMain::getNextRequest() {
     request->status = MEM_REQUEST_INCOMPLETE;
     if (!ignoreData) request->data = tl.GetData();
     if (!ignoreData) request->oldData = tl.GetOldData();
-    request->owner = (NVMObject*) this;
+    request->owner = object;
     request->arrivalCycle = tl.GetCycle();
 
     return request;
@@ -185,58 +223,53 @@ NVMainRequest* TraceMain::getNextRequest() {
 
 void TraceMain::waitForDrain() {
     std::cout << "TraceMain - end of trace file reached\n";
-    /* Force all modules to drain requests. */
-    bool draining = Drain();
-
     std::cout << "Could not read next line from trace file!" << std::endl;
 
     /* Wait for requests to drain. */
-    while (outstandingRequests > 0) {
-        globalEventQueue->Cycle(1);
-
+    while (!object->Drain()) {
+        object->Cycle(1);
         currentCycle++;
-
-        /* Retry drain each cycle if it failed. */
-        if (!draining) draining = Drain();
     }
 }
 
 bool TraceMain::issueRequest(NVMainRequest* req) {
-    while (!GetChild()->IsIssuable(req)) {
+    while (!object->IsIssuable(req)) {
         if (!tryCycle(1)) return false;
     }
 
     auto requestCycle = req->arrivalCycle;
     std::cout << "TraceMain - Issuing request " << requestCycle << " at cycle "
               << currentCycle << std::endl;
-    outstandingRequests++;
-    GetChild()->IssueCommand(req);
+    object->IssueCommand(req);
 
     return true;
 }
 
 bool TraceMain::tryCycle(ncycle_t cycles) {
     if (simulateCycles < (currentCycle + cycles) && simulateCycles > 0) {
-        globalEventQueue->Cycle(simulateCycles - currentCycle);
-        currentCycle = simulateCycles;
+        object->Cycle(simulateCycles - currentCycle);
+        currentCycle += simulateCycles - currentCycle;
         return false;
     }
 
-    globalEventQueue->Cycle(cycles);
-    currentCycle = globalEventQueue->GetCurrentCycle();
+    object->Cycle(cycles);
+    currentCycle += cycles;
     return true;
 }
 
 bool TraceMain::issueRowClone(NVMainRequest* req) {
+    while (!object->IsIssuable(req)) {
+        if (!tryCycle(1)) return false;
+    }
     NVMainRequest* srcReq = req;
     srcReq->type = ROWCLONE_SRC;
-    if (!issueRequest(srcReq)) return false;
+    if (!object->IssueCommand(srcReq)) return false;
 
     NVMainRequest* destReq = new NVMainRequest();
     *destReq = *req;
     destReq->address = destReq->address2;
     destReq->type = ROWCLONE_DEST;
-    if (!issueRequest(destReq)) return false;
+    if (!object->IssueCommand(destReq)) return false;
     return true;
 }
 
@@ -285,9 +318,9 @@ void TraceMain::runSimulation() {
 }
 
 void TraceMain::printStats() {
-    GetChild()->CalculateStats();
+    object->GetChild()->CalculateStats();
     std::ostream& refStream = (statStream.is_open()) ? statStream : std::cout;
-    stats->PrintAll(refStream);
+    object->GetStats()->PrintAll(refStream);
 
     std::cout << "Exiting at cycle " << currentCycle << " because simCycles "
               << simulateCycles << " reached." << std::endl;
@@ -305,23 +338,9 @@ int TraceMain::RunTrace(int argc, char* argv[]) {
     }
 
     setupConfig(argc, argv);
-    setupChildren();
     printArgs(argc, argv);
     runSimulation();
     printStats();
 
     return 0;
-}
-
-void TraceMain::Cycle(ncycle_t /*steps*/) {}
-
-bool TraceMain::RequestComplete(NVMainRequest* request) {
-    // This is the top-level module, so there are no more parents to fallback.
-    assert(request->owner == this);
-
-    outstandingRequests--;
-
-    delete request;
-
-    return true;
 }
