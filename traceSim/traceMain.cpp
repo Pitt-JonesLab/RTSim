@@ -146,11 +146,8 @@ TraceMain::TraceMain() {
     trace = NULL;
 }
 
-TraceMain::~TraceMain() { delete config; }
-
 void TraceMain::setupConfig(int argc, char* argv[]) {
-    config = new Config();
-    config->Read(argv[1]);
+    config.Read(argv[1]);
 
     // Allow for overriding config parameter values for trace simulations from
     // command line
@@ -166,25 +163,25 @@ void TraceMain::setupConfig(int argc, char* argv[]) {
             std::cout << "Overriding " << clParam << " with '" << clValue << "'"
                       << std::endl;
 
-            config->SetValue(clParam, clValue);
+            config.SetValue(clParam, clValue);
         }
     }
 
-    object = new MainObj(config);
+    object = new MainObj(&config);
 
-    if (config->KeyExists("IgnoreData") &&
-        config->GetString("IgnoreData") == "true") {
+    if (config.KeyExists("IgnoreData") &&
+        config.GetString("IgnoreData") == "true") {
         ignoreData = true;
     }
 
-    if (config->KeyExists("StatsFile")) {
-        statStream.open(config->GetString("StatsFile").c_str(),
+    if (config.KeyExists("StatsFile")) {
+        statStream.open(config.GetString("StatsFile").c_str(),
                         std::ofstream::out | std::ofstream::app);
     }
 
-    if (config->KeyExists("TraceReader"))
+    if (config.KeyExists("TraceReader"))
         trace = TraceReaderFactory::CreateNewTraceReader(
-            config->GetString("TraceReader"));
+            config.GetString("TraceReader"));
     else trace = TraceReaderFactory::CreateNewTraceReader("NVMainTrace");
 
     trace->SetTraceFile(argv[2]);
@@ -280,8 +277,8 @@ void TraceMain::runSimulation() {
      *  The trace cycle is assumed to be the rate that the CPU/LLC is issuing.
      *  Scale the simulation cycles to be the number of *memory cycles* to run.
      */
-    simulateCycles = (uint64_t) ceil(((double) (config->GetValue("CPUFreq")) /
-                                      (double) (config->GetValue("CLK"))) *
+    simulateCycles = (uint64_t) ceil(((double) (config.GetValue("CPUFreq")) /
+                                      (double) (config.GetValue("CLK"))) *
                                      simulateCycles);
 
     std::cout << simulateCycles << " memory cycles) ***" << std::endl;
@@ -298,8 +295,8 @@ void TraceMain::runSimulation() {
 
         auto requestCycle = request->arrivalCycle;
 
-        if (config->KeyExists("IgnoreTraceCycle") &&
-            config->GetString("IgnoreTraceCycle") == "true")
+        if (config.KeyExists("IgnoreTraceCycle") &&
+            config.GetString("IgnoreTraceCycle") == "true")
             requestCycle = 0;
 
         if (request->type != READ && request->type != WRITE &&

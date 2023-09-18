@@ -49,11 +49,6 @@ class TraceMain {
     TraceMain();
 
     /**
-     * Frees memory used by this TraceMain object
-     */
-    ~TraceMain();
-
-    /**
      * Simulates a given trace file
      *
      * @param argc Number of command line arguments
@@ -66,7 +61,7 @@ class TraceMain {
     private:
     NVMObject* object;
     ncounter_t outstandingRequests; // Number of remaining requests
-    Config* config;                 // Configuration settings
+    Config config;                  // Configuration settings
     bool ignoreData;
     std::ofstream statStream;
     GenericTraceReader* trace;
