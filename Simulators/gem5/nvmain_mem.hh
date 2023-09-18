@@ -45,16 +45,12 @@
 #ifndef __MEM_NVMAIN_MEM_HH__
 #define __MEM_NVMAIN_MEM_HH__
 
-
-#include <fstream>
-#include <ostream>
-
-#include "NVM/nvmain.h"
 #include "base/callback.hh"
-#include "include/NVMTypes.h"
 #include "include/NVMainRequest.h"
+#include "include/NVMTypes.h"
 #include "mem/abstract_mem.hh"
 #include "mem/tport.hh"
+#include "NVM/nvmain.h"
 #include "params/NVMainMemory.hh"
 #include "sim/eventq.hh"
 #include "sim/serialize.hh"
@@ -64,85 +60,80 @@
 #include "src/SimInterface.h"
 #include "src/TagGenerator.h"
 
-class NVMainMemory : public AbstractMemory, public NVM::NVMObject
-{
-  private:
+#include <fstream>
+#include <ostream>
 
-    class MemoryPort : public SlavePort
-    {
+
+class NVMainMemory : public AbstractMemory, public NVM::NVMObject {
+    private:
+    class MemoryPort : public SlavePort {
         friend class NVMainMemory;
 
         NVMainMemory& memory;
         NVMainMemory& forgdb;
 
-      public:
-
+        public:
         MemoryPort(const std::string& _name, NVMainMemory& _memory);
 
-      protected:
-
+        protected:
         Tick recvAtomic(PacketPtr pkt);
 
         void recvFunctional(PacketPtr pkt);
 
         bool recvTimingReq(PacketPtr pkt);
 
-        void recvRetry( );
-        void recvRespRetry( );
+        void recvRetry();
+        void recvRespRetry();
 
         AddrRangeList getAddrRanges() const;
-
     };
 
     void tick();
-    void SendResponses( );
+    void SendResponses();
     EventWrapper<NVMainMemory, &NVMainMemory::tick> clockEvent;
     EventWrapper<NVMainMemory, &NVMainMemory::SendResponses> respondEvent;
 
-    void CheckDrainState( );
-    void ScheduleResponse( );
-    void ScheduleClockEvent( Tick );
-    void SetRequestData(NVM::NVMainRequest *request, PacketPtr pkt);
+    void CheckDrainState();
+    void ScheduleResponse();
+    void ScheduleClockEvent(Tick);
+    void SetRequestData(NVM::NVMainRequest* request, PacketPtr pkt);
 
-    class NVMainStatPrinter : public Callback
-    {
+    class NVMainStatPrinter : public Callback {
         friend class NVMainMemory;
 
-      public:
-        NVMainMemory *memory;
-        NVMainMemory *forgdb;
+        public:
+        NVMainMemory* memory;
+        NVMainMemory* forgdb;
 
         void process();
 
-        NVM::NVMain *nvmainPtr;
+        NVM::NVMain* nvmainPtr;
         std::ofstream statStream;
     };
 
-    class NVMainStatReseter : public Callback
-    {
-      public:
+    class NVMainStatReseter : public Callback {
+        public:
         void process();
 
-        NVM::NVMain *nvmainPtr;
+        NVM::NVMain* nvmainPtr;
     };
 
-    struct NVMainMemoryRequest
-    {
+    struct NVMainMemoryRequest {
         PacketPtr packet;
-        NVM::NVMainRequest *request;
+        NVM::NVMainRequest* request;
         Tick issueTick;
         bool atomic;
     };
 
-    DrainManager *drainManager;
+    DrainManager* drainManager;
 
-    NVM::NVMain *m_nvmainPtr;
-    NVM::Stats *m_statsPtr;
-    NVM::EventQueue *m_nvmainEventQueue;
-    NVM::GlobalEventQueue *m_nvmainGlobalEventQueue;
-    NVM::Config *m_nvmainConfig;
-    NVM::SimInterface *m_nvmainSimInterface;
-    NVM::TagGenerator *m_tagGenerator;
+    NVM::NVMain* m_nvmainPtr;
+    NVM::Stats* m_statsPtr;
+    NVM::EventQueue* m_nvmainEventQueue;
+    NVM::GlobalEventQueue* m_nvmainGlobalEventQueue;
+    NVM::Config* m_nvmainConfig;
+    NVM::SimInterface* m_nvmainSimInterface;
+    NVM::TagGenerator* m_tagGenerator;
     std::string m_nvmainConfigPath;
 
     bool m_nacked_requests;
@@ -167,10 +158,9 @@ class NVMainMemory : public AbstractMemory, public NVM::NVMObject
 
     uint64_t m_requests_outstanding;
 
-  public:
-
+    public:
     typedef NVMainMemoryParams Params;
-    NVMainMemory(const Params *p);
+    NVMainMemory(const Params* p);
     virtual ~NVMainMemory();
 
     BaseSlavePort& getSlavePort(const std::string& if_name,
@@ -179,38 +169,32 @@ class NVMainMemory : public AbstractMemory, public NVM::NVMObject
     void startup();
     void wakeup();
 
-    const Params *
-    params() const
-    {
-        return dynamic_cast<const Params *>(_params);
+    const Params* params() const {
+        return dynamic_cast<const Params*>(_params);
     }
 
+    bool RequestComplete(NVM::NVMainRequest* req);
 
-    bool RequestComplete( NVM::NVMainRequest *req );
-
-    void Cycle(NVM::ncycle_t) { }
+    void Cycle(NVM::ncycle_t) {}
 
     DrainState drain() override;
 
-    void serialize(CheckpointOut &cp) const override;
-    void unserialize(CheckpointIn &cp) override;
+    void serialize(CheckpointOut& cp) const override;
+    void unserialize(CheckpointIn& cp) override;
 
     MemoryPort port;
-    static NVMainMemory *masterInstance;
-    NVMainMemory *otherInstance;
-    std::vector<NVMainMemory *> allInstances;
+    static NVMainMemory* masterInstance;
+    NVMainMemory* otherInstance;
+    std::vector<NVMainMemory*> allInstances;
     bool retryRead, retryWrite, retryResp;
     std::deque<PacketPtr> responseQueue;
     std::vector<PacketPtr> pendingDelete;
-    std::map<NVM::NVMainRequest *, NVMainMemoryRequest *> m_request_map;
+    std::map<NVM::NVMainRequest*, NVMainMemoryRequest*> m_request_map;
 
-  protected:
-
+    protected:
     Tick doAtomicAccess(PacketPtr pkt);
     void doFunctionalAccess(PacketPtr pkt);
     void recvRetry();
-
 };
 
 #endif
-

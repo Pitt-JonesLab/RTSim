@@ -81,6 +81,7 @@ class TraceMain : public NVMObject {
     bool RequestComplete(NVMainRequest* request);
 
     private:
+    NVMObject object;
     ncounter_t outstandingRequests; // Number of remaining requests
     Config* config;                 // Configuration settings
     bool ignoreData;
