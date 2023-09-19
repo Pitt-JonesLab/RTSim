@@ -45,17 +45,20 @@
 #include "src/EventQueue.h"
 #include "src/Interconnect.h"
 #include "src/MemoryController.h"
+#include "src/MemoryStack.h"
+#include "src/RTSimLayer.h"
 #include "src/TranslationMethod.h"
 #include "Utils/HookFactory.h"
 
 #include <cmath>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <stdlib.h>
 
 using namespace NVM;
 
-class MainObj : public NVMObject {
+class MainObj : public NVMObject, public MemoryComponent {
     public:
     MainObj(Config* config) {
         outstandingRequests = 0;
@@ -101,6 +104,8 @@ class MainObj : public NVMObject {
     }
 
     void Cycle(ncycle_t cycles) final { globalEventQueue->Cycle(cycles); }
+
+    void cycle(unsigned int cycles) final { Cycle(cycles); }
 
     bool IsIssuable(NVMainRequest* req, FailReason* reason = nullptr) final {
         return GetChild()->IsIssuable(req, reason);
@@ -169,6 +174,11 @@ void TraceMain::setupConfig(int argc, char* argv[]) {
 
     object = new MainObj(&config);
 
+    auto layer = std::make_unique<RTSimLayer>();
+    layer->addComponent(std::move(std::unique_ptr<MemoryComponent>(
+        dynamic_cast<MemoryComponent*>(object))));
+    memorySystem.addLayer(std::move(layer));
+
     if (config.KeyExists("IgnoreData") &&
         config.GetString("IgnoreData") == "true") {
         ignoreData = true;
@@ -212,6 +222,7 @@ NVMainRequest* TraceMain::getNextRequest() {
     request->status = MEM_REQUEST_INCOMPLETE;
     if (!ignoreData) request->data = tl.GetData();
     if (!ignoreData) request->oldData = tl.GetOldData();
+    // request->owner = memorySystem.getTopLayer().getComponent();
     request->owner = object;
     request->arrivalCycle = tl.GetCycle();
 
@@ -223,9 +234,19 @@ void TraceMain::waitForDrain() {
     std::cout << "Could not read next line from trace file!" << std::endl;
 
     /* Wait for requests to drain. */
+    /**
+     * auto drainRequest = [](const MemoryComponent& component) { return
+     * component.drain(); };
+     * auto cycleRequest = [](const MemoryComponent& component) {
+     * component.cycle(1); };
+     *
+     * while (handleRequest(memorySystem, drainRequest)) {
+     *      handleRequest(memorySystem, cycleRequest);
+     *      currentCycle++;
+     * }
+     */
     while (!object->Drain()) {
-        object->Cycle(1);
-        currentCycle++;
+        if (!tryCycle(1)) return;
     }
 }
 
@@ -243,15 +264,20 @@ bool TraceMain::issueRequest(NVMainRequest* req) {
 }
 
 bool TraceMain::tryCycle(ncycle_t cycles) {
+    bool result = true;
     if (simulateCycles < (currentCycle + cycles) && simulateCycles > 0) {
-        object->Cycle(simulateCycles - currentCycle);
-        currentCycle += simulateCycles - currentCycle;
-        return false;
+        // object->Cycle(simulateCycles - currentCycle);
+        cycles = simulateCycles - currentCycle;
+        result = false;
     }
 
-    object->Cycle(cycles);
+    // object->Cycle(cycles);
+    handleRequest(memorySystem,
+                  Request<void>([cycles](MemoryComponent& component) {
+                      component.cycle(cycles);
+                  }));
     currentCycle += cycles;
-    return true;
+    return result;
 }
 
 bool TraceMain::issueRowClone(NVMainRequest* req) {

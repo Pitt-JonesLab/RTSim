@@ -37,6 +37,7 @@
 
 #include "src/Config.h"
 #include "src/NVMObject.h"
+#include "src/RTSimStack.h"
 #include "traceReader/TraceReaderFactory.h"
 
 namespace NVM {
@@ -59,6 +60,7 @@ class TraceMain {
     int RunTrace(int argc, char* argv[]);
 
     private:
+    RTSimStack memorySystem;
     NVMObject* object;
     ncounter_t outstandingRequests; // Number of remaining requests
     Config config;                  // Configuration settings

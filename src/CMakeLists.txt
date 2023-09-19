@@ -24,6 +24,8 @@ set(MAIN_SOURCES
     ${RTSIM_DIR}/src/RequestFinder.cpp
     ${RTSIM_DIR}/src/RefreshHandler.cpp
     ${RTSIM_DIR}/src/CommandQueues.cpp
-    ${RTSIM_DIR}/src/BankCounter.cpp)
+    ${RTSIM_DIR}/src/BankCounter.cpp
+    ${RTSIM_DIR}/src/RTSimStack.cpp
+    ${RTSIM_DIR}/src/RTSimLayer.cpp)
 
 set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)

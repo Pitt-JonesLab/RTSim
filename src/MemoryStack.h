@@ -2,6 +2,8 @@
 
 #include "src/MemoryLayer.h"
 
+#include <memory>
+
 namespace NVM {
 
 /*
@@ -15,17 +17,27 @@ namespace NVM {
  */
 class MemoryStack {
     public:
-    MemoryStack();
+    MemoryStack() = default;
+    virtual ~MemoryStack() = default;
 
     /**
      * Adds a MemoryLayer to the bottom of the stack
+     *
+     * @param layer Layer to be added
      */
-    virtual void addLayer(const MemoryLayer& layer) = 0;
+    virtual void addLayer(std::unique_ptr<MemoryLayer> layer) = 0;
 
-    /*
-     *   Processes events from the top layer and their responses
+    /**
+     * Returns the top layer of the stack
+     *
+     * @return Top layer of the stack
      */
-    virtual void processEvents() = 0;
+    virtual MemoryLayer* getTopLayer() const = 0;
 };
+
+template<typename T>
+T handleRequest(const MemoryStack& stack, Request<T> request) {
+    return handleRequest(*stack.getTopLayer(), request);
+}
 
 } // namespace NVM
