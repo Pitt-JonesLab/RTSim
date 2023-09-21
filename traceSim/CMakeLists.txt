@@ -1,5 +1,6 @@
 set(TRACEMAIN_SOURCES
-    traceMain.cpp)
+    ${RTSIM_DIR}/traceSim/traceMain.cpp
+    ${RTSIM_DIR}/traceSim/TraceSimulator.cpp)
 
 set(EXE_NAME nvmain.${buildtype})
 add_executable(${EXE_NAME} ${TRACEMAIN_SOURCES} ${ALL_SOURCES})
