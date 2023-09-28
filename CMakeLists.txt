@@ -32,6 +32,9 @@ add_subdirectory(include)
 add_subdirectory(NVM)
 add_subdirectory(SimInterface)
 
+add_library(RTSim ${ALL_SOURCES})
+target_include_directories(RTSim PUBLIC ${RTSIM_DIR})
+
 # Main dir
 add_subdirectory(traceSim)
 
