@@ -11,5 +11,9 @@ jobs:
         run: pip install scons
       - name: Checkout repo
         uses: actions/checkout@v3
-      - name: Run test
+      - name: Build
+        run: cmake . -B build -Dbuildtype=fast; cmake --build build;
+      - name: Unit Tests
+        run: ctest --test-dir build/test
+      - name: End-to-End
         run: python3 ./Tests/hello_world.py
