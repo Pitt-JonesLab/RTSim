@@ -27,7 +27,7 @@ function(add_catch_tests)
 		add_executable(${TEST_NAME} ${TEST})
 		#target_include_directories(${TEST_NAME} PRIVATE ${ADD_CATCH_TESTS_INCLUDE_DIRS})
         target_link_libraries(${TEST_NAME} PRIVATE ${ADD_CATCH_TESTS_LIBS} Catch2::Catch2WithMain)
-		catch_discover_tests(${TEST_NAME})
+		catch_discover_tests(${TEST_NAME} TEST_PREFIX ${TEST_NAME}-)
 	endforeach()
 endfunction()
 

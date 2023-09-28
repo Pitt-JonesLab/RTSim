@@ -1,3 +1,5 @@
+add_subdirectory(TraceSimulation)
+
 set(MAIN_SOURCES
     ${RTSIM_DIR}/src/AddressTranslator.cpp 
     ${RTSIM_DIR}/src/Bank.cpp
