@@ -9,7 +9,7 @@ class CycleTimer {
      *
      * @oaram max Max cycles for this timer. 0 for infinite cycles
      */
-    CycleTimer(unsigned int max);
+    CycleTimer(unsigned int max = 0);
 
     /**
      * Attempts to advance the timer by the given number of cycles

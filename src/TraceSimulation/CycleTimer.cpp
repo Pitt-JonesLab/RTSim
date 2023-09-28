@@ -6,5 +6,5 @@ CycleTimer::CycleTimer(unsigned int max) : currentCycle(0), maxCycles(max) {}
 
 bool CycleTimer::cycle(unsigned int cycles) {
     currentCycle += cycles;
-    return currentCycle < maxCycles || maxCycles == 0;
+    return currentCycle <= maxCycles || maxCycles == 0;
 }
