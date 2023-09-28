@@ -1,7 +1,10 @@
 import subprocess
 
+# Config CMake
+subprocess.run(["cmake", ".", "-B", "build", "-Dbuildtype=fast"])
+
 # Build nvmain.fast
-code = subprocess.run(["scons", "--build-type=fast"]).returncode
+code = subprocess.run(["cmake", "--build", "build"]).returncode
 
 if code != 0:
     print("nvmain build failed!")
@@ -14,6 +17,7 @@ code = code.returncode
 
 if code != 0:
     print("Test run failed!")
+    print(output)
     exit(1)
 
 print(len(output))

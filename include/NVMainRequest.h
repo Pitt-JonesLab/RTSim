@@ -69,7 +69,13 @@ enum OpType {
     BUS_WRITE,       /* Data bus write burst */
     CACHED_READ,     /* Check if read is cached anywhere in hierarchy. */
     CACHED_WRITE,    /* Check if write is cached anywhere in hierarchy. */
-    PIM_OP           // PIM operation (RowClone)
+    ROW_CLONE,       /* RowClone (RTM PIM)*/ 
+    TRANSVERSE_READ,  /* Transverse Read (RTM PIM)*/
+    TRANSVERSE_WRITE_L,  /* Transverse Write Shifting Leftwards (in to Right out from Left) (RTM PIM)*/
+    TRANSVERSE_WRITE_R,  /* Transverse Write Shifting Rightwards (in to Left out from Right) (RTM PIM)*/
+    PIM_OP,          // PIM operation (RowClone)
+    ROWCLONE_SRC,
+    ROWCLONE_DEST
 };
 
 enum MemRequestStatus {

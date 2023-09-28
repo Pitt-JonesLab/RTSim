@@ -61,41 +61,24 @@
 using namespace NVM;
 
 RTM::RTM() {
-    std::cout
-        << "Created a First Ready First Come First Serve memory controller!"
-        << std::endl;
-
     queueSize = 32;
     starvationThreshold = 4;
-
     averageLatency = 0.0f;
     averageQueueLatency = 0.0f;
     averageTotalLatency = 0.0f;
-
     measuredLatencies = 0;
     measuredQueueLatencies = 0;
     measuredTotalLatencies = 0;
-
     mem_reads = 0;
     mem_writes = 0;
-
     rb_hits = 0;
     rb_miss = 0;
-
     write_pauses = 0;
-
     starvation_precharges = 0;
-
     psInterval = 0;
 
     InitQueues(1);
-
     memQueue = &(transactionQueues[0]);
-}
-
-RTM::~RTM() {
-    std::cout << "RTM memory controller destroyed. " << memQueue->size()
-              << " commands still in memory queue." << std::endl;
 }
 
 void RTM::SetConfig(Config* conf, bool createChildren) {
@@ -130,29 +113,20 @@ void RTM::RegisterStats() {
     MemoryController::RegisterStats();
 }
 
-bool RTM::IsIssuable(NVMainRequest* /*request*/, FailReason* /*fail*/) {
-    bool rv = true;
-
-    /*
-     *  Limit the number of commands in the queue. This will stall the
-     * caches/CPU.
-     */
-    if (memQueue->size() >= queueSize) {
-        rv = false;
-    }
-
-    return rv;
+bool RTM::IsIssuable(NVMainRequest*, FailReason*) {
+    return memQueue->size() < queueSize;
 }
 
 bool RTM::IssueCommand(NVMainRequest* req) {
-    std::cout << "RTM - Received request " << req->arrivalCycle << std::endl;
+    std::cout << "RTM - Received request at cycle "
+              << GetEventQueue()->GetCurrentCycle() << std::endl;
     if (!IsIssuable(req)) {
+        throw std::runtime_error("RTM is not issuable!");
         return false;
     }
 
     req->arrivalCycle = GetEventQueue()->GetCurrentCycle();
 
-    // Request is enqueued here and broken up later
     Enqueue(0, req);
 
     if (req->type == READ) mem_reads++;
@@ -161,12 +135,24 @@ bool RTM::IssueCommand(NVMainRequest* req) {
     return true;
 }
 
+double updateAverage(double avg, double newVal, size_t totalMeasures) {
+    return (avg * totalMeasures + newVal) / (totalMeasures + 1);
+}
+
+ncycle_t issueLatency(NVMainRequest* req) {
+    return req->completionCycle - req->issueCycle;
+}
+
+ncycle_t queueLatency(NVMainRequest* req) {
+    return req->issueCycle - req->arrivalCycle;
+}
+
+ncycle_t totalLatency(NVMainRequest* req) {
+    return req->completionCycle - req->arrivalCycle;
+}
+
 bool RTM::RequestComplete(NVMainRequest* request) {
     if (request->type == WRITE || request->type == WRITE_PRECHARGE) {
-        /*
-         *  Put cancelled requests at the head of the write queue
-         *  like nothing ever happened.
-         */
         if (request->flags & NVMainRequest::FLAG_CANCELLED ||
             request->flags & NVMainRequest::FLAG_PAUSED) {
             Prequeue(0, request);
@@ -175,34 +161,21 @@ bool RTM::RequestComplete(NVMainRequest* request) {
         }
     }
 
-    /* Only reads and writes are sent back to NVMain and checked for in the
-     * transaction queue. */
     if (request->type == READ || request->type == READ_PRECHARGE ||
         request->type == WRITE || request->type == WRITE_PRECHARGE) {
         request->status = MEM_REQUEST_COMPLETE;
         request->completionCycle = GetEventQueue()->GetCurrentCycle();
 
-        /* Update the average latencies based on this request for READ/WRITE
-         * only. */
-        averageLatency =
-            ((averageLatency * static_cast<double>(measuredLatencies)) +
-             static_cast<double>(request->completionCycle) -
-             static_cast<double>(request->issueCycle)) /
-            static_cast<double>(measuredLatencies + 1);
+        averageLatency = updateAverage(averageLatency, issueLatency(request),
+                                       measuredLatencies);
         measuredLatencies += 1;
 
-        averageQueueLatency = ((averageQueueLatency *
-                                static_cast<double>(measuredQueueLatencies)) +
-                               static_cast<double>(request->issueCycle) -
-                               static_cast<double>(request->arrivalCycle)) /
-                              static_cast<double>(measuredQueueLatencies + 1);
+        averageQueueLatency = updateAverage(
+            averageQueueLatency, queueLatency(request), measuredQueueLatencies);
         measuredQueueLatencies += 1;
 
-        averageTotalLatency = ((averageTotalLatency *
-                                static_cast<double>(measuredTotalLatencies)) +
-                               static_cast<double>(request->completionCycle) -
-                               static_cast<double>(request->arrivalCycle)) /
-                              static_cast<double>(measuredTotalLatencies + 1);
+        averageTotalLatency = updateAverage(
+            averageTotalLatency, totalLatency(request), measuredTotalLatencies);
         measuredTotalLatencies += 1;
     }
 
@@ -210,42 +183,27 @@ bool RTM::RequestComplete(NVMainRequest* request) {
 }
 
 void RTM::Cycle(ncycle_t steps) {
-    NVMainRequest* nextRequest = NULL;
+    NVMainRequest* nextRequest = nullptr;
 
-    /* Check for starved requests BEFORE row buffer hits. */
-    if (FindStarvedRequest(*memQueue, &nextRequest)) {
+    if (reqFinder.FindStarvedRequest(*memQueue, &nextRequest)) {
         rb_miss++;
         starvation_precharges++;
-    }
-    /* Check for row buffer hits. */
-    else if (FindRTMRowBufferHit(*memQueue, &nextRequest)) {
+    } else if (reqFinder.FindRTMRowBufferHit(*memQueue, &nextRequest)) {
         rb_hits++;
-    }
-    /* Check if the address is accessible through any other means. */
-    else if (FindCachedAddress(*memQueue, &nextRequest)) {
-    } else if (FindWriteStalledRead(*memQueue, &nextRequest)) {
-        if (nextRequest != NULL) write_pauses++;
-    }
-    /* Find the oldest request that can be issued. */
-    else if (FindOldestReadyRequest(*memQueue, &nextRequest)) {
+    } else if (reqFinder.FindCachedAddress(*memQueue, &nextRequest)) {
+    } else if (reqFinder.FindWriteStalledRead(*memQueue, &nextRequest)) {
+        write_pauses++;
+    } else if (reqFinder.FindOldestReadyRequest(*memQueue, &nextRequest)) {
         rb_miss++;
-    }
-    /* Find requests to a bank that is closed. */
-    else if (FindClosedBankRequest(*memQueue, &nextRequest)) {
+    } else if (reqFinder.FindClosedBankRequest(*memQueue, &nextRequest)) {
         rb_miss++;
-    } else {
-        nextRequest = NULL;
     }
 
-    /* Issue the commands for this transaction. */
     if (nextRequest != NULL) {
         IssueMemoryCommands(nextRequest);
     }
 
-    /* Issue any commands in the command queues. */
     CycleCommandQueues();
 
     MemoryController::Cycle(steps);
 }
-
-void RTM::CalculateStats() { MemoryController::CalculateStats(); }

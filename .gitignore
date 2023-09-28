@@ -2,8 +2,10 @@
 /log
 /cputraces
 /traces_with_Ids
+/.vscode
 .sconsign.dblite
 *.log
 *.o
 *.fast
 *.debug
+output.txt

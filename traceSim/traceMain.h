@@ -41,17 +41,12 @@
 
 namespace NVM {
 
-class TraceMain : public NVMObject {
+class TraceMain {
     public:
     /**
      * Creates a TraceMain object
      */
     TraceMain();
-
-    /**
-     * Frees memory used by this TraceMain object
-     */
-    ~TraceMain();
 
     /**
      * Simulates a given trace file
@@ -63,26 +58,10 @@ class TraceMain : public NVMObject {
      */
     int RunTrace(int argc, char* argv[]);
 
-    /**
-     * Does nothing
-     *
-     * @param steps Number of cycles to simulate
-     */
-    void Cycle(ncycle_t steps);
-
-    /**
-     * Completes the given request. Throws an exception if the request is not
-     * owned by this TraceMain.
-     *
-     * @param request Pointer to the request to be completed
-     *
-     * @return Always true
-     */
-    bool RequestComplete(NVMainRequest* request);
-
     private:
+    NVMObject* object;
     ncounter_t outstandingRequests; // Number of remaining requests
-    Config* config;                 // Configuration settings
+    Config config;                  // Configuration settings
     bool ignoreData;
     std::ofstream statStream;
     GenericTraceReader* trace;
@@ -111,6 +90,12 @@ class TraceMain : public NVMObject {
     NVMainRequest* getNextRequest();
 
     void waitForDrain();
+
+    bool issueRequest(NVMainRequest* req);
+
+    bool issueRowClone(NVMainRequest* req);
+
+    bool tryCycle(ncycle_t cycles);
 };
 
 }; // namespace NVM

@@ -55,6 +55,86 @@
 
 using namespace NVM;
 
+class MainObj : public NVMObject {
+    public:
+    MainObj(Config* config) {
+        outstandingRequests = 0;
+
+        SetEventQueue(new EventQueue());
+        SetGlobalEventQueue(new GlobalEventQueue());
+        SetStats(new Stats());
+        SetTagGenerator(new TagGenerator(1000));
+
+        SimInterface* simInterface = new NullInterface();
+        config->SetSimInterface(simInterface);
+        simInterface->SetConfig(config, true);
+
+        std::vector<std::string>& hookList = config->GetHooks();
+
+        for (size_t i = 0; i < hookList.size(); i++) {
+            std::cout << "Creating hook " << hookList[i] << std::endl;
+
+            NVMObject* hook = HookFactory::CreateHook(hookList[i]);
+
+            if (hook != NULL) {
+                AddHook(hook);
+                hook->SetParent(this);
+                hook->Init(config);
+            } else {
+                std::cout << "Warning: Could not create a hook named `"
+                          << hookList[i] << "'." << std::endl;
+            }
+        }
+
+        NVMain* nvmain = new NVMain();
+        AddChild(nvmain);
+        nvmain->SetParent(this);
+
+        globalEventQueue->SetFrequency(config->GetEnergy("CPUFreq") *
+                                       1000000.0);
+        globalEventQueue->AddSystem(nvmain, config);
+
+        nvmain->SetConfig(config, "defaultMemory", true);
+
+        std::cout << "traceMain (" << (void*) (this) << ")" << std::endl;
+        nvmain->PrintHierarchy();
+    }
+
+    void Cycle(ncycle_t cycles) final { globalEventQueue->Cycle(cycles); }
+
+    bool IsIssuable(NVMainRequest* req, FailReason* reason = nullptr) final {
+        return GetChild()->IsIssuable(req, reason);
+    }
+
+    bool IssueCommand(NVMainRequest* req) final {
+        auto requestCycle = req->arrivalCycle;
+        std::cout << "TraceMain - Issuing request " << requestCycle
+                  << " at cycle " << GetEventQueue()->GetCurrentCycle()
+                  << std::endl;
+        outstandingRequests++;
+        return GetChild()->IssueCommand(req);
+    }
+
+    bool Drain() final {
+        std::cout << "MainObj - Draining with " << outstandingRequests
+                  << " remaining reqs\n";
+        NVMObject::Drain();
+        return outstandingRequests == 0;
+    }
+
+    bool RequestComplete(NVMainRequest* req) final {
+        if (req->owner == this) {
+            delete req;
+            outstandingRequests--;
+            return true;
+        }
+        throw std::runtime_error("Request with no owner!");
+    }
+
+    private:
+    int outstandingRequests;
+};
+
 int main(int argc, char* argv[]) {
     TraceMain* traceRunner = new TraceMain();
 
@@ -62,23 +142,12 @@ int main(int argc, char* argv[]) {
 }
 
 TraceMain::TraceMain() {
-    SetEventQueue(new EventQueue());
-    SetGlobalEventQueue(new GlobalEventQueue());
-    SetStats(new Stats());
-    SetTagGenerator(new TagGenerator(1000));
-
     ignoreData = false;
     trace = NULL;
 }
 
-TraceMain::~TraceMain() {
-    delete config;
-    delete stats;
-}
-
 void TraceMain::setupConfig(int argc, char* argv[]) {
-    config = new Config();
-    config->Read(argv[1]);
+    config.Read(argv[1]);
 
     // Allow for overriding config parameter values for trace simulations from
     // command line
@@ -94,65 +163,31 @@ void TraceMain::setupConfig(int argc, char* argv[]) {
             std::cout << "Overriding " << clParam << " with '" << clValue << "'"
                       << std::endl;
 
-            config->SetValue(clParam, clValue);
+            config.SetValue(clParam, clValue);
         }
     }
 
-    SimInterface* simInterface = new NullInterface();
-    config->SetSimInterface(simInterface);
-    simInterface->SetConfig(config, true);
+    object = new MainObj(&config);
 
-    if (config->KeyExists("IgnoreData") &&
-        config->GetString("IgnoreData") == "true") {
+    if (config.KeyExists("IgnoreData") &&
+        config.GetString("IgnoreData") == "true") {
         ignoreData = true;
     }
 
-    if (config->KeyExists("StatsFile")) {
-        statStream.open(config->GetString("StatsFile").c_str(),
+    if (config.KeyExists("StatsFile")) {
+        statStream.open(config.GetString("StatsFile").c_str(),
                         std::ofstream::out | std::ofstream::app);
     }
 
-    if (config->KeyExists("TraceReader"))
+    if (config.KeyExists("TraceReader"))
         trace = TraceReaderFactory::CreateNewTraceReader(
-            config->GetString("TraceReader"));
+            config.GetString("TraceReader"));
     else trace = TraceReaderFactory::CreateNewTraceReader("NVMainTrace");
 
     trace->SetTraceFile(argv[2]);
 
     if (argc == 3) simulateCycles = 0;
     else simulateCycles = atoi(argv[3]);
-}
-
-void TraceMain::setupChildren() {
-    // Add any specified hooks
-    std::vector<std::string>& hookList = config->GetHooks();
-
-    for (size_t i = 0; i < hookList.size(); i++) {
-        std::cout << "Creating hook " << hookList[i] << std::endl;
-
-        NVMObject* hook = HookFactory::CreateHook(hookList[i]);
-
-        if (hook != NULL) {
-            AddHook(hook);
-            hook->SetParent(this);
-            hook->Init(config);
-        } else {
-            std::cout << "Warning: Could not create a hook named `"
-                      << hookList[i] << "'." << std::endl;
-        }
-    }
-
-    NVMain* nvmain = new NVMain();
-    AddChild(nvmain);
-    nvmain->SetParent(this);
-
-    globalEventQueue->SetFrequency(config->GetEnergy("CPUFreq") * 1000000.0);
-    globalEventQueue->AddSystem(nvmain, config);
-
-    nvmain->SetConfig(config, "defaultMemory", true);
-
-    std::cout << "traceMain (" << (void*) (this) << ")" << std::endl;
-    nvmain->PrintHierarchy();
 }
 
 void printArgs(int argc, char* argv[]) {
@@ -167,7 +202,7 @@ void printArgs(int argc, char* argv[]) {
 NVMainRequest* TraceMain::getNextRequest() {
     TraceLine tl;
     if (!trace->GetNextAccess(&tl)) return nullptr;
-    
+
     NVMainRequest* request = new NVMainRequest();
     request->address = tl.GetAddress();
     request->address2 = tl.GetAddress2();
@@ -177,7 +212,7 @@ NVMainRequest* TraceMain::getNextRequest() {
     request->status = MEM_REQUEST_INCOMPLETE;
     if (!ignoreData) request->data = tl.GetData();
     if (!ignoreData) request->oldData = tl.GetOldData();
-    request->owner = (NVMObject*) this;
+    request->owner = object;
     request->arrivalCycle = tl.GetCycle();
 
     return request;
@@ -185,21 +220,54 @@ NVMainRequest* TraceMain::getNextRequest() {
 
 void TraceMain::waitForDrain() {
     std::cout << "TraceMain - end of trace file reached\n";
-    /* Force all modules to drain requests. */
-    bool draining = Drain();
-
-    std::cout << "Could not read next line from trace file!"
-            << std::endl;
+    std::cout << "Could not read next line from trace file!" << std::endl;
 
     /* Wait for requests to drain. */
-    while (outstandingRequests > 0) {
-        globalEventQueue->Cycle(1);
-
+    while (!object->Drain()) {
+        object->Cycle(1);
         currentCycle++;
-
-        /* Retry drain each cycle if it failed. */
-        if (!draining) draining = Drain();
     }
+}
+
+bool TraceMain::issueRequest(NVMainRequest* req) {
+    while (!object->IsIssuable(req)) {
+        if (!tryCycle(1)) return false;
+    }
+
+    auto requestCycle = req->arrivalCycle;
+    std::cout << "TraceMain - Issuing request " << requestCycle << " at cycle "
+              << currentCycle << std::endl;
+    object->IssueCommand(req);
+
+    return true;
+}
+
+bool TraceMain::tryCycle(ncycle_t cycles) {
+    if (simulateCycles < (currentCycle + cycles) && simulateCycles > 0) {
+        object->Cycle(simulateCycles - currentCycle);
+        currentCycle += simulateCycles - currentCycle;
+        return false;
+    }
+
+    object->Cycle(cycles);
+    currentCycle += cycles;
+    return true;
+}
+
+bool TraceMain::issueRowClone(NVMainRequest* req) {
+    while (!object->IsIssuable(req)) {
+        if (!tryCycle(1)) return false;
+    }
+    NVMainRequest* srcReq = req;
+    srcReq->type = ROWCLONE_SRC;
+    if (!object->IssueCommand(srcReq)) return false;
+
+    NVMainRequest* destReq = new NVMainRequest();
+    *destReq = *req;
+    destReq->address = destReq->address2;
+    destReq->type = ROWCLONE_DEST;
+    if (!object->IssueCommand(destReq)) return false;
+    return true;
 }
 
 void TraceMain::runSimulation() {
@@ -209,8 +277,8 @@ void TraceMain::runSimulation() {
      *  The trace cycle is assumed to be the rate that the CPU/LLC is issuing.
      *  Scale the simulation cycles to be the number of *memory cycles* to run.
      */
-    simulateCycles = (uint64_t) ceil(((double) (config->GetValue("CPUFreq")) /
-                                      (double) (config->GetValue("CLK"))) *
+    simulateCycles = (uint64_t) ceil(((double) (config.GetValue("CPUFreq")) /
+                                      (double) (config.GetValue("CLK"))) *
                                      simulateCycles);
 
     std::cout << simulateCycles << " memory cycles) ***" << std::endl;
@@ -221,61 +289,35 @@ void TraceMain::runSimulation() {
         auto request = getNextRequest();
 
         if (!request) {
-            // waitForDrain
             waitForDrain();
             break;
         }
 
         auto requestCycle = request->arrivalCycle;
-        // If you want to ignore the cycles used in the trace file, just set the cycle to 0.
-        if (config->KeyExists("IgnoreTraceCycle") &&
-            config->GetString("IgnoreTraceCycle") == "true")
+
+        if (config.KeyExists("IgnoreTraceCycle") &&
+            config.GetString("IgnoreTraceCycle") == "true")
             requestCycle = 0;
 
-        // TODO this should be an exception
-        if (request->type != READ && request->type != WRITE && request->type != PIM_OP)
-            std::cout << "traceMain: Unknown Operation: " << request->type
-                      << std::endl;
+        if (request->type != READ && request->type != WRITE &&
+            request->type != PIM_OP)
+            throw std::runtime_error("Unknown operation in trace file");
 
-        // Reached the end of the simulation
-        if (requestCycle > simulateCycles && simulateCycles != 0) {
-            globalEventQueue->Cycle(simulateCycles - currentCycle);
-            currentCycle += simulateCycles - currentCycle;
+        if (requestCycle > currentCycle)
+            if (!tryCycle(requestCycle - currentCycle)) break;
 
-            break;
+        if (request->type == PIM_OP) {
+            if (!issueRowClone(request)) break;
+        } else {
+            if (!issueRequest(request)) break;
         }
-
-        // Wait for arrival cycle
-        if (requestCycle > currentCycle) {
-            globalEventQueue->Cycle(requestCycle - currentCycle);
-            currentCycle = globalEventQueue->GetCurrentCycle();
-
-            if (currentCycle >= simulateCycles && simulateCycles != 0)
-                break;
-        }
-
-        // Wait for memory controller
-        while (!GetChild()->IsIssuable(request)) {
-            if (currentCycle >= simulateCycles && simulateCycles != 0)
-                break;
-
-            globalEventQueue->Cycle(1);
-            currentCycle = globalEventQueue->GetCurrentCycle();
-        }
-
-        std::cout << "TraceMain - Issuing request " << requestCycle
-                    << " at cycle " << currentCycle << std::endl;
-        outstandingRequests++;
-        GetChild()->IssueCommand(request);
-
-        if (currentCycle >= simulateCycles && simulateCycles != 0) break;
     }
 }
 
 void TraceMain::printStats() {
-    GetChild()->CalculateStats();
+    object->GetChild()->CalculateStats();
     std::ostream& refStream = (statStream.is_open()) ? statStream : std::cout;
-    stats->PrintAll(refStream);
+    object->GetStats()->PrintAll(refStream);
 
     std::cout << "Exiting at cycle " << currentCycle << " because simCycles "
               << simulateCycles << " reached." << std::endl;
@@ -293,23 +335,9 @@ int TraceMain::RunTrace(int argc, char* argv[]) {
     }
 
     setupConfig(argc, argv);
-    setupChildren();
     printArgs(argc, argv);
     runSimulation();
     printStats();
 
     return 0;
-}
-
-void TraceMain::Cycle(ncycle_t /*steps*/) {}
-
-bool TraceMain::RequestComplete(NVMainRequest* request) {
-    // This is the top-level module, so there are no more parents to fallback.
-    assert(request->owner == this);
-
-    outstandingRequests--;
-
-    delete request;
-
-    return true;
 }
