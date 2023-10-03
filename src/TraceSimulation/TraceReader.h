@@ -6,19 +6,17 @@ namespace NVM::Simulation {
 
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
-enum class Opcode2 {
-
-};
+enum class Opcode2 { NONE };
 
 /**
  * Data from each trace line
  */
 struct TraceLine {
-    unsigned int cycle;
-    Opcode1 op1;
-    Opcode2 op2;
+    unsigned int cycle = 0;
+    Opcode1 op1 = Opcode1::NONE;
+    Opcode2 op2 = Opcode2::NONE;
     // TODO make Address class? Use NVMAddress?
-    unsigned int threadId;
+    unsigned int threadId = 0;
 
     /**
      * Allows implicit conversion to bool
