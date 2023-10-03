@@ -2,6 +2,9 @@
 
 using namespace NVM::Simulation;
 
-TraceIssuer::TraceIssuer(TraceRequestMaker reqMaker, CycleTimer timer) {}
+TraceIssuer::TraceIssuer(std::unique_ptr<TraceReader> reader,
+                         unsigned int cycles) :
+    reqMaker(std::move(reader)),
+    timer(cycles) {}
 
 bool TraceIssuer::issue(MemorySystem* memory) { return false; }

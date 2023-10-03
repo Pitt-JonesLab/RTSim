@@ -13,12 +13,13 @@ class MemorySystem;
 class TraceIssuer {
     public:
     /**
-     * Creates a TraceIssuer with a given TraceRequestMaker and CycleTimer
+     * Creates a TraceIssuer with a given TraceReader and maximum number of
+     * cycles
      *
-     * @param reqMaker TraceRequestMaker for this TraceIssuer
-     * @param timer CycleTimer for this TraceIssuer
+     * @param reader TraceReader for this TraceIssuer
+     * @param cycles Max number of cycles to simulate
      */
-    TraceIssuer(TraceRequestMaker reqMaker, CycleTimer timer);
+    TraceIssuer(std::unique_ptr<TraceReader> reader, unsigned int cycles);
 
     /**
      * Attempts to issue the next request to the given MemorySystem. This will

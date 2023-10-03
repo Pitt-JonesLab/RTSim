@@ -38,6 +38,8 @@ class TraceReader {
      * are no more lines to read.
      */
     virtual TraceLine getLine() = 0;
+
+    virtual ~TraceReader() {}
 };
 
 } // namespace NVM::Simulation

@@ -1,9 +1,16 @@
 #include "src/TraceSimulation/TraceSimulator.h"
 
+#include "MockMemorySystem.h"
+#include "MockTraceReader.h"
+
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Constructs", "[TraceSimulator], [Simulation], [!mayfail]") {
-    REQUIRE(false);
+using namespace NVM::Simulation;
+
+TEST_CASE("Constructs", "[TraceSimulator], [Simulation]") {
+    REQUIRE_NOTHROW(
+        TraceSimulator(std::unique_ptr<TraceReader>(new MockTraceReader()),
+                       std::unique_ptr<MemorySystem>(new MockMemorySystem())));
 }
 
 TEST_CASE("Runs simulation", "[TraceSimulator], [Simulation], [!mayfail]") {
