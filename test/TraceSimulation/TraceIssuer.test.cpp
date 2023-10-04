@@ -17,7 +17,7 @@ TEST_CASE("Constructs", "[TraceIssuer], [Simulation]") {
         static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0));
 }
 
-TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation], [!mayfail]") {
+TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation]") {
     MockMemorySystem memory;
 
     SECTION("Issues available request") {

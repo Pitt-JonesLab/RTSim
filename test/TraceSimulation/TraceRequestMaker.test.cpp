@@ -18,7 +18,7 @@ TEST_CASE("Converts TraceLines to Requests",
     // Only test READ and WRITE for now
     SECTION("Read op") {
         auto reader = std::make_unique<MockTraceReader>();
-        reader->addLine({0, Opcode1::READ});
+        reader->addLine({5, Opcode1::READ});
         TraceRequestMaker reqMaker(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)));
 
@@ -26,6 +26,7 @@ TEST_CASE("Converts TraceLines to Requests",
         auto req = reqMaker.getRequest();
         REQUIRE(req);
         REQUIRE(req->type == READ);
+        REQUIRE(req->arrivalCycle == 5);
 
         // Only one request
         req = reqMaker.getRequest();
@@ -33,7 +34,7 @@ TEST_CASE("Converts TraceLines to Requests",
     }
     SECTION("Write op") {
         auto reader = std::make_unique<MockTraceReader>();
-        reader->addLine({0, Opcode1::WRITE});
+        reader->addLine({5, Opcode1::WRITE});
         TraceRequestMaker reqMaker(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)));
 
@@ -41,6 +42,7 @@ TEST_CASE("Converts TraceLines to Requests",
         auto req = reqMaker.getRequest();
         REQUIRE(req);
         REQUIRE(req->type == WRITE);
+        REQUIRE(req->arrivalCycle == 5);
 
         // Only one request
         req = reqMaker.getRequest();

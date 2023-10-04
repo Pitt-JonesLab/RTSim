@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <string>
+#include <vector>
 
 namespace NVM::Simulation {
 
@@ -15,7 +17,18 @@ struct TraceLine {
     unsigned int cycle = 0;
     Opcode1 op1 = Opcode1::NONE;
     Opcode2 op2 = Opcode2::NONE;
-    // TODO make Address class? Use NVMAddress?
+    uint64_t address1 = 0;
+    uint64_t address2 = 0;
+
+    /**
+     * 512-bit data block
+     */
+    struct DataBlock {
+        std::array<uint8_t, 64> bytes;
+    };
+
+    std::vector<DataBlock> data;
+
     unsigned int threadId = 0;
 
     /**

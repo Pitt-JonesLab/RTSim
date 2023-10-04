@@ -17,15 +17,24 @@ class TraceSimulator {
      *
      * @param reader TraceReader for this simulator
      * @param memory MemorySystem to be simulated
+     * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
      */
     TraceSimulator(std::unique_ptr<TraceReader> reader,
-                   std::unique_ptr<MemorySystem> memory);
+                   std::unique_ptr<MemorySystem> memory,
+                   unsigned int maxCycles = 0);
 
     /**
      * Simulates the trace with the MemorySystem. Completes when the maximum
      * cycle has been reached or when all requests have been completed.
      */
     void run();
+
+    /**
+     * Prints results of simulation
+     *
+     * @param statStream Output stream for stats
+     */
+    void printStats(std::ostream& statStream);
 
     private:
     TraceIssuer issuer;

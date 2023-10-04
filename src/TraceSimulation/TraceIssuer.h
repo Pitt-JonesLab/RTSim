@@ -32,6 +32,15 @@ class TraceIssuer {
      */
     bool issue(MemorySystem* memory);
 
+    /**
+     * Cycles the MemorySystem until all requests have been processed
+     *
+     * @param memory MemorySystem to drain
+     *
+     * @return True if successful, false if timer maxed out
+     */
+    bool drain(MemorySystem* memory);
+
     private:
     TraceRequestMaker reqMaker;
     CycleTimer timer;

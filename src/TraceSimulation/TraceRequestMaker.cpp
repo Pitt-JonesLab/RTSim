@@ -57,10 +57,29 @@ OpType opcodeToOptype(Opcode1 op1) {
 NVMainRequest* makeRequest(TraceLine line) {
     NVMainRequest* req = new NVMainRequest();
 
-    // TODO: TraceLine needs address
+    NVMAddress address;
+    address.SetPhysicalAddress(line.address1);
+    req->address = address;
+
+    NVMDataBlock data;
+    data.SetSize(64);
+    if (!line.data.empty()) {
+        for (int i = 0; i < 64; i++) {
+            data.SetByte(i, line.data[0].bytes[i]);
+        }
+    }
+    req->data = data;
+
+    NVMDataBlock oldData;
+    oldData.SetSize(64);
+    for (int i = 0; i < 64; i++) oldData.SetByte(i, 0);
+    req->oldData = oldData;
+
     req->type = opcodeToOptype(line.op1);
     req->bulkCmd = CMD_NOP;
     req->threadId = line.threadId;
+    req->arrivalCycle = line.cycle;
+    req->status = MEM_REQUEST_INCOMPLETE;
     return req;
 }
 
@@ -73,13 +92,13 @@ void TraceRequestMaker::convertWriteLine(TraceLine line) {
 }
 
 void TraceRequestMaker::convertPIMLine(TraceLine line) {
-    nextReqs.push(makeRequest(line));
+    // nextReqs.push(makeRequest(line));
 }
 
 void TraceRequestMaker::convertShiftLine(TraceLine line) {
-    nextReqs.push(makeRequest(line));
+    // nextReqs.push(makeRequest(line));
 }
 
 void TraceRequestMaker::convertTWriteLine(TraceLine line) {
-    nextReqs.push(makeRequest(line));
+    // nextReqs.push(makeRequest(line));
 }
