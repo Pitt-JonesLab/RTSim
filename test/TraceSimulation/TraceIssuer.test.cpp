@@ -2,6 +2,7 @@
 
 #include "MockMemorySystem.h"
 #include "MockTraceReader.h"
+#include "src/TraceSimulation/ReadCommand.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -22,7 +23,7 @@ TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation]") {
 
     SECTION("Issues available request") {
         auto reader = std::make_unique<MockTraceReader>();
-        reader->addLine({0, Opcode1::READ});
+        reader->addCommand(std::unique_ptr<TraceCommand>(new ReadCommand(0, 0, DataBlock(), 0)));
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0);
         REQUIRE(issuer.issue(&memory));
@@ -37,7 +38,7 @@ TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation]") {
 
     SECTION("Fails to issue when timer is maxed out") {
         auto reader = std::make_unique<MockTraceReader>();
-        reader->addLine({10, Opcode1::READ});
+        reader->addCommand(std::unique_ptr<TraceCommand>(new ReadCommand(10, 0, DataBlock(), 0)));
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 1);
         REQUIRE_FALSE(issuer.issue(&memory));

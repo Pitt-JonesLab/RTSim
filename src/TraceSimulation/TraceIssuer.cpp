@@ -9,20 +9,14 @@ using namespace NVM::Simulation;
 
 TraceIssuer::TraceIssuer(std::unique_ptr<TraceReader> reader,
                          unsigned int cycles) :
-    reqMaker(std::move(reader)),
+    reader(std::move(reader)),
     timer(cycles) {}
 
 bool TraceIssuer::issue(MemorySystem* memory) {
-    auto nextReq = reqMaker.getRequest();
-    if (!nextReq) return false;
+    auto nextCommand = reader->getNext();
+    if (!nextCommand) return false;
 
-    int waitCycles = nextReq->arrivalCycle - timer.getCurrentCycle();
-    waitCycles = (waitCycles > 0) ? waitCycles : 0;
-    auto realCycles = timer.cycle(waitCycles);
-    memory->cycle(realCycles);
-    if (realCycles < waitCycles) return false;
-
-    while (!memory->issue(nextReq)) {
+    while (!nextCommand->issue(memory)) {
         if (timer.cycle(1)) memory->cycle(1);
         else return false;
     }

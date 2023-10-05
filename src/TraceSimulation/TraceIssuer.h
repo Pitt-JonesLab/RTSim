@@ -1,7 +1,7 @@
 #pragma once
 
 #include "src/TraceSimulation/CycleTimer.h"
-#include "src/TraceSimulation/TraceRequestMaker.h"
+#include "src/TraceSimulation/TraceReader.h"
 
 namespace NVM::Simulation {
 
@@ -42,7 +42,7 @@ class TraceIssuer {
     bool drain(MemorySystem* memory);
 
     private:
-    TraceRequestMaker reqMaker;
+    std::unique_ptr<TraceReader> reader;
     CycleTimer timer;
 };
 

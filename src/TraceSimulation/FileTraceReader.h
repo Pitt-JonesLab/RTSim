@@ -10,7 +10,7 @@ class FileTraceReader : public TraceReader {
     public:
     FileTraceReader(std::string traceFilename);
 
-    TraceLine getLine();
+    std::unique_ptr<TraceCommand> getNext();
 
     private:
     std::ifstream traceFile;

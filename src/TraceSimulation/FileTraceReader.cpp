@@ -1,6 +1,9 @@
 #include "src/TraceSimulation/FileTraceReader.h"
 
 #include "include/NVMDataBlock.h"
+#include "src/TraceSimulation/TraceCommand.h"
+#include "src/TraceSimulation/ReadCommand.h"
+#include "src/TraceSimulation/WriteCommand.h"
 
 #include <arpa/inet.h>
 #include <cstring>
@@ -74,12 +77,18 @@ NVMDataBlock readData(std::istringstream& inStream) {
     return data;
 }
 
-TraceLine getNextLine(std::ifstream& trace) {
+FileTraceReader::FileTraceReader(std::string traceFilename) :
+    traceFile(traceFilename),
+    traceVersion(-1) {}
+
+std::unique_ptr<TraceCommand> FileTraceReader::getNext() {
+    if (!traceFile.good()) return nullptr;
+    if (traceVersion == -1) traceVersion = readTraceVersion(traceFile);
     std::string fullLine;
-    getline(trace, fullLine);
-    if (trace.eof()) {
+    getline(traceFile, fullLine);
+    if (traceFile.eof()) {
         std::cout << "NVMainTraceReader: Reached EOF!" << std::endl;
-        return {};
+        return nullptr;
     }
 
     std::istringstream lineStream(fullLine);
@@ -90,17 +99,13 @@ TraceLine getNextLine(std::ifstream& trace) {
     NVMDataBlock dataBlock = readData(lineStream);
     unsigned int threadId = readCycle(lineStream);
 
-    TraceLine::DataBlock data;
+    DataBlock data;
     for (int i = 0; i < 64; i++) data.bytes[i] = dataBlock.GetByte(i);
-    return {cycle, operation, Opcode2::NONE, address, 0, {data}, threadId};
-}
 
-FileTraceReader::FileTraceReader(std::string traceFilename) :
-    traceFile(traceFilename),
-    traceVersion(-1) {}
-
-TraceLine FileTraceReader::getLine() {
-    if (!traceFile.good()) return {};
-    if (traceVersion == -1) traceVersion = readTraceVersion(traceFile);
-    return getNextLine(traceFile);
+    switch (operation) {
+        case Opcode1::READ:
+            return std::unique_ptr<TraceCommand>(new ReadCommand(cycle, address, data, threadId));
+        case Opcode1::WRITE:
+            return std::unique_ptr<TraceCommand>(new WriteCommand(cycle, address, data, threadId));
+    }
 }

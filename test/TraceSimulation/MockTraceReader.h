@@ -13,17 +13,18 @@ class MockTraceReader : public TraceReader {
     public:
     MockTraceReader() {}
 
-    TraceLine getLine() {
-        if (lines.empty()) return TraceLine();
-        auto line = lines.front();
-        lines.pop();
-        return line;
+    std::unique_ptr<TraceCommand> getNext() {
+        if (commands.empty()) return nullptr;
+        auto command = std::move(commands.front());
+        commands.pop();
+        return std::move(command);
     }
 
-    void addLine(TraceLine line) { lines.push(line); }
+    void addCommand(std::unique_ptr<TraceCommand> command) {
+        commands.push(std::move(command));
+    }
 
-    private:
-    std::queue<TraceLine> lines;
+    std::queue<std::unique_ptr<TraceCommand>> commands;
 };
 
 } // namespace NVM::Simulation

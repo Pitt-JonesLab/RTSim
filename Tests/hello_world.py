@@ -1,17 +1,7 @@
 import subprocess
 
-# Config CMake
-subprocess.run(["cmake", ".", "-B", "build", "-Dbuildtype=fast"])
-
-# Build nvmain.fast
-code = subprocess.run(["cmake", "--build", "build"]).returncode
-
-if code != 0:
-    print("nvmain build failed!")
-    exit(1)
-
 # Run hello_world.nvt
-code = subprocess.run(["./bin/debug/nvmain.fast", "Config/RM.config", "Tests/Traces/hello_world.nvt", "0"], capture_output=True, text=True)
+code = subprocess.run(["./bin/nvmain.fast", "Config/RM.config", "Tests/Traces/hello_world.nvt", "0"], capture_output=True, text=True)
 output = code.stdout
 code = code.returncode
 

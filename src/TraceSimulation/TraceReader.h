@@ -1,6 +1,10 @@
 #pragma once
 
+#include "src/TraceSimulation/DataBlock.h"
+#include "src/TraceSimulation/TraceCommand.h"
+
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,13 +24,6 @@ struct TraceLine {
     uint64_t address1 = 0;
     uint64_t address2 = 0;
 
-    /**
-     * 512-bit data block
-     */
-    struct DataBlock {
-        std::array<uint8_t, 64> bytes;
-    };
-
     std::vector<DataBlock> data;
 
     unsigned int threadId = 0;
@@ -45,12 +42,12 @@ struct TraceLine {
 class TraceReader {
     public:
     /**
-     * Gets the next TraceLine
+     * Gets the next TraceCommand
      *
-     * @return Next TraceLine in source. Returns NONE type TraceLine if there
-     * are no more lines to read.
+     * @return Next TraceCommand from the source. Returns nullptr if there are
+     * no more commands remaining.
      */
-    virtual TraceLine getLine() = 0;
+    virtual std::unique_ptr<TraceCommand> getNext() = 0;
 
     virtual ~TraceReader() {}
 };
