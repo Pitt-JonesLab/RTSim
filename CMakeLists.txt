@@ -6,8 +6,8 @@ set(buildtype "debug" CACHE STRING "Build type for RTSim")
 
 set(RTSIM_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RTSIM_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RTSIM_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RTSIM_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RTSIM_DIR}/bin/debug)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${RTSIM_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${RTSIM_DIR}/lib/debug)
@@ -32,8 +32,8 @@ add_subdirectory(include)
 add_subdirectory(NVM)
 add_subdirectory(SimInterface)
 
-# Main dir
-add_subdirectory(traceSim)
+add_library(RTSim ${ALL_SOURCES})
+target_include_directories(RTSim PUBLIC ${RTSIM_DIR})
 
 # If this is the top-level project, build the tests
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)

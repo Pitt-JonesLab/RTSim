@@ -1,4 +1,6 @@
 /build
+/bin
+/lib
 /log
 /cputraces
 /traces_with_Ids

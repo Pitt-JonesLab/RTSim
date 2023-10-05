@@ -1,3 +1,6 @@
+add_subdirectory(TraceSimulation)
+add_subdirectory(main)
+
 set(MAIN_SOURCES
     ${RTSIM_DIR}/src/AddressTranslator.cpp 
     ${RTSIM_DIR}/src/Bank.cpp
@@ -24,6 +27,7 @@ set(MAIN_SOURCES
     ${RTSIM_DIR}/src/RequestFinder.cpp
     ${RTSIM_DIR}/src/RefreshHandler.cpp
     ${RTSIM_DIR}/src/CommandQueues.cpp
-    ${RTSIM_DIR}/src/BankCounter.cpp)
+    ${RTSIM_DIR}/src/BankCounter.cpp
+    ${RTSIM_DIR}/src/RTComponent.cpp)
 
 set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)

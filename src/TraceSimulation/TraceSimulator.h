@@ -1,12 +1,11 @@
 #pragma once
 
+#include "src/TraceSimulation/MemorySystem.h"
 #include "src/TraceSimulation/TraceIssuer.h"
 
 #include <memory>
 
 namespace NVM::Simulation {
-
-class MemorySystem;
 
 /**
  * Given a TraceIssuer and a MemorySystem, simulates the trace to completion
@@ -14,18 +13,28 @@ class MemorySystem;
 class TraceSimulator {
     public:
     /**
-     * Creates a TraceSimulator with a given TraceIssuer and MemorySystem
+     * Creates a TraceSimulator with a given TraceReader and MemorySystem
      *
-     * @param issuer TraceIssuer for this simulator
+     * @param reader TraceReader for this simulator
      * @param memory MemorySystem to be simulated
+     * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
      */
-    TraceSimulator(TraceIssuer issuer, std::unique_ptr<MemorySystem> memory);
+    TraceSimulator(std::unique_ptr<TraceReader> reader,
+                   std::unique_ptr<MemorySystem> memory,
+                   unsigned int maxCycles = 0);
 
     /**
      * Simulates the trace with the MemorySystem. Completes when the maximum
      * cycle has been reached or when all requests have been completed.
      */
     void run();
+
+    /**
+     * Prints results of simulation
+     *
+     * @param statStream Output stream for stats
+     */
+    void printStats(std::ostream& statStream);
 
     private:
     TraceIssuer issuer;

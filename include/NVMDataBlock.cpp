@@ -56,8 +56,7 @@ NVMDataBlock::NVMDataBlock(const NVMDataBlock& rhs) {
 }
 
 NVMDataBlock::~NVMDataBlock() {
-    delete[] rawData;
-    rawData = NULL;
+    if (rawData) delete[] rawData;
 }
 
 void NVMDataBlock::SetSize(uint64_t s) {
