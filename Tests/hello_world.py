@@ -11,7 +11,7 @@ if code != 0:
     exit(1)
 
 # Run hello_world.nvt
-code = subprocess.run(["./bin/debug/nvmain.test.fast", "Config/RM.config", "Tests/Traces/hello_world.nvt", "0"], capture_output=True, text=True)
+code = subprocess.run(["./bin/debug/nvmain.fast", "Config/RM.config", "Tests/Traces/hello_world.nvt", "0"], capture_output=True, text=True)
 output = code.stdout
 code = code.returncode
 

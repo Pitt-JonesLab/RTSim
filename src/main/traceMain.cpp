@@ -48,8 +48,6 @@
 #include "src/TraceSimulation/FileTraceReader.h"
 #include "src/TraceSimulation/TraceSimulator.h"
 #include "src/TranslationMethod.h"
-#include "traceReader/TraceReaderFactory.h"
-#include "traceSim/TraceSimulator.h"
 #include "Utils/HookFactory.h"
 
 #include <cmath>

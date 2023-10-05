@@ -35,9 +35,6 @@ add_subdirectory(SimInterface)
 add_library(RTSim ${ALL_SOURCES})
 target_include_directories(RTSim PUBLIC ${RTSIM_DIR})
 
-# Main dir
-add_subdirectory(traceSim)
-
 # If this is the top-level project, build the tests
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
 	add_subdirectory(test)
