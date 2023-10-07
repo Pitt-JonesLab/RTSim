@@ -1,9 +1,10 @@
-set(SIM_SOURCES
-    ${RTSIM_DIR}/src/TraceSimulation/CycleTimer.cpp
-    ${RTSIM_DIR}/src/TraceSimulation/TraceIssuer.cpp
-    ${RTSIM_DIR}/src/TraceSimulation/TraceSimulator.cpp
-    ${RTSIM_DIR}/src/TraceSimulation/FileTraceReader.cpp
-    ${RTSIM_DIR}/src/TraceSimulation/ReadCommand.cpp
-    ${RTSIM_DIR}/src/TraceSimulation/WriteCommand.cpp)
+set(SIMULATION_SOURCES
+    CycleTimer.cpp
+    TraceIssuer.cpp
+    TraceSimulator.cpp
+    FileTraceReader.cpp
+    ReadCommand.cpp
+    WriteCommand.cpp)
 
-set(ALL_SOURCES ${ALL_SOURCES} ${SIM_SOURCES} PARENT_SCOPE)
+add_library(RTSim_Simulation ${SIMULATION_SOURCES})
+target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}) 
