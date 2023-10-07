@@ -16,4 +16,4 @@ jobs:
       - name: Unit Tests
         run: ctest --test-dir build/test
       - name: End-to-End
-        run: python3 ./Tests/hello_world.py
+        run: python3 ./test/Regressions.py
