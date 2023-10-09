@@ -24,21 +24,6 @@ RTSystem::RTSystem(NVM::Config* config) :
 
     std::vector<std::string>& hookList = config->GetHooks();
 
-    for (size_t i = 0; i < hookList.size(); i++) {
-        std::cout << "Creating hook " << hookList[i] << std::endl;
-
-        NVMObject* hook = HookFactory::CreateHook(hookList[i]);
-
-        if (hook != NULL) {
-            AddHook(hook);
-            hook->SetParent(this);
-            hook->Init(config);
-        } else {
-            std::cout << "Warning: Could not create a hook named `"
-                      << hookList[i] << "'." << std::endl;
-        }
-    }
-
     NVMain* nvmain = new NVMain();
     AddChild(nvmain);
     nvmain->SetParent(this);
@@ -86,7 +71,7 @@ bool RTSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     nextRead->status = MEM_REQUEST_INCOMPLETE;
 
     bool canIssue = GetChild()->IsIssuable(nextRead);
-    if (!canIssue)  {
+    if (!canIssue) {
         delete nextRead;
         return false;
     }
@@ -123,7 +108,7 @@ bool RTSystem::write(uint64_t address, DataBlock data, unsigned int threadId,
     nextWrite->owner = this;
 
     bool canIssue = GetChild()->IsIssuable(nextWrite);
-    if (!canIssue)  {
+    if (!canIssue) {
         delete nextWrite;
         return false;
     }

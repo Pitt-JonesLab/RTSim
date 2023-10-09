@@ -44,7 +44,6 @@
 #include "src/Interconnect.h"
 #include "src/main/RTSystem.h"
 #include "src/MemoryController.h"
-#include "src/RTComponent.h"
 #include "src/TraceSimulation/FileTraceReader.h"
 #include "src/TraceSimulation/TraceSimulator.h"
 #include "src/TranslationMethod.h"
