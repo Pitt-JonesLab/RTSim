@@ -1,5 +1,6 @@
 add_subdirectory(Simulation)
 add_subdirectory(Logging)
+add_subdirectory(Memory)
 add_subdirectory(main)
 
 set(MAIN_SOURCES

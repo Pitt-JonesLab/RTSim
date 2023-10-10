@@ -32,3 +32,4 @@ function(add_catch_tests)
 endfunction()
 
 add_subdirectory(Simulation)
+add_subdirectory(Memory)
