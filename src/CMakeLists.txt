@@ -1,4 +1,5 @@
 add_subdirectory(Simulation)
+add_subdirectory(Logging)
 add_subdirectory(main)
 
 set(MAIN_SOURCES
@@ -27,7 +28,6 @@ set(MAIN_SOURCES
     ${RTSIM_DIR}/src/RequestFinder.cpp
     ${RTSIM_DIR}/src/RefreshHandler.cpp
     ${RTSIM_DIR}/src/CommandQueues.cpp
-    ${RTSIM_DIR}/src/BankCounter.cpp
-    ${RTSIM_DIR}/src/RTComponent.cpp)
+    ${RTSIM_DIR}/src/BankCounter.cpp)
 
 set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)
