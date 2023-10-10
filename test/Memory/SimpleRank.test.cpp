@@ -2,6 +2,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Constructs", "[SimpleRank], [Memory], [!mayfail]") {
+TEST_CASE("Constructs", "[SimpleRank], [Memory]") {
     REQUIRE(false);
 }

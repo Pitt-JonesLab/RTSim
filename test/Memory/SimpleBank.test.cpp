@@ -2,6 +2,4 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Constructs", "[SimpleBank], [Memory], [!mayfail]") {
-    REQUIRE(false);
-}
+TEST_CASE("Constructs", "[SimpleBank], [Memory]") { REQUIRE(false); }
