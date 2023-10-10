@@ -1,7 +1,8 @@
 #include "Simulation/FileTraceReader.h"
 
-#include "Simulation/TraceCommand.h"
+#include "NVMDataBlock.h"
 #include "Simulation/ReadCommand.h"
+#include "Simulation/TraceCommand.h"
 #include "Simulation/WriteCommand.h"
 
 #include <arpa/inet.h>
@@ -54,18 +55,24 @@ uint64_t readAddress(std::istringstream& inStream) {
     return address;
 }
 
-DataBlock readData(std::istringstream& inStream) {
+NVMDataBlock readData(std::istringstream& inStream) {
     auto field = getNextToken(inStream);
 
     if (field.length() != 128)
         throw std::invalid_argument("Invalid data block!");
 
-    DataBlock data;
-    for (int byte = 0; byte < 64; byte++) {
+    NVMDataBlock data;
+    data.SetSize(64);
+
+    uint32_t* rawData = reinterpret_cast<uint32_t*>(data.rawData);
+    memset(rawData, 0, 64);
+
+    for (int byte = 0; byte < 16; byte++) {
         std::stringstream fmat;
 
-        fmat << std::hex << field.substr(byte * 2, 2);
-        fmat >> data.bytes[byte];
+        fmat << std::hex << field.substr(byte * 8, 8);
+        fmat >> rawData[byte];
+        rawData[byte] = htonl(rawData[byte]);
     }
     return data;
 }
@@ -89,13 +96,18 @@ std::unique_ptr<TraceCommand> FileTraceReader::getNext() {
     unsigned int cycle = readCycle(lineStream);
     Opcode1 operation = readOperation(lineStream);
     uint64_t address = readAddress(lineStream);
-    DataBlock data = readData(lineStream);
+    NVMDataBlock dataBlock = readData(lineStream);
     unsigned int threadId = readCycle(lineStream);
+
+    DataBlock data;
+    for (int i = 0; i < 64; i++) data.bytes[i] = dataBlock.GetByte(i);
 
     switch (operation) {
         case Opcode1::READ:
-            return std::unique_ptr<TraceCommand>(new ReadCommand(cycle, address, data, threadId));
+            return std::unique_ptr<TraceCommand>(
+                new ReadCommand(cycle, address, data, threadId));
         case Opcode1::WRITE:
-            return std::unique_ptr<TraceCommand>(new WriteCommand(cycle, address, data, threadId));
+            return std::unique_ptr<TraceCommand>(
+                new WriteCommand(cycle, address, data, threadId));
     }
 }
