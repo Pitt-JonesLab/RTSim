@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <string>
+#include <vector>
 
 namespace NVM::Logging {
 
@@ -45,11 +47,22 @@ class LogStream {
         if (level <= globalLevel) (*output) << message;
     }
 
+    void addStatTag(const std::string& tag);
+    void popStatTag();
+
+    void printTags();
+
     private:
     LogLevel level, globalLevel;
 
+    std::vector<std::string> statTags;
+
     std::ostream* output;
 };
+
+LogStream& useTags(LogStream& stream);
+
+LogStream& operator<<(LogStream& stream, LogStream& (*func)(LogStream&) );
 
 /**
  * Logs the given message at the current level of the LogStream

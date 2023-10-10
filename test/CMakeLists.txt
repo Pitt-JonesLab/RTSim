@@ -33,3 +33,4 @@ endfunction()
 
 add_subdirectory(Simulation)
 add_subdirectory(Memory)
+add_subdirectory(Logging)

@@ -20,3 +20,28 @@ LogStream& NVM::Logging::operator<<(LogStream& log, LogLevel level) {
     log.setLevel(level);
     return log;
 }
+
+void LogStream::addStatTag(const std::string& tag) { statTags.push_back(tag); }
+
+void LogStream::popStatTag() {
+    if (!statTags.empty()) statTags.pop_back();
+}
+
+void LogStream::printTags() {
+    if (statTags.empty()) return;
+    for (auto tag = statTags.begin(); tag != (statTags.end() - 1); tag++) {
+        log(*tag);
+        log('.');
+    }
+    log(statTags.back());
+}
+
+LogStream& NVM::Logging::useTags(LogStream& stream) {
+    stream.printTags();
+    return stream;
+}
+
+LogStream& NVM::Logging::operator<<(LogStream& stream,
+                                    LogStream& (*func)(LogStream&) ) {
+    return func(stream);
+}
