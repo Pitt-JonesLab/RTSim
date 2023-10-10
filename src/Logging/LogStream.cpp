@@ -16,7 +16,7 @@ void LogStream::setLevel(LogLevel l) { level = l; }
 
 void LogStream::setGlobalLevel(LogLevel l) { globalLevel = l; }
 
-LogStream& operator<<(LogStream& log, LogLevel level) {
+LogStream& NVM::Logging::operator<<(LogStream& log, LogLevel level) {
     log.setLevel(level);
     return log;
 }

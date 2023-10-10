@@ -7,7 +7,7 @@ namespace NVM::Logging {
 /**
  * Global LogStream for the simulation
  */
-LogStream log;
+LogStream& log();
 
 /**
  * Changes the log output to the given filename

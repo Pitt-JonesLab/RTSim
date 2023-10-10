@@ -4,15 +4,21 @@
 
 using namespace NVM::Logging;
 
-void setLogFile(std::string filename) {
+LogStream logStream;
+
+LogStream& NVM::Logging::log() { return logStream; }
+
+void NVM::Logging::setLogFile(std::string filename) {
     std::ofstream logFile(filename);
 
     if (!logFile.good()) {
-        log << LogLevel::ERROR << "Could not set log file: " << filename
-            << '\n';
+        logStream << LogLevel::ERROR << "Could not set log file: " << filename
+                  << '\n';
         return;
     }
-    log = LogStream(logFile);
+    logStream = LogStream(logFile);
 }
 
-void setLogLevel(LogLevel level) { log.setGlobalLevel(level); }
+void NVM::Logging::setLogLevel(LogLevel level) {
+    logStream.setGlobalLevel(level);
+}

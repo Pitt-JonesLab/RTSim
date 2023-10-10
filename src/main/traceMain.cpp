@@ -35,6 +35,7 @@
 #include "Endurance/EnduranceDistributionFactory.h"
 #include "include/NVMHelpers.h"
 #include "Interconnect/InterconnectFactory.h"
+#include "Logging/Logging.h"
 #include "MemControl/MemoryControllerFactory.h"
 #include "NVM/nvmain.h"
 #include "SimInterface/NullInterface/NullInterface.h"
@@ -58,6 +59,7 @@
 using namespace NVM;
 using namespace NVM::Simulation;
 using namespace NVM::Main;
+using namespace NVM::Logging;
 
 ncycle_t getMaxCycles(Config* config, char* arg) {
     ncycle_t maxCycles = 0;
@@ -105,6 +107,9 @@ int main(int argc, char* argv[]) {
         std::cout << argv[curArg] << " ";
     }
     std::cout << std::endl << std::endl;
+
+    // Set up log
+    Logging::setLogLevel(LogLevel::STAT);
 
     // Build dependencies
     Config* config = createConfig(argc, argv);

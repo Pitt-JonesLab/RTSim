@@ -55,6 +55,7 @@ uint64_t readAddress(std::istringstream& inStream) {
     return address;
 }
 
+// TODO get this function under test
 NVMDataBlock readData(std::istringstream& inStream) {
     auto field = getNextToken(inStream);
 

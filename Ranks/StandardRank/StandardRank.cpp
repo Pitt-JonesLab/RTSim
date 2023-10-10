@@ -49,6 +49,7 @@
 #include "Ranks/StandardRank/StandardRank.h"
 
 #include "Banks/BankFactory.h"
+#include "Logging/Logging.h"
 #include "src/EventQueue.h"
 
 #include <cassert>
@@ -56,6 +57,7 @@
 #include <sstream>
 
 using namespace NVM;
+using namespace NVM::Logging;
 
 std::string GetFilePath(std::string file);
 
@@ -120,8 +122,9 @@ void StandardRank::SetConfig(Config* c, bool createChildren) {
     banksPerRefresh = p->BanksPerRefresh;
 
     if (conf->GetValue("RAW") == -1) {
-        std::cout << "NVMain Warning: RAW (Row Activation Window) is not "
-                  << "specified. Has set it to 4 (FAW)" << std::endl;
+        Logging::log() << LogLevel::ERROR
+                       << "NVMain Warning: RAW (Row Activation Window) is not "
+                       << "specified. Has set it to 4 (FAW)" << '\n';
         rawNum = 4;
     } else rawNum = p->RAW;
 
@@ -130,7 +133,8 @@ void StandardRank::SetConfig(Config* c, bool createChildren) {
     /* Calculate the number of devices needed. */
     deviceCount = busWidth / deviceWidth;
     if (busWidth % deviceWidth != 0) {
-        std::cout
+        Logging::log()
+            << LogLevel::ERROR
             << "NVMain: device width is not a multiple of the bus width!\n";
         deviceCount++;
     }
@@ -147,8 +151,8 @@ void StandardRank::SetConfig(Config* c, bool createChildren) {
         rankAT->SetConfig(c, createChildren);
         SetDecoder(rankAT);
 
-        std::cout << "Creating " << bankCount << " banks in all " << deviceCount
-                  << " devices.\n";
+        Logging::log() << LogLevel::DEBUG << "Creating " << bankCount
+                       << " banks in all " << deviceCount << " devices.\n";
 
         for (ncounter_t i = 0; i < bankCount; i++) {
             std::stringstream formatter;
@@ -258,7 +262,7 @@ bool StandardRank::Activate(NVMainRequest* request) {
 
     if (activateBank >= bankCount) {
         std::cerr << "Rank: Attempted to activate non-existant bank "
-                  << activateBank << std::endl;
+                  << activateBank << '\n';
         return false;
     }
 
@@ -281,7 +285,7 @@ bool StandardRank::Activate(NVMainRequest* request) {
                                              p->tRRDR + p->tSH);
     } else {
         std::cerr << "NVMain Error: Rank Activation FAILED! "
-                  << "Did you check IsIssuable?" << std::endl;
+                  << "Did you check IsIssuable?" << '\n';
     }
 
     return true;
@@ -302,13 +306,13 @@ bool StandardRank::Read(NVMainRequest* request) {
 
     if (readBank >= bankCount) {
         std::cerr << "NVMain Error: Rank attempted to read non-existant bank: "
-                  << readBank << "!" << std::endl;
+                  << readBank << "!" << '\n';
         return false;
     }
 
     if (nextRead > GetEventQueue()->GetCurrentCycle()) {
         std::cerr << "NVMain Error: Rank Read violates the timing constraint: "
-                  << readBank << "!" << std::endl;
+                  << readBank << "!" << '\n';
         return false;
     }
 
@@ -338,7 +342,7 @@ bool StandardRank::Read(NVMainRequest* request) {
 
     if (success == false) {
         std::cerr << "NVMain Error: Rank Read FAILED! Did you check IsIssuable?"
-                  << std::endl;
+                  << '\n';
     }
 
     return success;
@@ -352,13 +356,13 @@ bool StandardRank::Write(NVMainRequest* request) {
 
     if (writeBank >= bankCount) {
         std::cerr << "NVMain Error: Attempted to write non-existant bank: "
-                  << writeBank << "!" << std::endl;
+                  << writeBank << "!" << '\n';
         return false;
     }
 
     if (nextWrite > GetEventQueue()->GetCurrentCycle()) {
         std::cerr << "NVMain Error: Rank Write violates the timing constraint: "
-                  << writeBank << "!" << std::endl;
+                  << writeBank << "!" << '\n';
         return false;
     }
 
@@ -391,7 +395,7 @@ bool StandardRank::Write(NVMainRequest* request) {
     if (success == false) {
         std::cerr
             << "NVMain Error: Rank Write FAILED! Did you check IsIssuable?"
-            << std::endl;
+            << '\n';
     }
 
     return success;
@@ -406,7 +410,7 @@ bool StandardRank::Precharge(NVMainRequest* request) {
     if (preBank >= bankCount) {
         std::cerr
             << "NVMain Error: Rank Attempted to precharge non-existant bank: "
-            << preBank << std::endl;
+            << preBank << '\n';
         return false;
     }
 
@@ -425,7 +429,7 @@ bool StandardRank::Precharge(NVMainRequest* request) {
     if (success == false) {
         std::cerr
             << "NVMain Error: Rank Precharge FAILED! Did you check IsIssuable?"
-            << std::endl;
+            << '\n';
     }
 
     return success;
@@ -475,7 +479,7 @@ bool StandardRank::PowerDown(NVMainRequest* request) {
 
         default:
             std::cerr << "NVMain Error: Unrecognized PowerDown command "
-                      << request->type << " is detected in Rank " << std::endl;
+                      << request->type << " is detected in Rank " << '\n';
             break;
     }
 
@@ -539,7 +543,7 @@ bool StandardRank::PowerUp(NVMainRequest* request) {
             std::cerr
                 << "NVMain Error: PowerUp is issued to a Rank that is not "
                 << "PowerDown before. The current rank state is " << state
-                << std::endl;
+                << '\n';
             break;
     }
 
@@ -719,16 +723,16 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
         uint64_t bank, rank, channel;
         req->address.GetTranslatedAddress(NULL, NULL, &bank, &rank, &channel,
                                           NULL);
-        std::cout << "NVMain: Rank: Warning: Command " << req->type
-                  << " @ Bank " << bank << " Rank " << rank << " Channel "
-                  << channel << " can not be issued!\n"
-                  << std::endl;
+        Logging::log() << LogLevel::ERROR << "NVMain: Rank: Warning: Command "
+                       << req->type << " @ Bank " << bank << " Rank " << rank
+                       << " Channel " << channel << " can not be issued!\n"
+                       << '\n';
 
         return false;
     }
 
-    std::cout << "StandardRank - Received request " << req->arrivalCycle
-              << std::endl;
+    Logging::log() << LogLevel::DEBUG << "StandardRank - Received request "
+                   << req->arrivalCycle << '\n';
 
     switch (req->type) {
         case ACTIVATE:
@@ -764,8 +768,10 @@ bool StandardRank::IssueCommand(NVMainRequest* req) {
             return this->Refresh(req);
 
         default:
-            std::cout << "NVMain: Rank: Unknown operation in command queue! "
-                      << req->type << std::endl;
+            Logging::log()
+                << LogLevel::ERROR
+                << "NVMain: Rank: Unknown operation in command queue! "
+                << req->type << '\n';
             return false;
     }
 }

@@ -50,6 +50,7 @@
 #include "include/NVMainRequest.h"
 #include "include/NVMHelpers.h"
 #include "Interconnect/InterconnectFactory.h"
+#include "Logging/Logging.h"
 #include "src/EventQueue.h"
 #include "src/Interconnect.h"
 #include "src/Rank.h"
@@ -65,6 +66,7 @@
 #include <sstream>
 
 using namespace NVM;
+using namespace NVM::Logging;
 
 /**************************PUBLIC FUNCTIONS*****************************/
 
@@ -187,11 +189,11 @@ void MemoryController::SetConfig(Config* conf, bool createChildren) {
         SetMappingScheme();
     }
 
-    std::cout << StatName() << " capacity is "
-              << ((p->ROWS * p->COLS * p->tBURST * p->RATE * p->BusWidth *
-                   p->BANKS * p->RANKS) /
-                  (8 * 1024))
-              << " KB." << std::endl;
+    Logging::log() << LogLevel::STAT << StatName() << " capacity is "
+                   << ((p->ROWS * p->COLS * p->tBURST * p->RATE * p->BusWidth *
+                        p->BANKS * p->RANKS) /
+                       (8 * 1024))
+                   << " KB." << '\n';
 
     starvationCounters = SubArrayCounter(p, conf);
     activeSubArrays = SubArrayCounter(p, conf);
@@ -403,13 +405,15 @@ void MemoryController::closeRow(NVMainRequest* req) {
 void MemoryController::handleActivate(NVMainRequest* req) {
     if (!bankIsActivated(req)) {
         enqueueActivate(req);
-        std::cout << "Memory Controller - Activated bank "
-                  << req->address.GetRow() << std::endl;
+        Logging::log() << LogLevel::DEBUG
+                       << "Memory Controller - Activated bank "
+                       << req->address.GetRow() << '\n';
     } else if (bankActivated[req] && !rowIsActivated(req)) {
         closeRow(req);
         enqueueActivate(req);
-        std::cout << "Memory Controller switched to row "
-                  << req->address.GetRow() << std::endl;
+        Logging::log() << LogLevel::DEBUG
+                       << "Memory Controller switched to row "
+                       << req->address.GetRow() << '\n';
     } else if (rowIsActivated(req)) {
         starvationCounters.increment(req);
     } else {
@@ -471,11 +475,11 @@ void MemoryController::CycleCommandQueues() {
     auto req = *reqToIssueIt;
 
     auto row = req->address.GetRow();
-    std::cout << GetEventQueue()->GetCurrentCycle()
-              << " MemoryController: Issued request type " << req->type
-              << " for address 0x" << std::hex
-              << req->address.GetPhysicalAddress() << std::dec << " row " << row
-              << std::endl;
+    Logging::log() << LogLevel::DEBUG << GetEventQueue()->GetCurrentCycle()
+                   << " MemoryController: Issued request type " << req->type
+                   << " for address 0x" << std::hex
+                   << req->address.GetPhysicalAddress() << std::dec << " row "
+                   << row << '\n';
 
     GetChild()->IssueCommand(req);
     req->flags |= NVMainRequest::FLAG_ISSUED;

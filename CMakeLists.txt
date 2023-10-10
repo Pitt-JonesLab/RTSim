@@ -34,7 +34,7 @@ add_subdirectory(SimInterface)
 
 add_library(RTSim ${ALL_SOURCES})
 target_include_directories(RTSim PUBLIC ${RTSIM_DIR} ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)
-target_link_libraries(RTSim PRIVATE RTSim_Simulation RTSim_Logging)
+target_link_libraries(RTSim PUBLIC RTSim_Simulation RTSim_Logging)
 
 # If this is the top-level project, build the tests
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)

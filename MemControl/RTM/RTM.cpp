@@ -42,6 +42,7 @@
 #include "MemControl/RTM/RTM.h"
 
 #include "include/NVMainRequest.h"
+#include "Logging/Logging.h"
 #include "src/EventQueue.h"
 
 #ifndef TRACE
@@ -59,6 +60,7 @@
 #include <set>
 
 using namespace NVM;
+using namespace NVM::Logging;
 
 RTM::RTM() {
     queueSize = 32;
@@ -118,8 +120,8 @@ bool RTM::IsIssuable(NVMainRequest*, FailReason*) {
 }
 
 bool RTM::IssueCommand(NVMainRequest* req) {
-    std::cout << "RTM - Received request at cycle "
-              << GetEventQueue()->GetCurrentCycle() << std::endl;
+    Logging::log() << LogLevel::DEBUG << "RTM - Received request at cycle "
+                   << GetEventQueue()->GetCurrentCycle() << '\n';
     if (!IsIssuable(req)) {
         throw std::runtime_error("RTM is not issuable!");
         return false;
