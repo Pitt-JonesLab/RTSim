@@ -1,4 +1,4 @@
-#include "src/TraceSimulation/ReadCommand.h"
+#include "Simulation/ReadCommand.h"
 
 #include "MockMemorySystem.h"
 

@@ -1,6 +1,6 @@
-#include "src/TraceSimulation/WriteCommand.h"
+#include "Simulation/WriteCommand.h"
 
-#include "src/TraceSimulation/MemorySystem.h"
+#include "Simulation/MemorySystem.h"
 
 using namespace NVM::Simulation;
 

@@ -7,4 +7,4 @@ set(SIMULATION_SOURCES
     WriteCommand.cpp)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})
-target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}) 
+target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src) 

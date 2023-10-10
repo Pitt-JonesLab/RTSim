@@ -1,8 +1,8 @@
-#include "src/TraceSimulation/TraceIssuer.h"
+#include "Simulation/TraceIssuer.h"
 
 #include "MockMemorySystem.h"
 #include "MockTraceReader.h"
-#include "src/TraceSimulation/ReadCommand.h"
+#include "Simulation/ReadCommand.h"
 
 #include <catch2/catch_test_macros.hpp>
 

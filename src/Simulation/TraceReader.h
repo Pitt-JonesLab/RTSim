@@ -1,7 +1,7 @@
 #pragma once
 
-#include "src/TraceSimulation/DataBlock.h"
-#include "src/TraceSimulation/TraceCommand.h"
+#include "Simulation/DataBlock.h"
+#include "Simulation/TraceCommand.h"
 
 #include <array>
 #include <memory>

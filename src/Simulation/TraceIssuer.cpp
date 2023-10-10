@@ -1,7 +1,6 @@
-#include "src/TraceSimulation/TraceIssuer.h"
+#include "Simulation/TraceIssuer.h"
 
-#include "include/NVMainRequest.h"
-#include "src/TraceSimulation/MemorySystem.h"
+#include "Simulation/MemorySystem.h"
 
 #include <iostream>
 

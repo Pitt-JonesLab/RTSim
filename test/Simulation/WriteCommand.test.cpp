@@ -1,4 +1,4 @@
-#include "src/TraceSimulation/WriteCommand.h"
+#include "Simulation/WriteCommand.h"
 
 #include "MockMemorySystem.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/TraceSimulation/MemorySystem.h"
+#include "Simulation/MemorySystem.h"
 
 namespace NVM::Simulation {
 class MockMemorySystem : public MemorySystem {

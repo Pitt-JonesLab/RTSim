@@ -1,4 +1,4 @@
-#include "src/TraceSimulation/CycleTimer.h"
+#include "Simulation/CycleTimer.h"
 
 #include <algorithm>
 

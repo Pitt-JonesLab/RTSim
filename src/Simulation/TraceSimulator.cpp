@@ -1,4 +1,4 @@
-#include "src/TraceSimulation/TraceSimulator.h"
+#include "Simulation/TraceSimulator.h"
 
 using namespace NVM::Simulation;
 

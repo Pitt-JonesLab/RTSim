@@ -1,7 +1,7 @@
 #pragma once
 
-#include "src/TraceSimulation/MemorySystem.h"
-#include "src/TraceSimulation/TraceIssuer.h"
+#include "Simulation/MemorySystem.h"
+#include "Simulation/TraceIssuer.h"
 
 #include <memory>
 

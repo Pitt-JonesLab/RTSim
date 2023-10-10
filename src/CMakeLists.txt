@@ -1,4 +1,4 @@
-add_subdirectory(TraceSimulation)
+add_subdirectory(Simulation)
 add_subdirectory(main)
 
 set(MAIN_SOURCES

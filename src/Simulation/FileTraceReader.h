@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/TraceSimulation/TraceReader.h"
+#include "Simulation/TraceReader.h"
 
 #include <fstream>
 

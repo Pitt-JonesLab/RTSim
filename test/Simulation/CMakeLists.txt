@@ -5,4 +5,4 @@ set(TEST_SOURCES
     ReadCommand.test.cpp
     WriteCommand.test.cpp)
 
-add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim)
+add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Simulation)

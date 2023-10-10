@@ -1,4 +1,4 @@
-#include "src/TraceSimulation/CycleTimer.h"
+#include "Simulation/CycleTimer.h"
 
 #include <catch2/catch_test_macros.hpp>
 

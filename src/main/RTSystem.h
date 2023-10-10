@@ -1,7 +1,7 @@
 #pragma once
 
 #include "src/NVMObject.h"
-#include "src/TraceSimulation/MemorySystem.h"
+#include "src/Simulation/MemorySystem.h"
 
 namespace NVM::Main {
 
