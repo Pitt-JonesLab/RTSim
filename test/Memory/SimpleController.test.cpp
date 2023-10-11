@@ -2,4 +2,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-TEST_CASE("Constructs", "[SimpleController], [Memory]") { REQUIRE(false); }
+using namespace NVM::Memory;
+
+TEST_CASE("Constructs", "[SimpleController], [Memory]") { REQUIRE_NOTHROW(SimpleController()); }
