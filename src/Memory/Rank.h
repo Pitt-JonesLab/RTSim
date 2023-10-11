@@ -1,9 +1,15 @@
 #pragma once
 
+#include "Memory/Bank.h"
 #include "Simulation/MemorySystem.h"
+
+#include <memory>
 
 namespace NVM::Memory {
 
-class Rank : public NVM::Simulation::MemorySystem {};
+class Rank : public NVM::Simulation::MemorySystem {
+    public:
+    virtual void addBank(std::unique_ptr<Bank> bank) = 0;
+};
 
 } // namespace NVM::Memory

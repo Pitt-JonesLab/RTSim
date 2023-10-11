@@ -20,6 +20,8 @@ class SimpleInterconnect : public Interconnect {
     bool isEmpty() const;
 
     void printStats(std::ostream& statStream);
+
+    void addRank(std::unique_ptr<Rank> rank);
 };
 
-}
+} // namespace NVM::Memory

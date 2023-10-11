@@ -20,6 +20,8 @@ class SimpleRank : public Rank {
     bool isEmpty() const;
 
     void printStats(std::ostream& statStream);
+
+    void addBank(std::unique_ptr<Bank> bank);
 };
 
-}
+} // namespace NVM::Memory

@@ -20,6 +20,8 @@ class SimpleController : public MemoryController {
     bool isEmpty() const;
 
     void printStats(std::ostream& statStream);
+
+    void addInterconnect(std::unique_ptr<Interconnect> interconnect);
 };
 
-}
+} // namespace NVM::Memory

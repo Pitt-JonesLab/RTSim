@@ -21,3 +21,5 @@ unsigned int SimpleRank::getCurrentCycle() { return 0; }
 bool SimpleRank::isEmpty() const { return false; }
 
 void SimpleRank::printStats(std::ostream& statStream) {}
+
+void SimpleRank::addBank(std::unique_ptr<Bank> bank) {}

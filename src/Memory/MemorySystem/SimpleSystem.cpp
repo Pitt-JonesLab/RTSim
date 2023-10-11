@@ -21,3 +21,6 @@ unsigned int SimpleSystem::getCurrentCycle() { return 0; }
 bool SimpleSystem::isEmpty() const { return false; }
 
 void SimpleSystem::printStats(std::ostream& statStream) {}
+
+void SimpleSystem::addController(std::unique_ptr<MemoryController> controller) {
+}

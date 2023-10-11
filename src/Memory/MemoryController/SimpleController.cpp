@@ -21,3 +21,6 @@ unsigned int SimpleController::getCurrentCycle() { return 0; }
 bool SimpleController::isEmpty() const { return false; }
 
 void SimpleController::printStats(std::ostream& statStream) {}
+
+void SimpleController::addInterconnect(
+    std::unique_ptr<Interconnect> interconnect) {}

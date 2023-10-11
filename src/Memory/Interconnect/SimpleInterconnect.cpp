@@ -22,3 +22,5 @@ unsigned int SimpleInterconnect::getCurrentCycle() { return 0; }
 bool SimpleInterconnect::isEmpty() const { return false; }
 
 void SimpleInterconnect::printStats(std::ostream& statStream) {}
+
+void SimpleInterconnect::addRank(std::unique_ptr<Rank> rank) {}

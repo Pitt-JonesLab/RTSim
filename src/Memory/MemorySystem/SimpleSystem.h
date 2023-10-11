@@ -20,6 +20,8 @@ class SimpleSystem : public MemorySystem {
     bool isEmpty() const;
 
     void printStats(std::ostream& statStream);
+
+    void addController(std::unique_ptr<MemoryController> controller);
 };
 
 } // namespace NVM::Memory

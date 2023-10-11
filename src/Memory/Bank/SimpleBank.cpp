@@ -21,3 +21,5 @@ unsigned int SimpleBank::getCurrentCycle() { return 0; }
 bool SimpleBank::isEmpty() const { return false; }
 
 void SimpleBank::printStats(std::ostream& statStream) {}
+
+void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {}

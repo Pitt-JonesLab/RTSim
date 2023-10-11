@@ -20,6 +20,8 @@ class SimpleBank : public Bank {
     bool isEmpty() const;
 
     void printStats(std::ostream& statStream);
+
+    void addSubArray(std::unique_ptr<SubArray> subArray);
 };
 
-}
+} // namespace NVM::Memory
