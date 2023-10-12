@@ -7,7 +7,7 @@
 
 namespace NVM::Memory {
 
-class Rank : public NVM::Simulation::MemorySystem {
+class Rank : public Component {
     public:
     virtual void addBank(std::unique_ptr<Bank> bank) = 0;
 };

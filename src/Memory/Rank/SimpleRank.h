@@ -6,20 +6,14 @@ namespace NVM::Memory {
 
 class SimpleRank : public Rank {
     public:
-    bool issue(NVMainRequest* req);
-
-    bool read(uint64_t address, NVM::Simulation::DataBlock data,
-              unsigned int threadId, unsigned int cycle);
-    bool write(uint64_t address, NVM::Simulation::DataBlock data,
-               unsigned int threadId, unsigned int cycle);
-
-    void cycle(unsigned int cycles);
-
-    unsigned int getCurrentCycle();
+    Command* read(uint64_t address,
+                          NVM::Simulation::DataBlock data);
+    Command* write(uint64_t address,
+                           NVM::Simulation::DataBlock data);
 
     bool isEmpty() const;
 
-    void printStats(std::ostream& statStream);
+    void cycle(unsigned int cycles);
 
     void addBank(std::unique_ptr<Bank> bank);
 };

@@ -18,12 +18,12 @@ TEST_CASE("Sends requests to Bank", "[SimpleRank], [Memory]") {
     rank.addBank(std::move(bank));
 
     SECTION("Bank gets write") {
-        REQUIRE(rank.write(0, {}, 0, 0));
+        REQUIRE(rank.write(0, {}));
         REQUIRE(bankPtr->writeFlag);
     }
 
     SECTION("Bank gets read") {
-        REQUIRE(rank.read(0, {}, 0, 0));
+        REQUIRE(rank.read(0, {}));
         REQUIRE(bankPtr->readFlag);
     }
 }

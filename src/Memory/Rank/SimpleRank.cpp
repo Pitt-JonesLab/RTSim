@@ -2,24 +2,16 @@
 
 using namespace NVM::Memory;
 
-bool SimpleRank::issue(NVMainRequest* req) { return false; }
-
-bool SimpleRank::read(uint64_t address, NVM::Simulation::DataBlock data,
-                      unsigned int threadId, unsigned int cycle) {
-    return false;
+Command* SimpleRank::read(uint64_t address, NVM::Simulation::DataBlock data) {
+    return nullptr;
 }
 
-bool SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data,
-                       unsigned int threadId, unsigned int cycle) {
-    return false;
+Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
+    return nullptr;
 }
-
-void SimpleRank::cycle(unsigned int cycles) {}
-
-unsigned int SimpleRank::getCurrentCycle() { return 0; }
 
 bool SimpleRank::isEmpty() const { return false; }
 
-void SimpleRank::printStats(std::ostream& statStream) {}
+void SimpleRank::cycle(unsigned int cycles) {}
 
 void SimpleRank::addBank(std::unique_ptr<Bank> bank) {}

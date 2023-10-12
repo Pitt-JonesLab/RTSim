@@ -69,7 +69,7 @@ class MockBank : public MockComponent2<Bank> {
     void addSubArray(std::unique_ptr<SubArray>) {}
 };
 
-class MockRank : public MockComponent<Rank> {
+class MockRank : public MockComponent2<Rank> {
     void addBank(std::unique_ptr<Bank>) {}
 };
 
