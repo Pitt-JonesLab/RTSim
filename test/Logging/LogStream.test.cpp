@@ -35,6 +35,7 @@ TEST_CASE("Stat tags work properly", "[LogStream], [Logging]") {
 
     LogStream log(ss);
     log.setGlobalLevel(LogLevel::STAT);
+    log << LogLevel::STAT;
 
     SECTION("No tags") {
         log << Logging::useTags;

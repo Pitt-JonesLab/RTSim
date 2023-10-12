@@ -18,12 +18,12 @@ TEST_CASE("Sends requests to Interconnect", "[SimpleController], [Memory]") {
     controller.addInterconnect(std::move(interconnect));
 
     SECTION("Interconnect gets write") {
-        REQUIRE(controller.write(0, {}, 0, 0));
+        REQUIRE(controller.write(0, {}));
         REQUIRE(interconnectPtr->writeFlag);
     }
 
     SECTION("Interconnect gets read") {
-        REQUIRE(controller.read(0, {}, 0, 0));
+        REQUIRE(controller.read(0, {}));
         REQUIRE(interconnectPtr->readFlag);
     }
 }
