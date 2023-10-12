@@ -73,7 +73,7 @@ class MockRank : public MockComponent2<Rank> {
     void addBank(std::unique_ptr<Bank>) {}
 };
 
-class MockInterconnect : public MockComponent<Interconnect> {
+class MockInterconnect : public MockComponent2<Interconnect> {
     void addRank(std::unique_ptr<Rank>) {}
 };
 

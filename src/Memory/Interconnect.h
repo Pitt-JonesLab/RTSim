@@ -7,7 +7,7 @@
 
 namespace NVM::Memory {
 
-class Interconnect : public NVM::Simulation::MemorySystem {
+class Interconnect : public Component {
     public:
     virtual void addRank(std::unique_ptr<Rank> rank) = 0;
 };

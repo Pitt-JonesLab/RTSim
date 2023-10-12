@@ -6,20 +6,13 @@ namespace NVM::Memory {
 
 class SimpleInterconnect : public Interconnect {
     public:
-    bool issue(NVMainRequest* req);
+    Command* read(uint64_t address, NVM::Simulation::DataBlock data);
 
-    bool read(uint64_t address, NVM::Simulation::DataBlock data,
-              unsigned int threadId, unsigned int cycle);
-    bool write(uint64_t address, NVM::Simulation::DataBlock data,
-               unsigned int threadId, unsigned int cycle);
+    Command* write(uint64_t address, NVM::Simulation::DataBlock data);
 
     void cycle(unsigned int cycles);
 
-    unsigned int getCurrentCycle();
-
     bool isEmpty() const;
-
-    void printStats(std::ostream& statStream);
 
     void addRank(std::unique_ptr<Rank> rank);
 };

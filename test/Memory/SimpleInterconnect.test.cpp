@@ -18,12 +18,12 @@ TEST_CASE("Sends requests to Rank", "[SimpleInterconnect], [Memory]") {
     interconnect.addRank(std::move(rank));
 
     SECTION("Rank gets write") {
-        REQUIRE(interconnect.write(0, {}, 0, 0));
+        REQUIRE(interconnect.write(0, {}));
         REQUIRE(rankPtr->writeFlag);
     }
 
     SECTION("Rank gets read") {
-        REQUIRE(interconnect.read(0, {}, 0, 0));
+        REQUIRE(interconnect.read(0, {}));
         REQUIRE(rankPtr->readFlag);
     }
 }
