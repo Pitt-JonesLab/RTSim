@@ -20,6 +20,8 @@ class SimpleBank : public Bank {
 
     void addSubArray(std::unique_ptr<SubArray> subArray);
 
+    StatBlock getStats(std::string tag) const;
+
     private:
     std::vector<std::unique_ptr<SubArray>> subArrays;
 

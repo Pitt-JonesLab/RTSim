@@ -87,3 +87,14 @@ void SimpleController::addInterconnect(
     std::unique_ptr<Interconnect> interconnect) {
     interconnects.emplace_back(std::move(interconnect));
 }
+
+StatBlock SimpleController::getStats(std::string tag) const {
+    StatBlock stats(tag);
+
+    for (int i = 0; i < interconnects.size(); i++) {
+        stats.addChild(
+            interconnects[i]->getStats(tag + ".i" + std::to_string(i)));
+    }
+
+    return stats;
+}

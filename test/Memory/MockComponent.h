@@ -45,6 +45,8 @@ template<typename T> class MockComponent : public T {
     bool isEmpty() const { return empty; }
 
     void cycle(unsigned int cycles) { currentCycle += cycles; }
+
+    StatBlock getStats(std::string tag) const { return StatBlock(); }
 };
 
 using MockSubArray = MockComponent<SubArray>;

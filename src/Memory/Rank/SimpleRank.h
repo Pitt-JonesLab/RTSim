@@ -17,6 +17,8 @@ class SimpleRank : public Rank {
 
     void addBank(std::unique_ptr<Bank> bank);
 
+    StatBlock getStats(std::string tag) const;
+
     private:
     std::vector<std::unique_ptr<Bank>> banks;
     std::unique_ptr<Command> currentCommand;

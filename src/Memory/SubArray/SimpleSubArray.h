@@ -17,6 +17,8 @@ class SimpleSubArray : public SubArray {
 
     bool isEmpty() const;
 
+    StatBlock getStats(std::string tag) const;
+
     private:
     const static unsigned int readTime;
     const static unsigned int writeTime;

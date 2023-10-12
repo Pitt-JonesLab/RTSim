@@ -73,3 +73,29 @@ TEST_CASE("Logs events", "[SimpleRank], [Memory]") {
         REQUIRE_FALSE(logString.str().empty());
     }
 }
+
+TEST_CASE("Tracks stats", "[SimpleRank], [Memory]") {
+    SimpleRank rank;
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::STAT);
+
+    StatBlock stats = rank.getStats("rank");
+    stats.log();
+
+    SECTION("Tracks reads") {
+        REQUIRE(logString.str().find("rank.reads 0\n") != std::string::npos);
+        REQUIRE(rank.read(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("rank.reads 1\n") != std::string::npos);
+    }
+
+    SECTION("Tracks writes") {
+        REQUIRE(logString.str().find("rank.writes 0\n") != std::string::npos);
+        REQUIRE(rank.write(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("rank.writes 1\n") != std::string::npos);
+    }
+}

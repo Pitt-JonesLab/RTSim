@@ -46,3 +46,33 @@ TEST_CASE("Logs events", "[SimpleSubArray], [Memory]") {
         REQUIRE_FALSE(logString.str().empty());
     }
 }
+
+TEST_CASE("Tracks stats", "[SimpleSubArray], [Memory]") {
+    SimpleSubArray subArray;
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::STAT);
+
+    StatBlock stats = subArray.getStats("subArray");
+    stats.log();
+
+    SECTION("Tracks reads") {
+        REQUIRE(logString.str().find("subArray.reads 0\n") !=
+                std::string::npos);
+        REQUIRE(subArray.read(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("subArray.reads 1\n") !=
+                std::string::npos);
+    }
+
+    SECTION("Tracks writes") {
+        REQUIRE(logString.str().find("subArray.writes 0\n") !=
+                std::string::npos);
+        REQUIRE(subArray.write(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("subArray.writes 1\n") !=
+                std::string::npos);
+    }
+}

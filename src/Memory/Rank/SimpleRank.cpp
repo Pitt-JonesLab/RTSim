@@ -81,3 +81,13 @@ bool SimpleRank::isEmpty() const { return currentCommand == nullptr; }
 void SimpleRank::addBank(std::unique_ptr<Bank> bank) {
     banks.emplace_back(std::move(bank));
 }
+
+StatBlock SimpleRank::getStats(std::string tag) const {
+    StatBlock stats(tag);
+
+    for (int i = 0; i < banks.size(); i++) {
+        stats.addChild(banks[i]->getStats(tag + ".bank" + std::to_string(i)));
+    }
+
+    return stats;
+}

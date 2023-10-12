@@ -17,6 +17,8 @@ class SimpleController : public MemoryController {
 
     void addInterconnect(std::unique_ptr<Interconnect> interconnect);
 
+    StatBlock getStats(std::string tag) const;
+
     private:
     std::vector<std::unique_ptr<Interconnect>> interconnects;
     std::unique_ptr<Command> currentCommand;

@@ -68,3 +68,9 @@ void SimpleSubArray::cycle(unsigned int cycles) {
 bool SimpleSubArray::isEmpty() const {
     return nextWrite <= currentCycle && nextRead <= currentCycle;
 }
+
+StatBlock SimpleSubArray::getStats(std::string tag) const {
+    StatBlock stats(tag);
+
+    return stats;
+}

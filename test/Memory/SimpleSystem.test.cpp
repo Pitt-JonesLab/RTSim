@@ -73,3 +73,28 @@ TEST_CASE("Logs events", "[SimpleSystem], [Memory]") {
         REQUIRE_FALSE(logString.str().empty());
     }
 }
+
+TEST_CASE("Tracks stats", "[SimpleSystem], [Memory]") {
+    SimpleSystem system;
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::STAT);
+
+    system.printStats(logString);
+
+    SECTION("Tracks reads") {
+        REQUIRE(logString.str().find("system.reads 0\n") != std::string::npos);
+        REQUIRE(system.read(0, {}, 0, 0));
+        logString.str(std::string());
+        system.printStats(logString);
+        REQUIRE(logString.str().find("system.reads 1\n") != std::string::npos);
+    }
+
+    SECTION("Tracks writes") {
+        REQUIRE(logString.str().find("system.writes 0\n") != std::string::npos);
+        REQUIRE(system.write(0, {}, 0, 0));
+        logString.str(std::string());
+        system.printStats(logString);
+        REQUIRE(logString.str().find("system.writes 1\n") != std::string::npos);
+    }
+}

@@ -43,7 +43,11 @@ class LogStream {
     /**
      * Logs a message at the current level
      */
-    template<typename T> void log(T message) {
+    template<typename T> void log(T& message) {
+        if (level <= globalLevel) (*output) << message;
+    }
+
+    template<typename T> void log(const T& message) {
         if (level <= globalLevel) (*output) << message;
     }
 
@@ -67,7 +71,12 @@ LogStream& operator<<(LogStream& stream, LogStream& (*func)(LogStream&) );
 /**
  * Logs the given message at the current level of the LogStream
  */
-template<typename T> LogStream& operator<<(LogStream& log, T message) {
+template<typename T> LogStream& operator<<(LogStream& log, T& message) {
+    log.log(message);
+    return log;
+}
+
+template<typename T> LogStream& operator<<(LogStream& log, const T& message) {
     log.log(message);
     return log;
 }

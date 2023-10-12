@@ -87,6 +87,14 @@ void SimpleSystem::addController(
     channels.emplace_back(std::move(interconnect));
 }
 
-void SimpleSystem::printStats(std::ostream& statStream) {}
+void SimpleSystem::printStats(std::ostream& statStream) {
+    StatBlock stats;
+
+    for (int i = 0; i < channels.size(); i++) {
+        stats.addChild(channels[i]->getStats("channel" + std::to_string(i)));
+    }
+
+    stats.log(statStream);
+}
 
 unsigned int SimpleSystem::getCurrentCycle() { return 0; }

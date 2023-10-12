@@ -81,3 +81,14 @@ bool SimpleBank::isEmpty() const { return currentCommand == nullptr; }
 void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {
     subArrays.emplace_back(std::move(subArray));
 }
+
+StatBlock SimpleBank::getStats(std::string tag) const {
+    StatBlock stats(tag);
+
+    for (int i = 0; i < subArrays.size(); i++) {
+        stats.addChild(
+            subArrays[i]->getStats(tag + ".subArray" + std::to_string(i)));
+    }
+
+    return stats;
+}

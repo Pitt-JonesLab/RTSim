@@ -18,6 +18,8 @@ class SimpleInterconnect : public Interconnect {
 
     void addRank(std::unique_ptr<Rank> rank);
 
+    StatBlock getStats(std::string tag) const;
+
     private:
     std::vector<std::unique_ptr<Rank>> ranks;
     std::unique_ptr<Command> currentCommand;

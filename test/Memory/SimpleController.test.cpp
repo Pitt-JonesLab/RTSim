@@ -73,3 +73,33 @@ TEST_CASE("Logs events", "[SimpleController], [Memory]") {
         REQUIRE_FALSE(logString.str().empty());
     }
 }
+
+TEST_CASE("Tracks stats", "[SimpleController], [Memory]") {
+    SimpleController controller;
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::STAT);
+
+    StatBlock stats = controller.getStats("controller");
+    stats.log();
+
+    SECTION("Tracks reads") {
+        REQUIRE(logString.str().find("controller.reads 0\n") !=
+                std::string::npos);
+        REQUIRE(controller.read(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("controller.reads 1\n") !=
+                std::string::npos);
+    }
+
+    SECTION("Tracks writes") {
+        REQUIRE(logString.str().find("controller.writes 0\n") !=
+                std::string::npos);
+        REQUIRE(controller.write(0, {}));
+        logString.str(std::string());
+        stats.log();
+        REQUIRE(logString.str().find("controller.writes 1\n") !=
+                std::string::npos);
+    }
+}
