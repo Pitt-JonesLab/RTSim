@@ -7,4 +7,4 @@ set(TEST_SOURCES
     SimpleBank.test.cpp
     SimpleSubArray.test.cpp)
 
-add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory)
+add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory RTSim_Logging)

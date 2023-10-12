@@ -22,3 +22,7 @@ void NVM::Logging::setLogFile(std::string filename) {
 void NVM::Logging::setLogLevel(LogLevel level) {
     logStream.setGlobalLevel(level);
 }
+
+void NVM::Logging::setLogOutput(std::ostream& output) {
+    logStream = LogStream(output);
+}

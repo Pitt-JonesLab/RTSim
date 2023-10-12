@@ -2,6 +2,8 @@
 
 #include "Logging/LogStream.h"
 
+#include <iostream>
+
 namespace NVM::Logging {
 
 /**
@@ -15,6 +17,11 @@ LogStream& log();
  * If the file cannot be opened, logs an error and keeps the last output stream
  */
 void setLogFile(std::string filename);
+
+/**
+ * Changes the log output to the given ostream
+ */
+void setLogOutput(std::ostream& output);
 
 /**
  * Sets the global log level

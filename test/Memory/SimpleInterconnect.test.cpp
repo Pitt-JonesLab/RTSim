@@ -1,10 +1,13 @@
 #include "Memory/Interconnect/SimpleInterconnect.h"
 
+#include "Logging/Logging.h"
 #include "MockComponent.h"
 
 #include <catch2/catch_test_macros.hpp>
+#include <sstream>
 
 using namespace NVM::Memory;
+using namespace NVM::Logging;
 
 TEST_CASE("Constructs", "[SimpleInterconnect], [Memory]") {
     REQUIRE_NOTHROW(SimpleInterconnect());
@@ -49,5 +52,24 @@ TEST_CASE("Handles requests properly", "[SimpleInterconnect], [Memory]") {
         rankPtr->command.notify();
         interconnect.cycle(1);
         REQUIRE(interconnect.write(0, {}));
+    }
+}
+
+TEST_CASE("Logs events", "[SimpleInterconnect], [Memory]") {
+    auto rank = std::unique_ptr<Rank>(new MockRank());
+    SimpleInterconnect interconnect;
+    interconnect.addRank(std::move(rank));
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::EVENT);
+
+    SECTION("Logs read") {
+        REQUIRE(interconnect.read(0, {}));
+        REQUIRE_FALSE(logString.str().empty());
+    }
+
+    SECTION("Logs write") {
+        REQUIRE(interconnect.write(0, {}));
+        REQUIRE_FALSE(logString.str().empty());
     }
 }

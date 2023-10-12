@@ -1,10 +1,13 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 
+#include "Logging/Logging.h"
 #include "MockComponent.h"
 
 #include <catch2/catch_test_macros.hpp>
+#include <sstream>
 
 using namespace NVM::Memory;
+using namespace NVM::Logging;
 
 TEST_CASE("Constructs", "[SimpleSystem], [Memory]") {
     REQUIRE_NOTHROW(SimpleSystem());
@@ -49,5 +52,24 @@ TEST_CASE("Handles requests properly", "[SimpleSystem], [Memory]") {
         controllerPtr->command.notify();
         system.cycle(1);
         REQUIRE(system.write(0, {}, 0, 0));
+    }
+}
+
+TEST_CASE("Logs events", "[SimpleSystem], [Memory]") {
+    auto controller = std::unique_ptr<MemoryController>(new MockController());
+    SimpleSystem system;
+    system.addController(std::move(controller));
+    std::stringstream logString;
+    setLogOutput(logString);
+    setLogLevel(LogLevel::EVENT);
+
+    SECTION("Logs read") {
+        REQUIRE(system.read(0, {}, 0, 0));
+        REQUIRE_FALSE(logString.str().empty());
+    }
+
+    SECTION("Logs write") {
+        REQUIRE(system.write(0, {}, 0, 0));
+        REQUIRE_FALSE(logString.str().empty());
     }
 }
