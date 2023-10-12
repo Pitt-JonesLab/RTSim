@@ -1,5 +1,7 @@
 #include "Memory/MemoryController/SimpleController.h"
 
+#include "Logging/Logging.h"
+
 #include <functional>
 
 using namespace NVM::Memory;
@@ -30,6 +32,7 @@ class ControllerCommand : public Command {
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
@@ -51,6 +54,8 @@ Command* SimpleController::read(uint64_t address, DataBlock data) {
     };
 
     currentCommand = std::move(makeCommand(readFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleController received read\n";
     return currentCommand.get();
 }
 
@@ -64,6 +69,8 @@ Command* SimpleController::write(uint64_t address,
     };
 
     currentCommand = std::move(makeCommand(writeFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleController received write\n";
     return currentCommand.get();
 }
 

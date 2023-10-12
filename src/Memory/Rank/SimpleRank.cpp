@@ -1,5 +1,7 @@
 #include "Memory/Rank/SimpleRank.h"
 
+#include "Logging/Logging.h"
+
 #include <functional>
 
 using namespace NVM::Memory;
@@ -30,6 +32,7 @@ class RankCommand : public Command {
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
@@ -49,6 +52,8 @@ Command* SimpleRank::read(uint64_t address, DataBlock data) {
     CommandFunc readFunc = [&]() { return banks[0]->read(address, data); };
 
     currentCommand = std::move(makeCommand(readFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleRank received read\n";
     return currentCommand.get();
 }
 
@@ -59,6 +64,8 @@ Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     CommandFunc writeFunc = [&]() { return banks[0]->write(address, data); };
 
     currentCommand = std::move(makeCommand(writeFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleRank received read\n";
     return currentCommand.get();
 }
 

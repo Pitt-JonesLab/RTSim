@@ -1,5 +1,7 @@
 #include "Memory/Interconnect/SimpleInterconnect.h"
 
+#include "Logging/Logging.h"
+
 #include <functional>
 
 using namespace NVM::Memory;
@@ -30,6 +32,7 @@ class InterconnectCommand : public Command {
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
@@ -49,6 +52,8 @@ Command* SimpleInterconnect::read(uint64_t address, DataBlock data) {
     CommandFunc readFunc = [&]() { return ranks[0]->read(address, data); };
 
     currentCommand = std::move(makeCommand(readFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleInterconnect received read\n";
     return currentCommand.get();
 }
 
@@ -60,6 +65,8 @@ Command* SimpleInterconnect::write(uint64_t address,
     CommandFunc writeFunc = [&]() { return ranks[0]->write(address, data); };
 
     currentCommand = std::move(makeCommand(writeFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleInterconnect received read\n";
     return currentCommand.get();
 }
 

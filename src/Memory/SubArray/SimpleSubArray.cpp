@@ -1,5 +1,7 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
+#include "Logging/Logging.h"
+
 namespace NVM::Memory {
 
 class TimedCommand : public Command {
@@ -29,6 +31,7 @@ class TimedCommand : public Command {
 } // namespace NVM::Memory
 
 using namespace NVM::Memory;
+using namespace NVM::Logging;
 
 const unsigned int SimpleSubArray::readTime = 5;
 const unsigned int SimpleSubArray::writeTime = 5;
@@ -43,6 +46,7 @@ Command* SimpleSubArray::read(uint64_t address,
                               NVM::Simulation::DataBlock data) {
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (currentCommand) log() << LogLevel::EVENT << "SubArray received read\n";
     return currentCommand.get();
 }
 
@@ -50,6 +54,7 @@ Command* SimpleSubArray::write(uint64_t address,
                                NVM::Simulation::DataBlock data) {
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (currentCommand) log() << LogLevel::EVENT << "SubArray received write\n";
     return currentCommand.get();
 }
 

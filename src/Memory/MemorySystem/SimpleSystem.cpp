@@ -1,5 +1,7 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 
+#include "Logging/Logging.h"
+
 #include <functional>
 
 using namespace NVM::Memory;
@@ -30,6 +32,7 @@ class SystemCommand : public Command {
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 bool SimpleSystem::issue(NVMainRequest* req) { return false; }
 
@@ -52,6 +55,8 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     CommandFunc readFunc = [&]() { return channels[0]->read(address, data); };
 
     currentCommand = std::move(makeCommand(readFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleSystem received read\n";
     return currentCommand != nullptr;
 }
 
@@ -63,6 +68,8 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
     CommandFunc writeFunc = [&]() { return channels[0]->write(address, data); };
 
     currentCommand = std::move(makeCommand(writeFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleSystem received write\n";
     return currentCommand != nullptr;
 }
 

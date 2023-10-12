@@ -1,5 +1,7 @@
 #include "Memory/Bank/SimpleBank.h"
 
+#include "Logging/Logging.h"
+
 #include <functional>
 
 namespace NVM::Memory {
@@ -28,6 +30,7 @@ class BankCommand : public Command {
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
@@ -47,6 +50,8 @@ Command* SimpleBank::read(uint64_t address, DataBlock data) {
     CommandFunc readFunc = [&]() { return subArrays[0]->read(address, data); };
 
     currentCommand = std::move(makeCommand(readFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleBank received read\n";
     return currentCommand.get();
 }
 
@@ -59,6 +64,8 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     };
 
     currentCommand = std::move(makeCommand(writeFunc));
+    if (currentCommand)
+        log() << LogLevel::EVENT << "SimpleBank received write\n";
     return currentCommand.get();
 }
 
