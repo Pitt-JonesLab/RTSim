@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory/Bank.h"
+#include "Memory/Component.h"
 #include "Memory/Interconnect.h"
 #include "Memory/MemoryController.h"
 #include "Memory/Rank.h"
@@ -41,7 +42,28 @@ template<typename T> class MockComponent : public T {
     void printStats(std::ostream& statStream) {}
 };
 
-using MockSubArray = MockComponent<SubArray>;
+template<typename T> class MockComponent2 : public T {
+    public:
+    bool readFlag = false, writeFlag = false;
+    bool empty = true;
+    unsigned int currentCycle = 0;
+
+    Command* read(uint64_t address, NVM::Simulation::DataBlock data) {
+        readFlag = true;
+        return nullptr;
+    }
+
+    Command* write(uint64_t address, NVM::Simulation::DataBlock data) {
+        writeFlag = true;
+        return nullptr;
+    }
+
+    bool isEmpty() const { return empty; }
+
+    void cycle(unsigned int cycles) { currentCycle += cycles; }
+};
+
+using MockSubArray = MockComponent2<SubArray>;
 
 class MockBank : public MockComponent<Bank> {
     void addSubArray(std::unique_ptr<SubArray>) {}

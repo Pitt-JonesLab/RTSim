@@ -1,23 +1,65 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
+namespace NVM::Memory {
+
+class TimedCommand : public Command {
+    public:
+    TimedCommand() : parent(nullptr), cyclesLeft(5) {}
+
+    void setParent(Command* p) { parent = p; }
+
+    void cycle(unsigned int cycles) {
+        if (cycles >= cyclesLeft) {
+            cyclesLeft = 0;
+            if (parent) parent->notify();
+            return;
+        }
+        cyclesLeft -= cycles;
+    }
+
+    bool isDone() { return cyclesLeft == 0; }
+
+    void notify() {}
+
+    private:
+    Command* parent;
+    unsigned int cyclesLeft;
+};
+
+} // namespace NVM::Memory
+
 using namespace NVM::Memory;
 
-bool SimpleSubArray::issue(NVMainRequest* req) { return false; }
+const unsigned int SimpleSubArray::readTime = 5;
+const unsigned int SimpleSubArray::writeTime = 5;
 
-bool SimpleSubArray::read(uint64_t address, NVM::Simulation::DataBlock data,
-                          unsigned int threadId, unsigned int cycle) {
-    return false;
+SimpleSubArray::SimpleSubArray() :
+    nextRead(0),
+    nextWrite(0),
+    currentCycle(0),
+    currentCommand(nullptr) {}
+
+Command* SimpleSubArray::read(uint64_t address,
+                              NVM::Simulation::DataBlock data) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    return currentCommand.get();
 }
 
-bool SimpleSubArray::write(uint64_t address, NVM::Simulation::DataBlock data,
-                           unsigned int threadId, unsigned int cycle) {
-    return false;
+Command* SimpleSubArray::write(uint64_t address,
+                               NVM::Simulation::DataBlock data) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    return currentCommand.get();
 }
 
-void SimpleSubArray::cycle(unsigned int cycles) {}
+void SimpleSubArray::cycle(unsigned int cycles) {
+    if (!currentCommand) return;
+    TimedCommand* cmd = static_cast<TimedCommand*>(currentCommand.get());
+    cmd->cycle(cycles);
+    if (cmd->isDone()) currentCommand.reset();
+}
 
-unsigned int SimpleSubArray::getCurrentCycle() { return 0; }
-
-bool SimpleSubArray::isEmpty() const { return false; }
-
-void SimpleSubArray::printStats(std::ostream& statStream) {}
+bool SimpleSubArray::isEmpty() const {
+    return nextWrite <= currentCycle && nextRead <= currentCycle;
+}

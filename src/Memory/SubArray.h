@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Simulation/MemorySystem.h"
+#include "Memory/Component.h"
 
 namespace NVM::Memory {
 
-class SubArray : public NVM::Simulation::MemorySystem {};
+class SubArray : public Component {};
 
 } // namespace NVM::Memory

@@ -2,24 +2,30 @@
 
 #include "Memory/SubArray.h"
 
+#include <memory>
+
 namespace NVM::Memory {
 
 class SimpleSubArray : public SubArray {
     public:
-    bool issue(NVMainRequest* req);
+    SimpleSubArray();
 
-    bool read(uint64_t address, NVM::Simulation::DataBlock data,
-              unsigned int threadId, unsigned int cycle);
-    bool write(uint64_t address, NVM::Simulation::DataBlock data,
-               unsigned int threadId, unsigned int cycle);
+    Command* read(uint64_t address, NVM::Simulation::DataBlock data);
+    Command* write(uint64_t address, NVM::Simulation::DataBlock data);
 
     void cycle(unsigned int cycles);
 
-    unsigned int getCurrentCycle();
-
     bool isEmpty() const;
 
-    void printStats(std::ostream& statStream);
+    private:
+    const static unsigned int readTime;
+    const static unsigned int writeTime;
+
+    unsigned int nextRead;
+    unsigned int nextWrite;
+    unsigned int currentCycle;
+
+    std::unique_ptr<Command> currentCommand;
 };
 
-}
+} // namespace NVM::Memory
