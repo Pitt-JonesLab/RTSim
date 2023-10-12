@@ -1,26 +1,85 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 
+#include <functional>
+
 using namespace NVM::Memory;
+
+namespace NVM::Memory {
+
+class SystemCommand : public Command {
+    public:
+    SystemCommand() : parent(nullptr), complete(false) {}
+
+    void setParent(Command* p) { parent = p; }
+
+    void notify() {
+        if (parent) {
+            parent->notify();
+            complete = true;
+        }
+    }
+
+    bool isDone() const { return complete; }
+
+    private:
+    Command* parent;
+    bool complete;
+};
+
+} // namespace NVM::Memory
+
+using namespace NVM::Memory;
+using namespace NVM::Simulation;
 
 bool SimpleSystem::issue(NVMainRequest* req) { return false; }
 
-bool SimpleSystem::read(uint64_t address, NVM::Simulation::DataBlock data,
-                        unsigned int threadId, unsigned int cycle) {
-    return false;
+using CommandFunc = std::function<Command*()>;
+
+std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+    auto interconnectCommand = func();
+    if (!interconnectCommand) return nullptr;
+
+    auto systemCommand = std::unique_ptr<Command>(new SystemCommand());
+    interconnectCommand->setParent(systemCommand.get());
+    return std::move(systemCommand);
+}
+
+bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
+                        unsigned int cycle) {
+    if (channels.empty()) return false;
+    if (currentCommand) return false;
+
+    CommandFunc readFunc = [&]() { return channels[0]->read(address, data); };
+
+    currentCommand = std::move(makeCommand(readFunc));
+    return currentCommand != nullptr;
 }
 
 bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
                          unsigned int threadId, unsigned int cycle) {
-    return false;
+    if (channels.empty()) return false;
+    if (currentCommand) return false;
+
+    CommandFunc writeFunc = [&]() { return channels[0]->write(address, data); };
+
+    currentCommand = std::move(makeCommand(writeFunc));
+    return currentCommand != nullptr;
 }
 
-void SimpleSystem::cycle(unsigned int cycles) {}
+void SimpleSystem::cycle(unsigned int cycles) {
+    if (!channels.empty()) channels[0]->cycle(cycles);
+    if (!currentCommand) return;
+    if (static_cast<SystemCommand*>(currentCommand.get())->isDone())
+        currentCommand.reset();
+}
 
-unsigned int SimpleSystem::getCurrentCycle() { return 0; }
+bool SimpleSystem::isEmpty() const { return currentCommand == nullptr; }
 
-bool SimpleSystem::isEmpty() const { return false; }
+void SimpleSystem::addController(
+    std::unique_ptr<MemoryController> interconnect) {
+    channels.emplace_back(std::move(interconnect));
+}
 
 void SimpleSystem::printStats(std::ostream& statStream) {}
 
-void SimpleSystem::addController(std::unique_ptr<MemoryController> controller) {
-}
+unsigned int SimpleSystem::getCurrentCycle() { return 0; }

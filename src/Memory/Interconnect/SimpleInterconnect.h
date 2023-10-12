@@ -2,6 +2,8 @@
 
 #include "Memory/Interconnect.h"
 
+#include <vector>
+
 namespace NVM::Memory {
 
 class SimpleInterconnect : public Interconnect {
@@ -15,6 +17,10 @@ class SimpleInterconnect : public Interconnect {
     bool isEmpty() const;
 
     void addRank(std::unique_ptr<Rank> rank);
+
+    private:
+    std::vector<std::unique_ptr<Rank>> ranks;
+    std::unique_ptr<Command> currentCommand;
 };
 
 } // namespace NVM::Memory

@@ -2,6 +2,8 @@
 
 #include "Memory/MemoryController.h"
 
+#include <vector>
+
 namespace NVM::Memory {
 
 class SimpleController : public MemoryController {
@@ -14,6 +16,10 @@ class SimpleController : public MemoryController {
     bool isEmpty() const;
 
     void addInterconnect(std::unique_ptr<Interconnect> interconnect);
+
+    private:
+    std::vector<std::unique_ptr<Interconnect>> interconnects;
+    std::unique_ptr<Command> currentCommand;
 };
 
 } // namespace NVM::Memory

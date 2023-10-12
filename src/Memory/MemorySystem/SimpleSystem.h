@@ -2,6 +2,8 @@
 
 #include "Memory/MemorySystem.h"
 
+#include <vector>
+
 namespace NVM::Memory {
 
 class SimpleSystem : public MemorySystem {
@@ -22,6 +24,10 @@ class SimpleSystem : public MemorySystem {
     void printStats(std::ostream& statStream);
 
     void addController(std::unique_ptr<MemoryController> controller);
+
+    private:
+    std::vector<std::unique_ptr<MemoryController>> channels;
+    std::unique_ptr<Command> currentCommand;
 };
 
 } // namespace NVM::Memory
