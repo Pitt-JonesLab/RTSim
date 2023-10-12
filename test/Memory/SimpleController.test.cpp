@@ -27,3 +27,27 @@ TEST_CASE("Sends requests to Interconnect", "[SimpleController], [Memory]") {
         REQUIRE(interconnectPtr->readFlag);
     }
 }
+
+TEST_CASE("Handles requests properly", "[SimpleController], [Memory]") {
+    auto interconnectPtr = new MockInterconnect();
+    auto interconnect = std::unique_ptr<Interconnect>(interconnectPtr);
+
+    SimpleController controller;
+    controller.addInterconnect(std::move(interconnect));
+
+    SECTION("One read at a time") {
+        REQUIRE(controller.read(0, {}));
+        REQUIRE_FALSE(controller.read(0, {}));
+        interconnectPtr->command.notify();
+        controller.cycle(1);
+        REQUIRE(controller.read(0, {}));
+    }
+
+    SECTION("One write at a time") {
+        REQUIRE(controller.write(0, {}));
+        REQUIRE_FALSE(controller.write(0, {}));
+        interconnectPtr->command.notify();
+        controller.cycle(1);
+        REQUIRE(controller.write(0, {}));
+    }
+}

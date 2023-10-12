@@ -27,3 +27,27 @@ TEST_CASE("Sends requests to Rank", "[SimpleInterconnect], [Memory]") {
         REQUIRE(rankPtr->readFlag);
     }
 }
+
+TEST_CASE("Handles requests properly", "[SimpleInterconnect], [Memory]") {
+    auto rankPtr = new MockRank();
+    auto rank = std::unique_ptr<Rank>(rankPtr);
+
+    SimpleInterconnect interconnect;
+    interconnect.addRank(std::move(rank));
+
+    SECTION("One read at a time") {
+        REQUIRE(interconnect.read(0, {}));
+        REQUIRE_FALSE(interconnect.read(0, {}));
+        rankPtr->command.notify();
+        interconnect.cycle(1);
+        REQUIRE(interconnect.read(0, {}));
+    }
+
+    SECTION("One write at a time") {
+        REQUIRE(interconnect.write(0, {}));
+        REQUIRE_FALSE(interconnect.write(0, {}));
+        rankPtr->command.notify();
+        interconnect.cycle(1);
+        REQUIRE(interconnect.write(0, {}));
+    }
+}

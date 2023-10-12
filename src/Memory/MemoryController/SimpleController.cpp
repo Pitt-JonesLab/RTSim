@@ -15,8 +15,8 @@ class ControllerCommand : public Command {
     void notify() {
         if (parent) {
             parent->notify();
-            complete = true;
         }
+        complete = true;
     }
 
     bool isDone() const { return complete; }
