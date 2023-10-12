@@ -18,12 +18,12 @@ TEST_CASE("Sends requests to SubArray", "[SimpleBank], [Memory]") {
     bank.addSubArray(std::move(subArray));
 
     SECTION("SubArray gets write") {
-        REQUIRE(bank.write(0, {}, 0, 0));
+        REQUIRE(bank.write(0, {}));
         REQUIRE(subArrayPtr->writeFlag);
     }
 
     SECTION("SubArray gets read") {
-        REQUIRE(bank.read(0, {}, 0, 0));
+        REQUIRE(bank.read(0, {}));
         REQUIRE(subArrayPtr->readFlag);
     }
 }

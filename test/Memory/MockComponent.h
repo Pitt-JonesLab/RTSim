@@ -65,7 +65,7 @@ template<typename T> class MockComponent2 : public T {
 
 using MockSubArray = MockComponent2<SubArray>;
 
-class MockBank : public MockComponent<Bank> {
+class MockBank : public MockComponent2<Bank> {
     void addSubArray(std::unique_ptr<SubArray>) {}
 };
 

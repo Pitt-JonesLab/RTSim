@@ -2,24 +2,16 @@
 
 using namespace NVM::Memory;
 
-bool SimpleBank::issue(NVMainRequest* req) { return false; }
-
-bool SimpleBank::read(uint64_t address, NVM::Simulation::DataBlock data,
-                      unsigned int threadId, unsigned int cycle) {
-    return false;
+Command* SimpleBank::read(uint64_t address, NVM::Simulation::DataBlock data) {
+    return nullptr;
 }
 
-bool SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data,
-                       unsigned int threadId, unsigned int cycle) {
-    return false;
+Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
+    return nullptr;
 }
 
 void SimpleBank::cycle(unsigned int cycles) {}
 
-unsigned int SimpleBank::getCurrentCycle() { return 0; }
-
 bool SimpleBank::isEmpty() const { return false; }
-
-void SimpleBank::printStats(std::ostream& statStream) {}
 
 void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {}

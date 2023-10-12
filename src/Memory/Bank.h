@@ -7,7 +7,7 @@
 
 namespace NVM::Memory {
 
-class Bank : public NVM::Simulation::MemorySystem {
+class Bank : public Component {
     public:
     virtual void addSubArray(std::unique_ptr<SubArray> subArray) = 0;
 };
