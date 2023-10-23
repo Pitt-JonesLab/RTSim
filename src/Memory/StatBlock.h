@@ -17,7 +17,7 @@ class StatValue {
         virtual std::unique_ptr<Printable> clone() const = 0;
     };
 
-    template<typename T> class PrintableWrapper {
+    template<typename T> class PrintableWrapper : public Printable {
         public:
         PrintableWrapper(T* vPtr) : valuePtr(vPtr) {}
 
@@ -37,20 +37,23 @@ class StatValue {
     };
 
     std::unique_ptr<Printable> value;
-    std::string unit;
+    std::string name, unit;
 
     public:
     template<typename T>
-    StatValue(T* v, std::string u) :
+    StatValue(T* v, std::string n, std::string u) :
         value(new PrintableWrapper<T>(v)),
+        name(n),
         unit(u) {}
 
     StatValue(const StatValue& other) :
         value(other.value->clone()),
+        name(other.name),
         unit(other.unit) {}
 
     StatValue& operator=(const StatValue& other) {
         value = other.value->clone();
+        name = other.name;
         unit = other.unit;
         return *this;
     }
@@ -67,8 +70,9 @@ class StatBlock {
     public:
     StatBlock(std::string t = "");
 
-    template<typename T> void addStat(T* statPtr, std::string unit = "") {
-        values.emplace_back(statPtr, unit);
+    template<typename T>
+    void addStat(T* statPtr, std::string name, std::string unit = "") {
+        values.emplace_back(statPtr, name, unit);
     }
 
     void addChild(StatBlock childBlock);

@@ -33,20 +33,19 @@ class TimedCommand : public Command {
 using namespace NVM::Memory;
 using namespace NVM::Logging;
 
-const unsigned int SimpleSubArray::readTime = 5;
-const unsigned int SimpleSubArray::writeTime = 5;
-
 SimpleSubArray::SimpleSubArray() :
-    nextRead(0),
-    nextWrite(0),
-    currentCycle(0),
+    totalReads(0),
+    totalWrites(0),
     currentCommand(nullptr) {}
 
 Command* SimpleSubArray::read(uint64_t address,
                               NVM::Simulation::DataBlock data) {
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
-    if (currentCommand) log() << LogLevel::EVENT << "SubArray received read\n";
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SubArray received read\n";
+        totalReads++;
+    }
     return currentCommand.get();
 }
 
@@ -54,7 +53,10 @@ Command* SimpleSubArray::write(uint64_t address,
                                NVM::Simulation::DataBlock data) {
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
-    if (currentCommand) log() << LogLevel::EVENT << "SubArray received write\n";
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SubArray received write\n";
+        totalWrites++;
+    }
     return currentCommand.get();
 }
 
@@ -65,12 +67,13 @@ void SimpleSubArray::cycle(unsigned int cycles) {
     if (cmd->isDone()) currentCommand.reset();
 }
 
-bool SimpleSubArray::isEmpty() const {
-    return nextWrite <= currentCycle && nextRead <= currentCycle;
-}
+bool SimpleSubArray::isEmpty() const { return currentCommand == nullptr; }
 
 StatBlock SimpleSubArray::getStats(std::string tag) const {
     StatBlock stats(tag);
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     return stats;
 }

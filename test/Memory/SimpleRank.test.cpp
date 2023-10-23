@@ -76,6 +76,7 @@ TEST_CASE("Logs events", "[SimpleRank], [Memory]") {
 
 TEST_CASE("Tracks stats", "[SimpleRank], [Memory]") {
     SimpleRank rank;
+    rank.addBank(std::unique_ptr<Bank>(new MockBank()));
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);
@@ -84,18 +85,22 @@ TEST_CASE("Tracks stats", "[SimpleRank], [Memory]") {
     stats.log();
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("rank.reads 0\n") != std::string::npos);
         REQUIRE(rank.read(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("rank.reads 1\n") != std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("rank.writes 0\n") != std::string::npos);
         REQUIRE(rank.write(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("rank.writes 1\n") != std::string::npos);
     }
 }

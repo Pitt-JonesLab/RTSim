@@ -76,6 +76,7 @@ TEST_CASE("Logs events", "[SimpleInterconnect], [Memory]") {
 
 TEST_CASE("Tracks stats", "[SimpleInterconnect], [Memory]") {
     SimpleInterconnect interconnect;
+    interconnect.addRank(std::unique_ptr<Rank>(new MockRank()));
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);
@@ -84,21 +85,25 @@ TEST_CASE("Tracks stats", "[SimpleInterconnect], [Memory]") {
     stats.log();
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("interconnect.reads 0\n") !=
                 std::string::npos);
         REQUIRE(interconnect.read(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("interconnect.reads 1\n") !=
                 std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("interconnect.writes 0\n") !=
                 std::string::npos);
         REQUIRE(interconnect.write(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("interconnect.writes 1\n") !=
                 std::string::npos);
     }

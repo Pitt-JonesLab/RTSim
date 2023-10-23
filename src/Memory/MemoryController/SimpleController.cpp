@@ -36,7 +36,7 @@ using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+std::unique_ptr<Command> makeControllerCommand(CommandFunc& func) {
     auto interconnectCommand = func();
     if (!interconnectCommand) return nullptr;
 
@@ -44,6 +44,8 @@ std::unique_ptr<Command> makeCommand(CommandFunc& func) {
     interconnectCommand->setParent(systemCommand.get());
     return std::move(systemCommand);
 }
+
+SimpleController::SimpleController() : totalReads(0), totalWrites(0) {}
 
 Command* SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return nullptr;
@@ -53,9 +55,11 @@ Command* SimpleController::read(uint64_t address, DataBlock data) {
         return interconnects[0]->read(address, data);
     };
 
-    currentCommand = std::move(makeCommand(readFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeControllerCommand(readFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleController received read\n";
+        totalReads++;
+    }
     return currentCommand.get();
 }
 
@@ -68,9 +72,11 @@ Command* SimpleController::write(uint64_t address,
         return interconnects[0]->write(address, data);
     };
 
-    currentCommand = std::move(makeCommand(writeFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeControllerCommand(writeFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleController received write\n";
+        totalWrites++;
+    }
     return currentCommand.get();
 }
 
@@ -90,6 +96,9 @@ void SimpleController::addInterconnect(
 
 StatBlock SimpleController::getStats(std::string tag) const {
     StatBlock stats(tag);
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < interconnects.size(); i++) {
         stats.addChild(

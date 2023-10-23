@@ -13,13 +13,13 @@ parser.add_option("-b", "--build", type="string", help="RTSim build to test (e.g
 
 (options, args) = parser.parse_args()
 
-def find_executable():
-    nvmainexec = "bin" + os.sep + "nvmain." + options.build
-    if not os.path.isfile(nvmainexec) or not os.access(nvmainexec, os.X_OK):
-        print("Could not find Nvmain executable: {}".format(nvmainexec))
+def find_executable(exec_name):
+    exe_file = "bin" + os.sep + exec_name
+    if not os.path.isfile(exe_file) or not os.access(exe_file, os.X_OK):
+        print("Could not find executable: {}".format(exe_file))
         print("Exiting...")
         sys.exit(1)
-    return nvmainexec
+    return exe_file
 
 def get_tests():
     json_data = open('test/Tests.json')
@@ -36,15 +36,19 @@ def find_bad_check(check_line, test_output):
         return bad_line[0]
     return ''
 
-def run_test(test_data, nvmainexec):
-    command = [nvmainexec, test_data["config"], test_data["trace"], test_data["cycles"]]
+def run_test(test_data):
+    exe_file = find_executable(test_data["exec"])
+    command = [exe_file, test_data["config"], test_data["trace"], test_data["cycles"]]
     command.extend(test_data["overrides"].split(' '))
 
     try:
-        result = subprocess.run(command, capture_output=True, text=True)
+        result = subprocess.run(command, capture_output=True, text=True, timeout=60)
     except subprocess.CalledProcessError as e:
         print("Error!")
-        return
+        sys.exit(1)
+    except subprocess.TimeoutExpired as e:
+        print("Timeout!")
+        sys.exit(1)
     print("Done!")
 
     test_lines = result.stdout.split('\n')
@@ -66,9 +70,9 @@ def run_test(test_data, nvmainexec):
     if not passed:
         sys.exit(1)
 
-nvmainexec = find_executable()
 testdata = get_tests()
 
 for test in testdata["tests"]:
-    sys.stdout.write(test["name"] + " ... ")
-    run_test(test, nvmainexec)
+    sys.stdout.write(test["name"] + "...")
+    sys.stdout.flush()
+    run_test(test)

@@ -4,7 +4,7 @@ using namespace NVM::Memory;
 
 std::ostream& NVM::Memory::operator<<(std::ostream& out,
                                       const StatValue& statValue) {
-    out << statValue.value->print();
+    out << '.' << statValue.name << ' ' << statValue.value->print();
     if (!statValue.unit.empty()) out << ' ' << statValue.unit;
     out << '\n';
     return out;
@@ -18,14 +18,14 @@ void StatBlock::addChild(StatBlock childBlock) {
 
 void StatBlock::log() const {
     for (const auto& val : values) {
-        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << val;
+        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
     for (const auto& child : children) child.log();
 }
 
 void StatBlock::log(std::ostream& out) const {
     for (const auto& val : values) {
-        out << val;
+        out << tag << val;
     }
     for (const auto& child : children) child.log();
 }

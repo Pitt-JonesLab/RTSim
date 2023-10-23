@@ -1,3 +1,5 @@
+#include "Simulation/MemorySystem.h"
+
 #include <memory>
 
 namespace NVM::Memory {
@@ -10,6 +12,6 @@ class MemorySystem;
  *
  * @return Unique pointer to the created MemorySystem
  */
-std::unique_ptr<MemorySystem> makeSimpleSystem();
+std::unique_ptr<NVM::Simulation::MemorySystem> makeSimpleSystem();
 
 } // namespace NVM::Memory

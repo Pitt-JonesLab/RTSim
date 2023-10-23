@@ -36,7 +36,7 @@ using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+std::unique_ptr<Command> makeRankCommand(CommandFunc& func) {
     auto bankCommand = func();
     if (!bankCommand) return nullptr;
 
@@ -45,15 +45,19 @@ std::unique_ptr<Command> makeCommand(CommandFunc& func) {
     return std::move(rankCommand);
 }
 
+SimpleRank::SimpleRank() : totalReads(0), totalWrites(0) {}
+
 Command* SimpleRank::read(uint64_t address, DataBlock data) {
     if (banks.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
     CommandFunc readFunc = [&]() { return banks[0]->read(address, data); };
 
-    currentCommand = std::move(makeCommand(readFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeRankCommand(readFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received read\n";
+        totalReads++;
+    }
     return currentCommand.get();
 }
 
@@ -63,9 +67,11 @@ Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
 
     CommandFunc writeFunc = [&]() { return banks[0]->write(address, data); };
 
-    currentCommand = std::move(makeCommand(writeFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeRankCommand(writeFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received read\n";
+        totalWrites++;
+    }
     return currentCommand.get();
 }
 
@@ -84,6 +90,9 @@ void SimpleRank::addBank(std::unique_ptr<Bank> bank) {
 
 StatBlock SimpleRank::getStats(std::string tag) const {
     StatBlock stats(tag);
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < banks.size(); i++) {
         stats.addChild(banks[i]->getStats(tag + ".bank" + std::to_string(i)));

@@ -36,7 +36,7 @@ using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+std::unique_ptr<Command> makeInterconnectCommand(CommandFunc& func) {
     auto rankCommand = func();
     if (!rankCommand) return nullptr;
 
@@ -45,15 +45,19 @@ std::unique_ptr<Command> makeCommand(CommandFunc& func) {
     return std::move(interCommand);
 }
 
+SimpleInterconnect::SimpleInterconnect() : totalReads(0), totalWrites(0) {}
+
 Command* SimpleInterconnect::read(uint64_t address, DataBlock data) {
     if (ranks.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
     CommandFunc readFunc = [&]() { return ranks[0]->read(address, data); };
 
-    currentCommand = std::move(makeCommand(readFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeInterconnectCommand(readFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleInterconnect received read\n";
+        totalReads++;
+    }
     return currentCommand.get();
 }
 
@@ -64,9 +68,11 @@ Command* SimpleInterconnect::write(uint64_t address,
 
     CommandFunc writeFunc = [&]() { return ranks[0]->write(address, data); };
 
-    currentCommand = std::move(makeCommand(writeFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeInterconnectCommand(writeFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleInterconnect received read\n";
+        totalWrites++;
+    }
     return currentCommand.get();
 }
 
@@ -85,6 +91,9 @@ void SimpleInterconnect::addRank(std::unique_ptr<Rank> rank) {
 
 StatBlock SimpleInterconnect::getStats(std::string tag) const {
     StatBlock stats(tag);
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < ranks.size(); i++) {
         stats.addChild(ranks[i]->getStats(tag + ".rank" + std::to_string(i)));

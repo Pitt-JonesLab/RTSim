@@ -76,6 +76,8 @@ TEST_CASE("Logs events", "[SimpleController], [Memory]") {
 
 TEST_CASE("Tracks stats", "[SimpleController], [Memory]") {
     SimpleController controller;
+    controller.addInterconnect(
+        std::unique_ptr<Interconnect>(new MockInterconnect()));
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);
@@ -84,21 +86,25 @@ TEST_CASE("Tracks stats", "[SimpleController], [Memory]") {
     stats.log();
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("controller.reads 0\n") !=
                 std::string::npos);
         REQUIRE(controller.read(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("controller.reads 1\n") !=
                 std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("controller.writes 0\n") !=
                 std::string::npos);
         REQUIRE(controller.write(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("controller.writes 1\n") !=
                 std::string::npos);
     }

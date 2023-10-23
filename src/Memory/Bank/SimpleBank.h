@@ -8,7 +8,7 @@ namespace NVM::Memory {
 
 class SimpleBank : public Bank {
     public:
-    SimpleBank() = default;
+    SimpleBank();
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
 
@@ -23,6 +23,9 @@ class SimpleBank : public Bank {
     StatBlock getStats(std::string tag) const;
 
     private:
+    unsigned int totalReads;
+    unsigned int totalWrites;
+
     std::vector<std::unique_ptr<SubArray>> subArrays;
 
     std::unique_ptr<Command> currentCommand;

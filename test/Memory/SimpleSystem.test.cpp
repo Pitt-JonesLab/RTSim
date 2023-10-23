@@ -76,6 +76,8 @@ TEST_CASE("Logs events", "[SimpleSystem], [Memory]") {
 
 TEST_CASE("Tracks stats", "[SimpleSystem], [Memory]") {
     SimpleSystem system;
+    system.addController(
+        std::unique_ptr<MemoryController>(new MockController()));
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);
@@ -83,18 +85,22 @@ TEST_CASE("Tracks stats", "[SimpleSystem], [Memory]") {
     system.printStats(logString);
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("system.reads 0\n") != std::string::npos);
         REQUIRE(system.read(0, {}, 0, 0));
         logString.str(std::string());
         system.printStats(logString);
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("system.reads 1\n") != std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("system.writes 0\n") != std::string::npos);
         REQUIRE(system.write(0, {}, 0, 0));
         logString.str(std::string());
         system.printStats(logString);
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("system.writes 1\n") != std::string::npos);
     }
 }

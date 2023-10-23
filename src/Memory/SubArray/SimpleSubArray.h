@@ -20,12 +20,8 @@ class SimpleSubArray : public SubArray {
     StatBlock getStats(std::string tag) const;
 
     private:
-    const static unsigned int readTime;
-    const static unsigned int writeTime;
-
-    unsigned int nextRead;
-    unsigned int nextWrite;
-    unsigned int currentCycle;
+    unsigned int totalReads;
+    unsigned int totalWrites;
 
     std::unique_ptr<Command> currentCommand;
 };

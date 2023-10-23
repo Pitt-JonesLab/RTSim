@@ -8,6 +8,8 @@ namespace NVM::Memory {
 
 class SimpleInterconnect : public Interconnect {
     public:
+    SimpleInterconnect();
+
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
 
     Command* write(uint64_t address, NVM::Simulation::DataBlock data);
@@ -21,6 +23,8 @@ class SimpleInterconnect : public Interconnect {
     StatBlock getStats(std::string tag) const;
 
     private:
+    unsigned int totalReads, totalWrites;
+
     std::vector<std::unique_ptr<Rank>> ranks;
     std::unique_ptr<Command> currentCommand;
 };

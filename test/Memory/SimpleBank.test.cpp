@@ -76,6 +76,7 @@ TEST_CASE("Logs events", "[SimpleBank], [Memory]") {
 
 TEST_CASE("Tracks stats", "[SimpleBank], [Memory]") {
     SimpleBank bank;
+    bank.addSubArray(std::unique_ptr<SubArray>(new MockSubArray()));
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);
@@ -84,18 +85,22 @@ TEST_CASE("Tracks stats", "[SimpleBank], [Memory]") {
     stats.log();
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("bank.reads 0\n") != std::string::npos);
         REQUIRE(bank.read(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("bank.reads 1\n") != std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("bank.writes 0\n") != std::string::npos);
         REQUIRE(bank.write(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("bank.writes 1\n") != std::string::npos);
     }
 }

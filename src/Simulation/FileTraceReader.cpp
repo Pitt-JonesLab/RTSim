@@ -110,5 +110,7 @@ std::unique_ptr<TraceCommand> FileTraceReader::getNext() {
         case Opcode1::WRITE:
             return std::unique_ptr<TraceCommand>(
                 new WriteCommand(cycle, address, data, threadId));
+        default:
+            throw std::runtime_error("Unknown trace operation!");
     }
 }

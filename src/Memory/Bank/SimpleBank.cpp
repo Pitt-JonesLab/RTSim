@@ -34,7 +34,7 @@ using namespace NVM::Logging;
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+std::unique_ptr<Command> makeBankCommand(CommandFunc& func) {
     auto subArrayCommand = func();
     if (!subArrayCommand) return nullptr;
 
@@ -43,15 +43,19 @@ std::unique_ptr<Command> makeCommand(CommandFunc& func) {
     return std::move(bankCommand);
 }
 
+SimpleBank::SimpleBank() : totalReads(0), totalWrites(0) {}
+
 Command* SimpleBank::read(uint64_t address, DataBlock data) {
     if (subArrays.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
     CommandFunc readFunc = [&]() { return subArrays[0]->read(address, data); };
 
-    currentCommand = std::move(makeCommand(readFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeBankCommand(readFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received read\n";
+        totalReads++;
+    }
     return currentCommand.get();
 }
 
@@ -63,9 +67,11 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
         return subArrays[0]->write(address, data);
     };
 
-    currentCommand = std::move(makeCommand(writeFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeBankCommand(writeFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received write\n";
+        totalWrites++;
+    }
     return currentCommand.get();
 }
 
@@ -84,6 +90,9 @@ void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {
 
 StatBlock SimpleBank::getStats(std::string tag) const {
     StatBlock stats(tag);
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < subArrays.size(); i++) {
         stats.addChild(

@@ -38,7 +38,7 @@ bool SimpleSystem::issue(NVMainRequest* req) { return false; }
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeCommand(CommandFunc& func) {
+std::unique_ptr<Command> makeSystemCommand(CommandFunc& func) {
     auto interconnectCommand = func();
     if (!interconnectCommand) return nullptr;
 
@@ -47,6 +47,8 @@ std::unique_ptr<Command> makeCommand(CommandFunc& func) {
     return std::move(systemCommand);
 }
 
+SimpleSystem::SimpleSystem() : totalReads(0), totalWrites(0), currentCycle(0) {}
+
 bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
                         unsigned int cycle) {
     if (channels.empty()) return false;
@@ -54,9 +56,11 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
 
     CommandFunc readFunc = [&]() { return channels[0]->read(address, data); };
 
-    currentCommand = std::move(makeCommand(readFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeSystemCommand(readFunc));
+    if (currentCommand) {
+        totalReads++;
         log() << LogLevel::EVENT << "SimpleSystem received read\n";
+    }
     return currentCommand != nullptr;
 }
 
@@ -67,14 +71,17 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
 
     CommandFunc writeFunc = [&]() { return channels[0]->write(address, data); };
 
-    currentCommand = std::move(makeCommand(writeFunc));
-    if (currentCommand)
+    currentCommand = std::move(makeSystemCommand(writeFunc));
+    if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleSystem received write\n";
+        totalWrites++;
+    }
     return currentCommand != nullptr;
 }
 
 void SimpleSystem::cycle(unsigned int cycles) {
     if (!channels.empty()) channels[0]->cycle(cycles);
+    currentCycle += cycles;
     if (!currentCommand) return;
     if (static_cast<SystemCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
@@ -88,13 +95,17 @@ void SimpleSystem::addController(
 }
 
 void SimpleSystem::printStats(std::ostream& statStream) {
-    StatBlock stats;
+    StatBlock stats("system");
+
+    stats.addStat(&totalReads, "reads");
+    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < channels.size(); i++) {
-        stats.addChild(channels[i]->getStats("channel" + std::to_string(i)));
+        stats.addChild(
+            channels[i]->getStats("system.channel" + std::to_string(i)));
     }
 
     stats.log(statStream);
 }
 
-unsigned int SimpleSystem::getCurrentCycle() { return 0; }
+unsigned int SimpleSystem::getCurrentCycle() { return currentCycle; }

@@ -57,21 +57,25 @@ TEST_CASE("Tracks stats", "[SimpleSubArray], [Memory]") {
     stats.log();
 
     SECTION("Tracks reads") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("subArray.reads 0\n") !=
                 std::string::npos);
         REQUIRE(subArray.read(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("subArray.reads 1\n") !=
                 std::string::npos);
     }
 
     SECTION("Tracks writes") {
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("subArray.writes 0\n") !=
                 std::string::npos);
         REQUIRE(subArray.write(0, {}));
         logString.str(std::string());
         stats.log();
+        INFO("Stat output was:\n" + logString.str());
         REQUIRE(logString.str().find("subArray.writes 1\n") !=
                 std::string::npos);
     }

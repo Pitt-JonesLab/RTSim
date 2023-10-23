@@ -2,6 +2,7 @@
     "tests": [
         {
             "name": "Hello World",
+            "exec": "nvmain.fast",
             "trace": "test/Traces/hello_world.nvt",
             "config": "Config/RM.config",
             "cycles": "0",
@@ -103,6 +104,28 @@
                 "i0.defaultMemory.successfulPrefetches 0",
                 "i0.defaultMemory.unsuccessfulPrefetches 0",
                 "Exiting at cycle 1732102 because simCycles 0 reached."
+            ]
+        },
+        {
+            "name": "Simple R/W",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/hello_world.nvt",
+            "config": "Config/RM.config",
+            "cycles": "0",
+            "overrides": "",
+            "checks": [
+                "system.reads 49675",
+                "system.writes 48275",
+                "system.channel0.reads 49675",
+                "system.channel0.writes 48275",
+                "system.channel0.i0.reads 49675",
+                "system.channel0.i0.writes 48275",
+                "system.channel0.i0.rank0.reads 49675",
+                "system.channel0.i0.rank0.writes 48275",
+                "system.channel0.i0.rank0.bank0.reads 49675",
+                "system.channel0.i0.rank0.bank0.writes 48275",
+                "system.channel0.i0.rank0.bank0.subArray0.reads 49675",
+                "system.channel0.i0.rank0.bank0.subArray0.writes 48275"
             ]
         }
     ]

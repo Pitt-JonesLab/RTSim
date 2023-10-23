@@ -8,6 +8,8 @@ namespace NVM::Memory {
 
 class SimpleController : public MemoryController {
     public:
+    SimpleController();
+
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
     Command* write(uint64_t address, NVM::Simulation::DataBlock data);
 
@@ -20,6 +22,8 @@ class SimpleController : public MemoryController {
     StatBlock getStats(std::string tag) const;
 
     private:
+    unsigned int totalReads, totalWrites;
+
     std::vector<std::unique_ptr<Interconnect>> interconnects;
     std::unique_ptr<Command> currentCommand;
 };

@@ -8,6 +8,8 @@ namespace NVM::Memory {
 
 class SimpleSystem : public MemorySystem {
     public:
+    SimpleSystem();
+
     bool issue(NVMainRequest* req);
 
     bool read(uint64_t address, NVM::Simulation::DataBlock data,
@@ -26,6 +28,8 @@ class SimpleSystem : public MemorySystem {
     void addController(std::unique_ptr<MemoryController> controller);
 
     private:
+    unsigned int totalReads, totalWrites, currentCycle;
+
     std::vector<std::unique_ptr<MemoryController>> channels;
     std::unique_ptr<Command> currentCommand;
 };
