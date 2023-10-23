@@ -5,7 +5,7 @@ set(SIMULATION_SOURCES
     FileTraceReader.cpp
     ReadCommand.cpp
     WriteCommand.cpp
-    ${RTSIM_DIR}/include/NVMDataBlock.cpp)
+    ${RTSIM_DIR}/include/NVMDataBlock.cpp
     Config.cpp)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})
