@@ -6,6 +6,7 @@ set(SIMULATION_SOURCES
     ReadCommand.cpp
     WriteCommand.cpp
     ${RTSIM_DIR}/include/NVMDataBlock.cpp)
+    Config.cpp)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})
 target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src ${RTSIM_DIR}) 
