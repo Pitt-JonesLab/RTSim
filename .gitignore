@@ -4,7 +4,7 @@
 /log
 /cputraces
 /traces_with_Ids
-/.vscode
+/.vscode/settings.json
 .sconsign.dblite
 *.log
 *.o

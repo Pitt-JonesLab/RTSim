@@ -1,0 +1,84 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "CMake: Build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": [
+				"CMake: Configure"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}/build"
+			},
+			"command": "cmake",
+			"args": [
+				"--build",
+				"."
+			]
+		},
+		{
+			"type": "shell",
+			"label": "CMake: Configure",
+			"group": "build",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"command": "cmake",
+			"args": [
+				"-G",
+				"Ninja",
+				"-S",
+				".",
+				"-B",
+				"build",
+				"-Dbuildtype=fast"
+			]
+		},
+		{
+			"label": "Unit Tests",
+			"type": "shell",
+			"group": "test",
+			"dependsOn": [
+				"CMake: Build"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"command": "ctest",
+			"args": [
+				"--test-dir",
+				"build/test"
+			]
+		},
+		{
+			"label": "Integration Tests",
+			"type": "shell",
+			"group": "test",
+			"dependsOn": [
+				"CMake: Build"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"command": "python3",
+			"args": [
+				"test/Regressions.py"
+			]
+		},
+		{
+			"label": "All Tests",
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			},
+			"dependsOn": [
+				"Unit Tests",
+				"Integration Tests"
+			]
+		}
+	]
+}
