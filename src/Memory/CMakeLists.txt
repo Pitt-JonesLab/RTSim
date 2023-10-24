@@ -4,6 +4,7 @@ set(MEMORY_SOURCES
     TimedCommand.cpp
     WaitingCommand.cpp
     ChainedCommand.cpp
+    NullCommand.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp
