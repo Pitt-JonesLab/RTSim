@@ -32,4 +32,6 @@ void ChainedCommand::getNextStep() {
     }
 }
 
-void ChainedCommand::cycle(unsigned int) {}
+void ChainedCommand::cycle(unsigned int) {
+    if (!isBusy() && !isDone()) getNextStep();
+}

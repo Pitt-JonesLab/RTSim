@@ -41,6 +41,7 @@ Command* SimpleSubArray::write(uint64_t address,
 void SimpleSubArray::cycle(unsigned int cycles) {
     if (!currentCommand) return;
     currentCommand->cycle(cycles);
+    rowControl.cycle(cycles);
     if (currentCommand->isDone()) currentCommand.reset();
 }
 
@@ -57,13 +58,12 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 
 Command* SimpleSubArray::switchRow(unsigned int row) {
     if (currentCommand) return nullptr;
-    std::vector<std::function<Command*()>> switchCmds;
+    if (rowControl.rowIsOpen(row)) return sendNull();
 
-    // Check for switchCmds
+    std::vector<std::function<Command*()>> switchCmds = 
+    {[&](){ return rowControl.closeRow(); },
+    [&](){ return rowControl.activate(row); }};
 
-    if (switchCmds.size()) {
-        currentCommand.reset(new ChainedCommand(switchCmds));
-        return currentCommand.get();
-    }
-    return sendNull();
+    currentCommand.reset(new ChainedCommand(switchCmds));
+    return currentCommand.get();
 }

@@ -36,11 +36,15 @@ class RowController {
 
         void cycle(unsigned int cycles);
 
+        Command* closeRow();
+        bool rowIsOpen(unsigned int row);
+
     private:
         std::vector<RowState> rowStates;
 
         unsigned int prechargeTime; // tRP
         unsigned int activateTime; // tRCD
+        unsigned int openRow;
 
         std::unique_ptr<TimedCommand> currentCmd;
 };

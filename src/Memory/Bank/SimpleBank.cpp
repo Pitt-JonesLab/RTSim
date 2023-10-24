@@ -55,6 +55,7 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
 void SimpleBank::cycle(unsigned int cycles) {
     if (!subArrays.empty()) subArrays[0]->cycle(cycles);
     if (!currentCommand) return;
+    currentCommand->cycle(cycles);
     if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
