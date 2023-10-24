@@ -33,11 +33,15 @@ class RowController {
         NVM::Memory::Command* activate(unsigned int row);
         NVM::Memory::Command* precharge(unsigned int row);
 
+        void cycle(unsigned int cycles);
+
     private:
         std::vector<RowState> rowStates;
 
         unsigned int prechargeTime; // tRP
         unsigned int activateTime; // tRCD
+
+        std::unique_ptr<NVM::Memory::TimedCommand> currentCmd;
 };
 
 }
