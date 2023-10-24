@@ -7,6 +7,8 @@ class Command {
     virtual void setParent(Command* parent) = 0;
 
     virtual void notify() = 0;
+
+    virtual bool isDone() const = 0;
 };
 
 } // namespace NVM::Memory

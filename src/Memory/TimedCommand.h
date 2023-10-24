@@ -15,7 +15,7 @@ class TimedCommand : public Command {
 
     void cycle(unsigned int cycles);
 
-    bool isDone();
+    bool isDone() const;
 
     void notify();
 

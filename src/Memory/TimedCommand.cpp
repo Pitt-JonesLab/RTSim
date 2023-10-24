@@ -15,6 +15,6 @@ void TimedCommand::cycle(unsigned int cycles) {
     cyclesLeft -= cycles;
 }
 
-bool TimedCommand::isDone() { return cyclesLeft == 0; }
+bool TimedCommand::isDone() const { return cyclesLeft == 0; }
 
 void TimedCommand::notify() {}

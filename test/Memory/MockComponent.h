@@ -23,6 +23,10 @@ class MockCommand : public Command {
         if (parent) parent->notify();
         parent = nullptr;
     }
+
+    bool isDone() const {
+        return false;
+    }
 };
 
 template<typename T> class MockComponent : public T {
