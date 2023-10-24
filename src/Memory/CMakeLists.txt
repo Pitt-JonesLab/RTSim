@@ -6,7 +6,8 @@ set(MEMORY_SOURCES
     MemoryController/SimpleController.cpp
     MemorySystem/SimpleSystem.cpp
     Rank/SimpleRank.cpp
-    SubArray/SimpleSubArray.cpp)
+    SubArray/SimpleSubArray.cpp
+    SubArray/RowController.cpp)
 
 add_library(RTSim_Memory ${MEMORY_SOURCES})
 target_include_directories(RTSim_Memory PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)
