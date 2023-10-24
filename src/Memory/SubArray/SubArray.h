@@ -5,6 +5,7 @@
 namespace NVM::Memory {
 
 class SubArray : public Component {
+    public:
     virtual Command* switchRow(unsigned int row) = 0;
 };
 

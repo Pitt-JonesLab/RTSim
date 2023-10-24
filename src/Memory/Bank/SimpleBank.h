@@ -3,6 +3,7 @@
 #include "Memory/Bank.h"
 
 #include <vector>
+#include <functional>
 
 namespace NVM::Memory {
 
@@ -23,6 +24,10 @@ class SimpleBank : public Bank {
     StatBlock getStats(std::string tag) const;
 
     private:
+    using CommandFunc = std::function<Command*()>;
+
+    std::unique_ptr<Command> makeBankCommand(CommandFunc& func);
+
     unsigned int totalReads;
     unsigned int totalWrites;
 

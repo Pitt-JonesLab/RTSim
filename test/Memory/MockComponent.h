@@ -5,6 +5,7 @@
 #include "Memory/Interconnect.h"
 #include "Memory/MemoryController.h"
 #include "Memory/Rank.h"
+#include "Memory/NullCommand.h"
 #include "Memory/SubArray/SubArray.h"
 #include "Simulation/DataBlock.h"
 #include "Simulation/MemorySystem.h"
@@ -56,7 +57,7 @@ template<typename T> class MockComponent : public T {
 };
 
 class MockSubArray : public MockComponent<SubArray> {
-    Command* switchRow(unsigned int row) { return nullptr; }
+    Command* switchRow(unsigned int row) { return sendNull(); }
 };
 
 class MockBank : public MockComponent<Bank> {

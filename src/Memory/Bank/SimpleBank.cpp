@@ -2,6 +2,7 @@
 
 #include "Logging/Logging.h"
 #include "Memory/WaitingCommand.h"
+#include "Memory/ChainedCommand.h"
 
 #include <functional>
 
@@ -9,15 +10,14 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-using CommandFunc = std::function<Command*()>;
+std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func) {
+    std::vector<CommandFunc> bankCmds = 
+        {[&]() { return subArrays[0]->switchRow(0); }, func};
 
-std::unique_ptr<Command> makeBankCommand(CommandFunc& func) {
-    auto subArrayCommand = func();
-    if (!subArrayCommand) return nullptr;
+    auto subCmd = std::unique_ptr<Command>
+        (new ChainedCommand(bankCmds));
 
-    auto bankCommand = std::unique_ptr<Command>(new WaitingCommand());
-    subArrayCommand->setParent(bankCommand.get());
-    return std::move(bankCommand);
+    return std::move(subCmd);
 }
 
 SimpleBank::SimpleBank() : totalReads(0), totalWrites(0) {}
