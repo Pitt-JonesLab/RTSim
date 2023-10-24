@@ -1,34 +1,11 @@
 #include "Memory/Interconnect/SimpleInterconnect.h"
 
 #include "Logging/Logging.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
 using namespace NVM::Memory;
-
-namespace NVM::Memory {
-
-class InterconnectCommand : public Command {
-    public:
-    InterconnectCommand() : parent(nullptr), complete(false) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void notify() {
-        if (parent) {
-            parent->notify();
-        }
-        complete = true;
-    }
-
-    bool isDone() const { return complete; }
-
-    private:
-    Command* parent;
-    bool complete;
-};
-
-} // namespace NVM::Memory
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -40,7 +17,7 @@ std::unique_ptr<Command> makeInterconnectCommand(CommandFunc& func) {
     auto rankCommand = func();
     if (!rankCommand) return nullptr;
 
-    auto interCommand = std::unique_ptr<Command>(new InterconnectCommand());
+    auto interCommand = std::unique_ptr<Command>(new WaitingCommand());
     rankCommand->setParent(interCommand.get());
     return std::move(interCommand);
 }
@@ -79,7 +56,7 @@ Command* SimpleInterconnect::write(uint64_t address,
 void SimpleInterconnect::cycle(unsigned int cycles) {
     if (!ranks.empty()) ranks[0]->cycle(cycles);
     if (!currentCommand) return;
-    if (static_cast<InterconnectCommand*>(currentCommand.get())->isDone())
+    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
 

@@ -2,6 +2,7 @@ set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
     TimedCommand.cpp
+    WaitingCommand.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp

@@ -1,34 +1,11 @@
 #include "Memory/Rank/SimpleRank.h"
 
 #include "Logging/Logging.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
 using namespace NVM::Memory;
-
-namespace NVM::Memory {
-
-class RankCommand : public Command {
-    public:
-    RankCommand() : parent(nullptr), complete(false) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void notify() {
-        if (parent) {
-            parent->notify();
-        }
-        complete = true;
-    }
-
-    bool isDone() const { return complete; }
-
-    private:
-    Command* parent;
-    bool complete;
-};
-
-} // namespace NVM::Memory
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -40,7 +17,7 @@ std::unique_ptr<Command> makeRankCommand(CommandFunc& func) {
     auto bankCommand = func();
     if (!bankCommand) return nullptr;
 
-    auto rankCommand = std::unique_ptr<Command>(new RankCommand());
+    auto rankCommand = std::unique_ptr<Command>(new WaitingCommand());
     bankCommand->setParent(rankCommand.get());
     return std::move(rankCommand);
 }
@@ -78,7 +55,7 @@ Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
 void SimpleRank::cycle(unsigned int cycles) {
     if (!banks.empty()) banks[0]->cycle(cycles);
     if (!currentCommand) return;
-    if (static_cast<RankCommand*>(currentCommand.get())->isDone())
+    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
 

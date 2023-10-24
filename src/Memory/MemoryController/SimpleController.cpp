@@ -1,34 +1,11 @@
 #include "Memory/MemoryController/SimpleController.h"
 
 #include "Logging/Logging.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
 using namespace NVM::Memory;
-
-namespace NVM::Memory {
-
-class ControllerCommand : public Command {
-    public:
-    ControllerCommand() : parent(nullptr), complete(false) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void notify() {
-        if (parent) {
-            parent->notify();
-        }
-        complete = true;
-    }
-
-    bool isDone() const { return complete; }
-
-    private:
-    Command* parent;
-    bool complete;
-};
-
-} // namespace NVM::Memory
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -40,7 +17,7 @@ std::unique_ptr<Command> makeControllerCommand(CommandFunc& func) {
     auto interconnectCommand = func();
     if (!interconnectCommand) return nullptr;
 
-    auto systemCommand = std::unique_ptr<Command>(new ControllerCommand());
+    auto systemCommand = std::unique_ptr<Command>(new WaitingCommand());
     interconnectCommand->setParent(systemCommand.get());
     return std::move(systemCommand);
 }
@@ -83,7 +60,7 @@ Command* SimpleController::write(uint64_t address,
 void SimpleController::cycle(unsigned int cycles) {
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
     if (!currentCommand) return;
-    if (static_cast<ControllerCommand*>(currentCommand.get())->isDone())
+    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
 

@@ -1,32 +1,9 @@
 #include "Memory/Bank/SimpleBank.h"
 
 #include "Logging/Logging.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
-
-namespace NVM::Memory {
-
-class BankCommand : public Command {
-    public:
-    BankCommand() : parent(nullptr), complete(false) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void notify() {
-        if (parent) {
-            parent->notify();
-        }
-        complete = true;
-    }
-
-    bool isDone() const { return complete; }
-
-    private:
-    Command* parent;
-    bool complete;
-};
-
-} // namespace NVM::Memory
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -38,7 +15,7 @@ std::unique_ptr<Command> makeBankCommand(CommandFunc& func) {
     auto subArrayCommand = func();
     if (!subArrayCommand) return nullptr;
 
-    auto bankCommand = std::unique_ptr<Command>(new BankCommand());
+    auto bankCommand = std::unique_ptr<Command>(new WaitingCommand());
     subArrayCommand->setParent(bankCommand.get());
     return std::move(bankCommand);
 }
@@ -78,7 +55,7 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
 void SimpleBank::cycle(unsigned int cycles) {
     if (!subArrays.empty()) subArrays[0]->cycle(cycles);
     if (!currentCommand) return;
-    if (static_cast<BankCommand*>(currentCommand.get())->isDone())
+    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
 

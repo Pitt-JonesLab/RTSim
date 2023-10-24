@@ -1,5 +1,7 @@
 #include "Memory/SubArray/RowController.h"
 
+#include "Memory/TimedCommand.h"
+
 using namespace NVM::Memory::SubArray;
 using NVM::Memory::Command;
 

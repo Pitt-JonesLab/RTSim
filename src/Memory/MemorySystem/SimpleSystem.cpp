@@ -1,34 +1,11 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 
 #include "Logging/Logging.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
 using namespace NVM::Memory;
-
-namespace NVM::Memory {
-
-class SystemCommand : public Command {
-    public:
-    SystemCommand() : parent(nullptr), complete(false) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void notify() {
-        if (parent) {
-            parent->notify();
-        }
-        complete = true;
-    }
-
-    bool isDone() const { return complete; }
-
-    private:
-    Command* parent;
-    bool complete;
-};
-
-} // namespace NVM::Memory
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -42,7 +19,7 @@ std::unique_ptr<Command> makeSystemCommand(CommandFunc& func) {
     auto interconnectCommand = func();
     if (!interconnectCommand) return nullptr;
 
-    auto systemCommand = std::unique_ptr<Command>(new SystemCommand());
+    auto systemCommand = std::unique_ptr<Command>(new WaitingCommand());
     interconnectCommand->setParent(systemCommand.get());
     return std::move(systemCommand);
 }
@@ -83,7 +60,7 @@ void SimpleSystem::cycle(unsigned int cycles) {
     if (!channels.empty()) channels[0]->cycle(cycles);
     currentCycle += cycles;
     if (!currentCommand) return;
-    if (static_cast<SystemCommand*>(currentCommand.get())->isDone())
+    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
         currentCommand.reset();
 }
 
