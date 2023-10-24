@@ -5,7 +5,7 @@
 #include "Memory/Interconnect.h"
 #include "Memory/MemoryController.h"
 #include "Memory/Rank.h"
-#include "Memory/SubArray.h"
+#include "Memory/SubArray/SubArray.h"
 #include "Simulation/DataBlock.h"
 #include "Simulation/MemorySystem.h"
 

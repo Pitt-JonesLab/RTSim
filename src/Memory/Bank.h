@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/SubArray.h"
+#include "Memory/SubArray/SubArray.h"
 #include "Simulation/MemorySystem.h"
 
 #include <memory>

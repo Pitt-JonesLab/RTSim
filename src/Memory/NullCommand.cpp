@@ -1,9 +1,11 @@
 #include "Memory/NullCommand.h"
 
-NullCommand() {}
+using namespace NVM::Memory;
 
-void setParent(Command* parent) { parent->notify(); }
+NullCommand::NullCommand() {}
 
-void notify() {}
+void NullCommand::setParent(Command* parent) { parent->notify(); }
 
-bool isDone() const { return true; }
+void NullCommand::notify() {}
+
+bool NullCommand::isDone() const { return true; }

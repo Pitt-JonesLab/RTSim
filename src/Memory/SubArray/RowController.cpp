@@ -4,6 +4,7 @@
 
 using namespace NVM::Memory::SubArray;
 using NVM::Memory::Command;
+using NVM::Memory::TimedCommand;
 
 RowController::RowController(unsigned int rows, RowTiming timing) :
     currentCmd(nullptr), 
@@ -28,15 +29,20 @@ const RowState& RowController::operator[](unsigned int row) const {
 }
 
 Command* RowController::activate(unsigned int row) {
-    currentCmd = std::unique_ptr<Command>(new TimingCommand(activateTime));
+    if (currentCmd.get()) return nullptr;
+    currentCmd.reset(new TimedCommand(activateTime));
     return currentCmd.get();
 }
 
 Command* RowController::precharge(unsigned int row) {
-    currentCmd = std::unique_ptr<Command>(new TimingCommand(prechargeTime));
+    if (currentCmd.get()) return nullptr;
+    currentCmd.reset(new TimedCommand(prechargeTime));
     return currentCmd.get();
 }
 
 void RowController::cycle(unsigned int cycles) {
-    if (currentCmd) currentCmd->cycle(cycles);
+    if (currentCmd) {
+        currentCmd->cycle(cycles);
+        if (currentCmd->isDone()) currentCmd.reset();
+    }
 }

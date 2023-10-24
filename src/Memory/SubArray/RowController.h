@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Memory/Command.h"
+#include "Memory/TimedCommand.h"
 
 #include <vector>
+#include <memory>
 
 namespace NVM::Memory::SubArray {
 

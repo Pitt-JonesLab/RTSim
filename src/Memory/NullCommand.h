@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Memory/Command.h"
+
 namespace NVM::Memory {
 
 /*
