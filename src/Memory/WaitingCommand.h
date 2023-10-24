@@ -14,6 +14,7 @@ class WaitingCommand : public Command {
         void setParent(Command* p);
         void notify();
         bool isDone() const;
+        void cycle(unsigned int);
 
     private:
         bool completed;

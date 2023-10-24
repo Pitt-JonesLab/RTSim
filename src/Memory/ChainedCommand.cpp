@@ -31,3 +31,5 @@ void ChainedCommand::getNextStep() {
         child->setParent(this);
     }
 }
+
+void ChainedCommand::cycle(unsigned int) {}

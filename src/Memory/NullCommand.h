@@ -9,7 +9,8 @@ namespace NVM::Memory {
 *   Immediately notifies parent on assignment
 *   Notifying this Command does nothing
 */
-class NullCommand {
+class NullCommand : public Command{
+    public:
     NullCommand();
 
     void setParent(Command* parent);
@@ -17,6 +18,10 @@ class NullCommand {
     void notify();
 
     bool isDone() const;
+
+    void cycle(unsigned int cycles);
 };
+
+Command* sendNull();
 
 }

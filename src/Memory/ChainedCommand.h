@@ -24,6 +24,8 @@ class ChainedCommand : public Command {
     bool isBusy() const;
     void getNextStep();
 
+    void cycle(unsigned int);
+
     private:
 
     std::vector<std::function<Command*()>> steps;

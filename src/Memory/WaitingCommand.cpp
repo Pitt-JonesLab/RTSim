@@ -12,3 +12,5 @@ void WaitingCommand::notify() {
 }
 
 bool WaitingCommand::isDone() const { return completed; }
+
+void WaitingCommand::cycle(unsigned int) {}

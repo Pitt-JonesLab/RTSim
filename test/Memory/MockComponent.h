@@ -27,6 +27,8 @@ class MockCommand : public Command {
     bool isDone() const {
         return false;
     }
+
+    void cycle(unsigned int) {}
 };
 
 template<typename T> class MockComponent : public T {
@@ -53,7 +55,9 @@ template<typename T> class MockComponent : public T {
     StatBlock getStats(std::string tag) const { return StatBlock(); }
 };
 
-using MockSubArray = MockComponent<SubArray>;
+class MockSubArray : public MockComponent<SubArray> {
+    Command* switchRow(unsigned int row) { return nullptr; }
+};
 
 class MockBank : public MockComponent<Bank> {
     void addSubArray(std::unique_ptr<SubArray>) {}

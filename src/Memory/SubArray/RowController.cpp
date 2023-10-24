@@ -2,9 +2,7 @@
 
 #include "Memory/TimedCommand.h"
 
-using namespace NVM::Memory::SubArray;
-using NVM::Memory::Command;
-using NVM::Memory::TimedCommand;
+using namespace NVM::Memory;
 
 RowController::RowController(unsigned int rows, RowTiming timing) :
     currentCmd(nullptr), 

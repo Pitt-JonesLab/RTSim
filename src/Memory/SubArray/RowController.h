@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 
-namespace NVM::Memory::SubArray {
+namespace NVM::Memory {
 
 enum class RowState {
     OPEN,
@@ -31,8 +31,8 @@ class RowController {
         RowState& operator[](unsigned int row);
         const RowState& operator[](unsigned int row) const;
 
-        NVM::Memory::Command* activate(unsigned int row);
-        NVM::Memory::Command* precharge(unsigned int row);
+        Command* activate(unsigned int row);
+        Command* precharge(unsigned int row);
 
         void cycle(unsigned int cycles);
 
@@ -42,7 +42,7 @@ class RowController {
         unsigned int prechargeTime; // tRP
         unsigned int activateTime; // tRCD
 
-        std::unique_ptr<NVM::Memory::TimedCommand> currentCmd;
+        std::unique_ptr<TimedCommand> currentCmd;
 };
 
 }

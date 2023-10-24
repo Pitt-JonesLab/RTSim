@@ -9,6 +9,8 @@ class Command {
     virtual void notify() = 0;
 
     virtual bool isDone() const = 0;
+
+    virtual void cycle(unsigned int) = 0;
 };
 
 } // namespace NVM::Memory

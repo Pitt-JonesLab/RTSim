@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory/SubArray/SubArray.h"
+#include "Memory/SubArray/RowController.h"
 
 #include <memory>
 
@@ -12,6 +13,7 @@ class SimpleSubArray : public SubArray {
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
     Command* write(uint64_t address, NVM::Simulation::DataBlock data);
+    Command* switchRow(unsigned int row);
 
     void cycle(unsigned int cycles);
 
@@ -24,6 +26,8 @@ class SimpleSubArray : public SubArray {
     unsigned int totalWrites;
 
     std::unique_ptr<Command> currentCommand;
+
+    RowController rowControl;
 };
 
 } // namespace NVM::Memory

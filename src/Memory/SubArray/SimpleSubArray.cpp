@@ -2,6 +2,10 @@
 
 #include "Logging/Logging.h"
 #include "Memory/TimedCommand.h"
+#include "Memory/NullCommand.h"
+#include "Memory/ChainedCommand.h"
+
+#include <functional>
 
 using namespace NVM::Memory;
 using namespace NVM::Logging;
@@ -9,7 +13,8 @@ using namespace NVM::Logging;
 SimpleSubArray::SimpleSubArray() :
     totalReads(0),
     totalWrites(0),
-    currentCommand(nullptr) {}
+    currentCommand(nullptr),
+    rowControl(10, {1, 1}) {}
 
 Command* SimpleSubArray::read(uint64_t address,
                               NVM::Simulation::DataBlock data) {
@@ -35,9 +40,8 @@ Command* SimpleSubArray::write(uint64_t address,
 
 void SimpleSubArray::cycle(unsigned int cycles) {
     if (!currentCommand) return;
-    TimedCommand* cmd = static_cast<TimedCommand*>(currentCommand.get());
-    cmd->cycle(cycles);
-    if (cmd->isDone()) currentCommand.reset();
+    currentCommand->cycle(cycles);
+    if (currentCommand->isDone()) currentCommand.reset();
 }
 
 bool SimpleSubArray::isEmpty() const { return currentCommand == nullptr; }
@@ -49,4 +53,17 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&totalWrites, "writes");
 
     return stats;
+}
+
+Command* SimpleSubArray::switchRow(unsigned int row) {
+    if (currentCommand) return nullptr;
+    std::vector<std::function<Command*()>> switchCmds;
+
+    // Check for switchCmds
+
+    if (switchCmds.size()) {
+        currentCommand.reset(new ChainedCommand(switchCmds));
+        return currentCommand.get();
+    }
+    return sendNull();
 }
