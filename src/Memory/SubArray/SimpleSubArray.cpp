@@ -1,34 +1,7 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
 #include "Logging/Logging.h"
-
-namespace NVM::Memory {
-
-class TimedCommand : public Command {
-    public:
-    TimedCommand() : parent(nullptr), cyclesLeft(5) {}
-
-    void setParent(Command* p) { parent = p; }
-
-    void cycle(unsigned int cycles) {
-        if (cycles >= cyclesLeft) {
-            cyclesLeft = 0;
-            if (parent) parent->notify();
-            return;
-        }
-        cyclesLeft -= cycles;
-    }
-
-    bool isDone() { return cyclesLeft == 0; }
-
-    void notify() {}
-
-    private:
-    Command* parent;
-    unsigned int cyclesLeft;
-};
-
-} // namespace NVM::Memory
+#include "Memory/TimedCommand.h"
 
 using namespace NVM::Memory;
 using namespace NVM::Logging;

@@ -1,6 +1,7 @@
 set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
+    TimedCommand.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp
