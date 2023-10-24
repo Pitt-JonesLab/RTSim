@@ -5,6 +5,9 @@ set(TEST_SOURCES
     SimpleInterconnect.test.cpp
     SimpleRank.test.cpp
     SimpleBank.test.cpp
-    SimpleSubArray.test.cpp)
+    SimpleSubArray.test.cpp
+    TimedCommand.test.cpp
+    WaitingCommand.test.cpp
+    ChainedCommand.test.cpp)
 
 add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory RTSim_Logging)

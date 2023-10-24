@@ -51,7 +51,8 @@
 			"command": "ctest",
 			"args": [
 				"--test-dir",
-				"build/test"
+				"build/test",
+				"--output-on-failure"
 			]
 		},
 		{

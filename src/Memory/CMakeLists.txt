@@ -3,6 +3,7 @@ set(MEMORY_SOURCES
     StatBlock.cpp
     TimedCommand.cpp
     WaitingCommand.cpp
+    ChainedCommand.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp
