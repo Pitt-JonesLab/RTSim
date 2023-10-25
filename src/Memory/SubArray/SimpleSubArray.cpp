@@ -1,9 +1,9 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
 #include "Logging/Logging.h"
-#include "Memory/TimedCommand.h"
-#include "Memory/NullCommand.h"
 #include "Memory/ChainedCommand.h"
+#include "Memory/NullCommand.h"
+#include "Memory/TimedCommand.h"
 
 #include <functional>
 
@@ -13,6 +13,7 @@ using namespace NVM::Logging;
 SimpleSubArray::SimpleSubArray() :
     totalReads(0),
     totalWrites(0),
+    rowBufferHits(0),
     currentCommand(nullptr),
     rowControl(10, {1, 1}) {}
 
@@ -52,17 +53,21 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");
+    stats.addStat(&rowBufferHits, "row_buffer_hits");
 
     return stats;
 }
 
 Command* SimpleSubArray::switchRow(unsigned int row) {
     if (currentCommand) return nullptr;
-    if (rowControl.rowIsOpen(row)) return sendNull();
+    if (rowControl.rowIsOpen(row)) {
+        rowBufferHits++;
+        return sendNull();
+    }
 
-    std::vector<std::function<Command*()>> switchCmds = 
-    {[&](){ return rowControl.closeRow(); },
-    [&](){ return rowControl.activate(row); }};
+    std::vector<std::function<Command*()>> switchCmds = {
+        [&]() { return rowControl.closeRow(); },
+        [&]() { return rowControl.activate(row); }};
 
     currentCommand.reset(new ChainedCommand(switchCmds));
     return currentCommand.get();

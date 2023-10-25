@@ -8,6 +8,7 @@ set(TEST_SOURCES
     SimpleSubArray.test.cpp
     TimedCommand.test.cpp
     WaitingCommand.test.cpp
-    ChainedCommand.test.cpp)
+    ChainedCommand.test.cpp
+    Decoder.test.cpp)
 
 add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory RTSim_Logging)

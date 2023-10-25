@@ -2,6 +2,7 @@
 #include "Logging/Logging.h"
 #include "Memory/MemoryFactory.h"
 #include "NVMTypes.h"
+#include "Simulation/Config.h"
 #include "Simulation/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
 
@@ -17,7 +18,7 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-ncycle_t getMaxCycles(Config* config, char* arg) {
+ncycle_t getMaxCycles(NVM::Config* config, char* arg) {
     ncycle_t maxCycles = 0;
 
     if (arg != nullptr) maxCycles = atoi(arg);
@@ -27,8 +28,8 @@ ncycle_t getMaxCycles(Config* config, char* arg) {
                            maxCycles);
 }
 
-Config* createConfig(int argc, char* argv[]) {
-    Config* config = new Config();
+NVM::Config* createConfig(int argc, char* argv[]) {
+    NVM::Config* config = new NVM::Config();
     config->Read(argv[1]);
     if (argc > 4) {
         for (int curArg = 4; curArg < argc; ++curArg) {
@@ -65,12 +66,14 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl << std::endl;
 
     // Set up log
-    Logging::setLogLevel(LogLevel::STAT);
+    Logging::setLogLevel(LogLevel::EVENT);
 
     // Build dependencies
-    Config* config = createConfig(argc, argv);
+    NVM::Config* config = createConfig(argc, argv);
     ncycle_t simulateCycles =
         getMaxCycles(config, (argc > 3) ? argv[3] : nullptr);
+
+    NVM::Simulation::Config conf = readConfig(argv[0]);
 
     // Build RTSystem
     auto memory = makeSimpleSystem();

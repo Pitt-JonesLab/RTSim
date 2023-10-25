@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Memory/SubArray/SubArray.h"
 #include "Memory/SubArray/RowController.h"
+#include "Memory/SubArray/SubArray.h"
 
 #include <memory>
 
@@ -24,6 +24,7 @@ class SimpleSubArray : public SubArray {
     private:
     unsigned int totalReads;
     unsigned int totalWrites;
+    unsigned int rowBufferHits;
 
     std::unique_ptr<Command> currentCommand;
 
