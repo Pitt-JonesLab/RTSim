@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl << std::endl;
 
     // Set up log
-    Logging::setLogLevel(LogLevel::STAT);
+    Logging::setLogLevel(LogLevel::DEBUG);
 
     // Build dependencies
     Config* config = createConfig(argc, argv);

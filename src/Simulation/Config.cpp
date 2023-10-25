@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <exception>
+#include <iostream>
 
 using namespace NVM::Simulation;
 
@@ -34,6 +35,8 @@ Config NVM::Simulation::readConfig(std::string filename) {
         throw std::runtime_error("Could not open config file " + filename);
     }
 
+    std::cout << "Reading config info from " << filename << '\n';
+
     return readConfig(configFile);
 }
 
@@ -65,18 +68,17 @@ Config NVM::Simulation::readConfig(std::istream& input) {
         std::string line;
         getline(input, line);
 
-        if (line.empty()) continue;
-        if (line[0] == ';') continue;
+        if (line.find(";") != std::string::npos)
+            line = line.substr(0, line.find(";"));
+        if (line.find_last_not_of(" \t\r\n") == std::string::npos) continue;
 
         std::string key = line.substr(0, line.find(" "));
         line = line.substr(line.find(" ")+1);
 
-        if (line.find(";") != std::string::npos)
-            line = line.substr(0, line.find(";"));
+        if (line.find_last_not_of(" \t\r\n") < line.size()-1)
+            line = line.substr(0, line.find_last_not_of(" \t\r\n")+1);
 
-        if (line.find_last_not_of(" ") < line.size()-1)
-            line = line.substr(0, line.find_last_not_of(" ")+1);
-
+        std::cout << key << " = " << line << '\n';
         setKey(conf, key, line);
     }
 

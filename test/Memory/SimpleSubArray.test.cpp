@@ -9,11 +9,11 @@ using namespace NVM::Memory;
 using namespace NVM::Logging;
 
 TEST_CASE("Constructs", "[SimpleSubArray], [Memory]") {
-    REQUIRE_NOTHROW(SimpleSubArray());
+    REQUIRE_NOTHROW(SimpleSubArray(1));
 }
 
 TEST_CASE("Handles requests properly", "[SimpleSubArray], [Memory]") {
-    SimpleSubArray subArray;
+    SimpleSubArray subArray(1);
 
     SECTION("Reads when available") {
         REQUIRE(subArray.read(0, {}));
@@ -31,7 +31,7 @@ TEST_CASE("Handles requests properly", "[SimpleSubArray], [Memory]") {
 }
 
 TEST_CASE("Logs events", "[SimpleSubArray], [Memory]") {
-    SimpleSubArray subArray;
+    SimpleSubArray subArray(1);
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::EVENT);
@@ -48,7 +48,7 @@ TEST_CASE("Logs events", "[SimpleSubArray], [Memory]") {
 }
 
 TEST_CASE("Tracks stats", "[SimpleSubArray], [Memory]") {
-    SimpleSubArray subArray;
+    SimpleSubArray subArray(1);
     std::stringstream logString;
     setLogOutput(logString);
     setLogLevel(LogLevel::STAT);

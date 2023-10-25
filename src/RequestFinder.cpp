@@ -173,7 +173,6 @@ bool RequestFinder::FindRTMRowBufferHit(
         ncounter_t rank, bank, row, subarray, col;
         req->address.GetTranslatedAddress(&row, &col, &bank, &rank, NULL,
                                           &subarray);
-        ncounter_t muxLevel = static_cast<ncounter_t>(col / owner->p->RBSize);
 
         return (owner->bankActivated[req] && owner->rowIsActivated(req) &&
                 !owner->refreshHandler.bankNeedsRefresh(req) &&

@@ -11,4 +11,4 @@ set(TEST_SOURCES
     ChainedCommand.test.cpp
     Decoder.test.cpp)
 
-add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory RTSim_Logging)
+add_catch_tests(TARGETS ${TEST_SOURCES} LIBS RTSim_Memory RTSim_Logging RTSim_Simulation)

@@ -9,7 +9,7 @@ namespace NVM::Memory {
 
 class SimpleSubArray : public SubArray {
     public:
-    SimpleSubArray();
+    SimpleSubArray(unsigned int rows);
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
     Command* write(uint64_t address, NVM::Simulation::DataBlock data);
@@ -24,6 +24,8 @@ class SimpleSubArray : public SubArray {
     private:
     unsigned int totalReads;
     unsigned int totalWrites;
+    unsigned int totalActivates;
+    unsigned int totalPrecharges;
     unsigned int rowBufferHits;
 
     std::unique_ptr<Command> currentCommand;

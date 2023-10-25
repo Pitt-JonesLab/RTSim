@@ -3,6 +3,7 @@
 #include "Logging/Logging.h"
 #include "Memory/WaitingCommand.h"
 #include "Memory/ChainedCommand.h"
+#include "Memory/Decoder.h"
 
 #include <functional>
 
@@ -10,9 +11,10 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func) {
+std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func, uint64_t address) {
+    auto row = Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, address);
     std::vector<CommandFunc> bankCmds = 
-        {[&]() { return subArrays[0]->switchRow(0); }, func};
+        {[this, row]() { return subArrays[0]->switchRow(row); }, func};
 
     auto subCmd = std::unique_ptr<Command>
         (new ChainedCommand(bankCmds));
@@ -28,7 +30,7 @@ Command* SimpleBank::read(uint64_t address, DataBlock data) {
 
     CommandFunc readFunc = [&]() { return subArrays[0]->read(address, data); };
 
-    currentCommand = std::move(makeBankCommand(readFunc));
+    currentCommand = std::move(makeBankCommand(readFunc, address));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received read\n";
         totalReads++;
@@ -44,7 +46,7 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
         return subArrays[0]->write(address, data);
     };
 
-    currentCommand = std::move(makeBankCommand(writeFunc));
+    currentCommand = std::move(makeBankCommand(writeFunc, address));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received write\n";
         totalWrites++;

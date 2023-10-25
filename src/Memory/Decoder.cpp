@@ -19,8 +19,10 @@ AddressSymbol stringToSymbol(std::string token) {
 }
 
 unsigned int minBits(unsigned int count) {
-    auto log = log2(count);
-    return static_cast<unsigned int>(ceil(log));
+    count--;
+    unsigned int bits = 0;
+    while (count >>= 1) bits++;
+    return bits;
 }
 
 unsigned int getBitLength(AddressSymbol symbol, ComponentCounts counts) {
@@ -64,6 +66,8 @@ unsigned int getBitRange(uint64_t val, unsigned int msb, unsigned int lsb) {
 }
 
 unsigned int NVM::Memory::Decoder::decodeSymbol(AddressSymbol symbol, uint64_t address) {
+    // Truncating bus offset and burst length TODO: find these numbers
+    address >>= 5;
     if (!symbolPositions.count(symbol)) return 0;
     return getBitRange(address, symbolPositions[symbol].first, symbolPositions[symbol].second);
 }

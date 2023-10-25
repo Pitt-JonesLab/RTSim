@@ -6,11 +6,11 @@ using namespace NVM::Memory;
 
 TEST_CASE("Decodes properly", "[Decoder], [Memory]") {
     Decoder::ComponentCounts counts;
-    counts.rows = 2;
-    counts.channels = 2;
-    counts.cols = 2;
-    counts.ranks = 2;
-    counts.banks = 2;
+    counts.rows = 4;
+    counts.channels = 4;
+    counts.cols = 4;
+    counts.ranks = 4;
+    counts.banks = 4;
 
     Decoder::setScheme("RK:BK:CH:R:C", counts);
 

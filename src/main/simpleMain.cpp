@@ -5,6 +5,7 @@
 #include "Simulation/Config.h"
 #include "Simulation/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
+#include "Memory/Decoder.h"
 
 #include <cmath>
 #include <fstream>
@@ -49,6 +50,18 @@ NVM::Config* createConfig(int argc, char* argv[]) {
     return config;
 }
 
+void setAddressScheme(const NVM::Simulation::Config& conf) {
+    Decoder::ComponentCounts counts;
+
+    counts.rows = conf.get<int>("DBCS");
+    counts.cols = conf.get<int>("DOMAINS");
+    counts.ranks = conf.get<int>("RANKS");
+    counts.banks = conf.get<int>("BANKS");
+    counts.channels = conf.get<int>("CHANNELS");
+
+    Decoder::setScheme(conf.get<std::string>("AddressMappingScheme"), counts);
+}
+
 int main(int argc, char* argv[]) {
     // Check for correct args
     if (argc < 4) {
@@ -73,10 +86,11 @@ int main(int argc, char* argv[]) {
     ncycle_t simulateCycles =
         getMaxCycles(config, (argc > 3) ? argv[3] : nullptr);
 
-    NVM::Simulation::Config conf = readConfig(argv[0]);
+    NVM::Simulation::Config conf = readConfig(argv[1]);
+    setAddressScheme(conf);
 
     // Build RTSystem
-    auto memory = makeSimpleSystem();
+    auto memory = makeSimpleSystem(conf);
 
     // Build TraceReader
     auto reader = std::make_unique<FileTraceReader>(argv[2]);

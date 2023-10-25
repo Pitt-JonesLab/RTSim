@@ -26,7 +26,7 @@ class SimpleBank : public Bank {
     private:
     using CommandFunc = std::function<Command*()>;
 
-    std::unique_ptr<Command> makeBankCommand(CommandFunc& func);
+    std::unique_ptr<Command> makeBankCommand(CommandFunc& func, uint64_t address);
 
     unsigned int totalReads;
     unsigned int totalWrites;

@@ -10,12 +10,14 @@
 using namespace NVM::Memory;
 using namespace NVM::Logging;
 
-SimpleSubArray::SimpleSubArray() :
+SimpleSubArray::SimpleSubArray(unsigned int rows) :
     totalReads(0),
     totalWrites(0),
+    totalActivates(0),
+    totalPrecharges(0),
     rowBufferHits(0),
     currentCommand(nullptr),
-    rowControl(10, {1, 1}) {}
+    rowControl(rows, {1, 1}) {}
 
 Command* SimpleSubArray::read(uint64_t address,
                               NVM::Simulation::DataBlock data) {
@@ -53,6 +55,8 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");
+    stats.addStat(&totalActivates, "activates");
+    stats.addStat(&totalPrecharges, "precharges");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
 
     return stats;
@@ -60,14 +64,19 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 
 Command* SimpleSubArray::switchRow(unsigned int row) {
     if (currentCommand) return nullptr;
+
     if (rowControl.rowIsOpen(row)) {
         rowBufferHits++;
+        log() << LogLevel::EVENT << "Row " << row << " is already activated\n";
         return sendNull();
     }
 
+    // TODO: RowController should handle these stats
+    totalActivates++;
+    totalPrecharges++;
     std::vector<std::function<Command*()>> switchCmds = {
-        [&]() { return rowControl.closeRow(); },
-        [&]() { return rowControl.activate(row); }};
+        [this]() { return rowControl.closeRow(); },
+        [this,row]() { return rowControl.activate(row); }};
 
     currentCommand.reset(new ChainedCommand(switchCmds));
     return currentCommand.get();

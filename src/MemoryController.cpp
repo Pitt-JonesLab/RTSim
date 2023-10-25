@@ -64,6 +64,7 @@
 #include <limits>
 #include <numeric>
 #include <sstream>
+#include <iostream>
 
 using namespace NVM;
 using namespace NVM::Logging;
