@@ -4,8 +4,8 @@
 #include "Memory/Component.h"
 #include "Memory/Interconnect.h"
 #include "Memory/MemoryController.h"
-#include "Memory/Rank.h"
 #include "Memory/NullCommand.h"
+#include "Memory/Rank.h"
 #include "Memory/SubArray/SubArray.h"
 #include "Simulation/DataBlock.h"
 #include "Simulation/MemorySystem.h"
@@ -25,9 +25,7 @@ class MockCommand : public Command {
         parent = nullptr;
     }
 
-    bool isDone() const {
-        return false;
-    }
+    bool isDone() const { return false; }
 
     void cycle(unsigned int) {}
 };
@@ -46,6 +44,21 @@ template<typename T> class MockComponent : public T {
 
     Command* write(uint64_t address, NVM::Simulation::DataBlock data) {
         writeFlag = true;
+        return &command;
+    }
+
+    Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
+                      NVM::Simulation::DataBlock data) {
+        return &command;
+    }
+
+    Command* transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                            std::vector<NVM::Simulation::DataBlock> data) {
+        return &command;
+    }
+
+    Command* transverseWrite(uint64_t address,
+                             std::vector<NVM::Simulation::DataBlock> data) {
         return &command;
     }
 

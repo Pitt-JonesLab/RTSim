@@ -54,6 +54,59 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     return currentCommand.get();
 }
 
+Command* SimpleBank::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                              NVM::Simulation::DataBlock data) {
+    if (subArrays.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return subArrays[0]->rowClone(srcAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeBankCommand(writeFunc, srcAddress));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleBank received row clone\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command*
+SimpleBank::transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                           std::vector<NVM::Simulation::DataBlock> data) {
+    if (subArrays.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return subArrays[0]->transverseRead(baseAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeBankCommand(writeFunc, baseAddress));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleBank received transverse read\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command*
+SimpleBank::transverseWrite(uint64_t address,
+                            std::vector<NVM::Simulation::DataBlock> data) {
+    if (subArrays.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return subArrays[0]->transverseWrite(address, data);
+    };
+
+    currentCommand = std::move(makeBankCommand(writeFunc, address));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleBank received transverse write\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
 void SimpleBank::cycle(unsigned int cycles) {
     if (!subArrays.empty()) subArrays[0]->cycle(cycles);
     if (!currentCommand) return;

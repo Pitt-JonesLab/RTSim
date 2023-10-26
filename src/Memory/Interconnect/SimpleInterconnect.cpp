@@ -53,6 +53,60 @@ Command* SimpleInterconnect::write(uint64_t address,
     return currentCommand.get();
 }
 
+Command* SimpleInterconnect::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                                      NVM::Simulation::DataBlock data) {
+    if (ranks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return ranks[0]->rowClone(srcAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeInterconnectCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleInterconnect received row clone\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command* SimpleInterconnect::transverseRead(
+    uint64_t baseAddress, uint64_t destAddress,
+    std::vector<NVM::Simulation::DataBlock> data) {
+    if (ranks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return ranks[0]->transverseRead(baseAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeInterconnectCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT
+              << "SimpleInterconnect received transverse read\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command* SimpleInterconnect::transverseWrite(
+    uint64_t address, std::vector<NVM::Simulation::DataBlock> data) {
+    if (ranks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return ranks[0]->transverseWrite(address, data);
+    };
+
+    currentCommand = std::move(makeInterconnectCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT
+              << "SimpleInterconnect received transverse write\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
 void SimpleInterconnect::cycle(unsigned int cycles) {
     if (!ranks.empty()) ranks[0]->cycle(cycles);
     if (!currentCommand) return;

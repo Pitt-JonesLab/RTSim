@@ -57,6 +57,60 @@ Command* SimpleController::write(uint64_t address,
     return currentCommand.get();
 }
 
+Command* SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                                    NVM::Simulation::DataBlock data) {
+    if (interconnects.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc rowCloneFunc = [&]() {
+        return interconnects[0]->rowClone(srcAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeControllerCommand(rowCloneFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleController received row clone\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command*
+SimpleController::transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                                 std::vector<NVM::Simulation::DataBlock> data) {
+    if (interconnects.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return interconnects[0]->transverseRead(baseAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeControllerCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT
+              << "SimpleController received transverse read\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command* SimpleController::transverseWrite(
+    uint64_t address, std::vector<NVM::Simulation::DataBlock> data) {
+    if (interconnects.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return interconnects[0]->transverseWrite(address, data);
+    };
+
+    currentCommand = std::move(makeControllerCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT
+              << "SimpleController received transverse write\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
 void SimpleController::cycle(unsigned int cycles) {
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
     if (!currentCommand) return;

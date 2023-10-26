@@ -52,6 +52,59 @@ Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     return currentCommand.get();
 }
 
+Command* SimpleRank::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                              NVM::Simulation::DataBlock data) {
+    if (banks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return banks[0]->rowClone(srcAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeRankCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleRank received row clone\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command*
+SimpleRank::transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                           std::vector<NVM::Simulation::DataBlock> data) {
+    if (banks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return banks[0]->transverseRead(baseAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeRankCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleRank received transverse read\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
+Command*
+SimpleRank::transverseWrite(uint64_t address,
+                            std::vector<NVM::Simulation::DataBlock> data) {
+    if (banks.empty()) return nullptr;
+    if (currentCommand) return nullptr;
+
+    CommandFunc writeFunc = [&]() {
+        return banks[0]->transverseWrite(address, data);
+    };
+
+    currentCommand = std::move(makeRankCommand(writeFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleRank received transverse write\n";
+        totalWrites++;
+    }
+    return currentCommand.get();
+}
+
 void SimpleRank::cycle(unsigned int cycles) {
     if (!banks.empty()) banks[0]->cycle(cycles);
     if (!currentCommand) return;

@@ -42,13 +42,49 @@ Command* SimpleSubArray::write(uint64_t address,
                                NVM::Simulation::DataBlock data) {
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SubArray received write\n";
-        totalWrites++;
-        totalShifts;
-        writeEnergy += 18.3;
-        shiftEnergy += 0.03;
-    }
+    log() << LogLevel::EVENT << "SubArray received write\n";
+    totalWrites++;
+    totalShifts;
+    writeEnergy += 18.3;
+    shiftEnergy += 0.03;
+    return currentCommand.get();
+}
+
+Command* SimpleSubArray::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                                  NVM::Simulation::DataBlock data) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    log() << LogLevel::EVENT << "SubArray received row clone\n";
+    totalWrites++;
+    totalShifts;
+    writeEnergy += 18.3;
+    shiftEnergy += 0.03;
+    return currentCommand.get();
+}
+
+Command*
+SimpleSubArray::transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                               std::vector<NVM::Simulation::DataBlock> data) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    log() << LogLevel::EVENT << "SubArray received transverse read\n";
+    totalWrites++;
+    totalShifts;
+    writeEnergy += 18.3;
+    shiftEnergy += 0.03;
+    return currentCommand.get();
+}
+
+Command*
+SimpleSubArray::transverseWrite(uint64_t address,
+                                std::vector<NVM::Simulation::DataBlock> data) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    log() << LogLevel::EVENT << "SubArray received transverse write\n";
+    totalWrites++;
+    totalShifts;
+    writeEnergy += 18.3;
+    shiftEnergy += 0.03;
     return currentCommand.get();
 }
 

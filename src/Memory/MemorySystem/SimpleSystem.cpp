@@ -59,20 +59,53 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
 bool SimpleSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
                             NVM::Simulation::DataBlock data,
                             unsigned int threadId, unsigned int cycle) {
-    return true;
+    if (channels.empty()) return false;
+    if (currentCommand) return false;
+
+    CommandFunc rowCloneFunc = [&]() {
+        return channels[0]->rowClone(srcAddress, destAddress, data);
+    };
+
+    currentCommand = std::move(makeSystemCommand(rowCloneFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleSystem received row clone\n";
+    }
+    return currentCommand != nullptr;
 }
 
 bool SimpleSystem::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> inputRows, unsigned int threadId,
     unsigned int cycle) {
-    return true;
+    if (channels.empty()) return false;
+    if (currentCommand) return false;
+
+    CommandFunc trFunc = [&]() {
+        return channels[0]->transverseRead(baseAddress, destAddress, inputRows);
+    };
+
+    currentCommand = std::move(makeSystemCommand(trFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleSystem received transverse read\n";
+    }
+    return currentCommand != nullptr;
 }
 
 bool SimpleSystem::transverseWrite(
     uint64_t baseAddress, std::vector<NVM::Simulation::DataBlock> writeData,
     unsigned int threadId, unsigned int cycle) {
-    return true;
+    if (channels.empty()) return false;
+    if (currentCommand) return false;
+
+    CommandFunc twFunc = [&]() {
+        return channels[0]->transverseWrite(baseAddress, writeData);
+    };
+
+    currentCommand = std::move(makeSystemCommand(twFunc));
+    if (currentCommand) {
+        log() << LogLevel::EVENT << "SimpleSystem received transverse write\n";
+    }
+    return currentCommand != nullptr;
 }
 
 bool SimpleSystem::shift(uint64_t address, unsigned int shiftAmount,
