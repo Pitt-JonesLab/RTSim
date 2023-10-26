@@ -2,7 +2,9 @@
 
 #include "NVMDataBlock.h"
 #include "Simulation/ReadCommand.h"
-#include "Simulation/TraceCommand.h"
+#include "Simulation/RowCloneCommand.h"
+#include "Simulation/TransverseReadCommand.h"
+#include "Simulation/TransverseWriteCommand.h"
 #include "Simulation/WriteCommand.h"
 
 #include <arpa/inet.h>
@@ -43,7 +45,9 @@ Opcode1 readOperation(std::istringstream& inStream) {
     auto opString = getNextToken(inStream);
     if (opString == "R") return Opcode1::READ;
     if (opString == "W") return Opcode1::WRITE;
-    // if (opString == "P") return ROW_CLONE;
+    if (opString == "P") return Opcode1::PIM;
+    if (opString == "S") return Opcode1::SHIFT;
+    if (opString == "T") return Opcode1::TRANSVERSE_WRITE;
     throw std::invalid_argument("Unknown operation in trace file!");
 }
 
@@ -96,7 +100,18 @@ std::unique_ptr<TraceCommand> FileTraceReader::getNext() {
 
     unsigned int cycle = readCycle(lineStream);
     Opcode1 operation = readOperation(lineStream);
+    if (operation == Opcode1::TRANSVERSE_WRITE) {
+        return std::unique_ptr<TraceCommand>(new TransverseWriteCommand());
+    }
     uint64_t address = readAddress(lineStream);
+    if (operation == Opcode1::PIM) {
+        getNextToken(lineStream);
+        auto pimOp = getNextToken(lineStream);
+        if (pimOp == "RC") {
+            return std::unique_ptr<TraceCommand>(new RowCloneCommand());
+        }
+        return std::unique_ptr<TraceCommand>(new TransverseReadCommand());
+    }
     NVMDataBlock dataBlock = readData(lineStream);
     unsigned int threadId = readCycle(lineStream);
 

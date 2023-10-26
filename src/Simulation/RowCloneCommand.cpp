@@ -5,5 +5,5 @@
 using namespace NVM::Simulation;
 
 bool RowCloneCommand::issue(MemorySystem* memory) {
-    memory->rowClone(0, 0, DataBlock(), 0, 0);
+    return memory->rowClone(0, 0, DataBlock(), 0, 0);
 }

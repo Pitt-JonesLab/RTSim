@@ -5,6 +5,9 @@ set(SIMULATION_SOURCES
     FileTraceReader.cpp
     ReadCommand.cpp
     WriteCommand.cpp
+    TransverseReadCommand.cpp
+    TransverseWriteCommand.cpp
+    RowCloneCommand.cpp
     ${RTSIM_DIR}/include/NVMDataBlock.cpp
     Config.cpp)
 

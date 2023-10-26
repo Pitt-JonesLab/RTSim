@@ -5,5 +5,5 @@
 using namespace NVM::Simulation;
 
 bool TransverseReadCommand::issue(MemorySystem* memory) {
-    memory->transverseRead(0, 0, {}, 0, 0);
+    return memory->transverseRead(0, 0, {}, 0, 0);
 }
