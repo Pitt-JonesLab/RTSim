@@ -25,6 +25,27 @@ class MockMemorySystem : public MemorySystem {
         return available;
     }
 
+    bool rowClone(uint64_t srcAddress, uint64_t destAddress, DataBlock data,
+                  unsigned int threadId, unsigned int cycle) {
+        return true;
+    }
+
+    bool transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                        std::vector<DataBlock> inputRows, unsigned int threadId,
+                        unsigned int cycle) {
+        return true;
+    }
+
+    bool transverseWrite(uint64_t baseAddress, std::vector<DataBlock> writeData,
+                         unsigned int threadId, unsigned int cycle) {
+        return true;
+    }
+
+    bool shift(uint64_t address, unsigned int shiftAmount, DataBlock data,
+               unsigned int threadId, unsigned int cycle) {
+        return true;
+    }
+
     void cycle(unsigned int cycles) { currentCycle += cycles; }
 
     bool isEmpty() const { return currentCycle > lastCycle + 10; }

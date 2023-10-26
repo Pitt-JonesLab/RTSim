@@ -56,6 +56,31 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
     return currentCommand != nullptr;
 }
 
+bool SimpleSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                            NVM::Simulation::DataBlock data,
+                            unsigned int threadId, unsigned int cycle) {
+    return true;
+}
+
+bool SimpleSystem::transverseRead(
+    uint64_t baseAddress, uint64_t destAddress,
+    std::vector<NVM::Simulation::DataBlock> inputRows, unsigned int threadId,
+    unsigned int cycle) {
+    return true;
+}
+
+bool SimpleSystem::transverseWrite(
+    uint64_t baseAddress, std::vector<NVM::Simulation::DataBlock> writeData,
+    unsigned int threadId, unsigned int cycle) {
+    return true;
+}
+
+bool SimpleSystem::shift(uint64_t address, unsigned int shiftAmount,
+                         NVM::Simulation::DataBlock data, unsigned int threadId,
+                         unsigned int cycle) {
+    return true;
+}
+
 void SimpleSystem::cycle(unsigned int cycles) {
     if (!channels.empty()) channels[0]->cycle(cycles);
     currentCycle += cycles;

@@ -3,6 +3,7 @@
 #include "Simulation/DataBlock.h"
 
 #include <iostream>
+#include <vector>
 
 namespace NVM {
 class NVMainRequest;
@@ -27,6 +28,22 @@ class MemorySystem {
     virtual bool read(uint64_t address, DataBlock data, unsigned int threadId,
                       unsigned int cycle) = 0;
     virtual bool write(uint64_t address, DataBlock data, unsigned int threadId,
+                       unsigned int cycle) = 0;
+
+    virtual bool rowClone(uint64_t srcAddress, uint64_t destAddress,
+                          DataBlock data, unsigned int threadId,
+                          unsigned int cycle) = 0;
+
+    virtual bool transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                                std::vector<DataBlock> inputRows,
+                                unsigned int threadId, unsigned int cycle) = 0;
+
+    virtual bool transverseWrite(uint64_t baseAddress,
+                                 std::vector<DataBlock> writeData,
+                                 unsigned int threadId, unsigned int cycle) = 0;
+
+    virtual bool shift(uint64_t address, unsigned int shiftAmount,
+                       DataBlock data, unsigned int threadId,
                        unsigned int cycle) = 0;
 
     /**

@@ -117,6 +117,29 @@ bool RTSystem::write(uint64_t address, DataBlock data, unsigned int threadId,
     return canIssue;
 }
 
+bool RTSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
+                        DataBlock data, unsigned int threadId,
+                        unsigned int cycle) {
+    return true;
+}
+
+bool RTSystem::transverseRead(uint64_t baseAddress, uint64_t destAddress,
+                              std::vector<DataBlock> inputRows,
+                              unsigned int threadId, unsigned int cycle) {
+    return true;
+}
+
+bool RTSystem::transverseWrite(uint64_t baseAddress,
+                               std::vector<DataBlock> writeData,
+                               unsigned int threadId, unsigned int cycle) {
+    return true;
+}
+
+bool RTSystem::shift(uint64_t address, unsigned int shiftAmount, DataBlock data,
+                     unsigned int threadId, unsigned int cycle) {
+    return true;
+}
+
 void RTSystem::cycle(unsigned int cycles) { globalEventQueue->Cycle(cycles); }
 
 bool RTSystem::isEmpty() const { return outstandingRequests == 0; }
