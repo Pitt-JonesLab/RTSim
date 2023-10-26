@@ -21,6 +21,9 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
     readEnergy(0),
     totalShifts(0),
     shiftEnergy(0),
+    totalRCs(0),
+    totalTRs(0),
+    totalTWs(0),
     currentCommand(nullptr),
     rowControl(rows, {1, 1}) {}
 
@@ -44,7 +47,7 @@ Command* SimpleSubArray::write(uint64_t address,
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received write\n";
     totalWrites++;
-    totalShifts;
+    totalShifts++;
     writeEnergy += 18.3;
     shiftEnergy += 0.03;
     return currentCommand.get();
@@ -55,10 +58,11 @@ Command* SimpleSubArray::rowClone(uint64_t srcAddress, uint64_t destAddress,
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received row clone\n";
-    totalWrites++;
-    totalShifts;
-    writeEnergy += 18.3;
-    shiftEnergy += 0.03;
+    totalRCs++;
+    totalActivates++;
+    totalPrecharges++;
+    rowBufferHits = 0;
+    actEnergy += 0.080096;
     return currentCommand.get();
 }
 
@@ -68,10 +72,11 @@ SimpleSubArray::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received transverse read\n";
-    totalWrites++;
-    totalShifts;
-    writeEnergy += 18.3;
-    shiftEnergy += 0.03;
+    totalTRs++;
+    totalActivates++;
+    totalPrecharges++;
+    rowBufferHits = 0;
+    actEnergy += 0.080096;
     return currentCommand.get();
 }
 
@@ -81,10 +86,11 @@ SimpleSubArray::transverseWrite(uint64_t address,
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received transverse write\n";
-    totalWrites++;
-    totalShifts;
-    writeEnergy += 18.3;
-    shiftEnergy += 0.03;
+    totalTWs++;
+    totalActivates++;
+    totalPrecharges++;
+    rowBufferHits = 0;
+    actEnergy += 0.080096;
     return currentCommand.get();
 }
 
@@ -105,6 +111,9 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&totalActivates, "activates");
     stats.addStat(&totalPrecharges, "precharges");
     stats.addStat(&totalShifts, "shifts");
+    stats.addStat(&totalRCs, "row_clones");
+    stats.addStat(&totalTRs, "transverse_reads");
+    stats.addStat(&totalTWs, "transverse_writes");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
     stats.addStat(&actEnergy, "activate_energy");
     stats.addStat(&readEnergy, "read_energy");

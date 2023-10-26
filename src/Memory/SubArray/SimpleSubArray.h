@@ -28,7 +28,7 @@ class SimpleSubArray : public SubArray {
     StatBlock getStats(std::string tag) const;
 
     private:
-    unsigned int totalReads;
+    unsigned int totalReads, totalRCs, totalTRs, totalTWs;
     unsigned int totalWrites;
     unsigned int totalActivates;
     unsigned int totalPrecharges;

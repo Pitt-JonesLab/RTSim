@@ -64,7 +64,6 @@ Command* SimpleRank::rowClone(uint64_t srcAddress, uint64_t destAddress,
     currentCommand = std::move(makeRankCommand(writeFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received row clone\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -82,7 +81,6 @@ SimpleRank::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     currentCommand = std::move(makeRankCommand(writeFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received transverse read\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -100,7 +98,6 @@ SimpleRank::transverseWrite(uint64_t address,
     currentCommand = std::move(makeRankCommand(writeFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received transverse write\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -133,6 +130,9 @@ StatBlock SimpleRank::getStats(std::string tag) const {
         stats.addChildStat(bankStats, "writes");
         stats.addChildStat(bankStats, "activates");
         stats.addChildStat(bankStats, "precharges");
+        stats.addChildStat(bankStats, "row_clones");
+        stats.addChildStat(bankStats, "transverse_reads");
+        stats.addChildStat(bankStats, "transverse_writes");
         stats.addChild(bankStats);
     }
 

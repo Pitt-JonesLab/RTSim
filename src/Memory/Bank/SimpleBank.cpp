@@ -49,7 +49,6 @@ Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     currentCommand = std::move(makeBankCommand(writeFunc, address));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received write\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -66,7 +65,6 @@ Command* SimpleBank::rowClone(uint64_t srcAddress, uint64_t destAddress,
     currentCommand = std::move(makeBankCommand(writeFunc, srcAddress));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received row clone\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -84,7 +82,6 @@ SimpleBank::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     currentCommand = std::move(makeBankCommand(writeFunc, baseAddress));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleBank received transverse read\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -137,6 +134,9 @@ StatBlock SimpleBank::getStats(std::string tag) const {
         stats.addChildStat(subArrayStats, "writes");
         stats.addChildStat(subArrayStats, "activates");
         stats.addChildStat(subArrayStats, "precharges");
+        stats.addChildStat(subArrayStats, "row_clones");
+        stats.addChildStat(subArrayStats, "transverse_reads");
+        stats.addChildStat(subArrayStats, "transverse_writes");
         stats.addChild(subArrayStats);
     }
 

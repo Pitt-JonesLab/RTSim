@@ -69,7 +69,6 @@ Command* SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
     currentCommand = std::move(makeControllerCommand(rowCloneFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleController received row clone\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -88,7 +87,6 @@ SimpleController::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     if (currentCommand) {
         log() << LogLevel::EVENT
               << "SimpleController received transverse read\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -106,7 +104,6 @@ Command* SimpleController::transverseWrite(
     if (currentCommand) {
         log() << LogLevel::EVENT
               << "SimpleController received transverse write\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }

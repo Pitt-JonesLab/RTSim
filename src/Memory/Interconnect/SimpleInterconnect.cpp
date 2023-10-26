@@ -65,7 +65,6 @@ Command* SimpleInterconnect::rowClone(uint64_t srcAddress, uint64_t destAddress,
     currentCommand = std::move(makeInterconnectCommand(writeFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleInterconnect received row clone\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -84,7 +83,6 @@ Command* SimpleInterconnect::transverseRead(
     if (currentCommand) {
         log() << LogLevel::EVENT
               << "SimpleInterconnect received transverse read\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
@@ -102,7 +100,6 @@ Command* SimpleInterconnect::transverseWrite(
     if (currentCommand) {
         log() << LogLevel::EVENT
               << "SimpleInterconnect received transverse write\n";
-        totalWrites++;
     }
     return currentCommand.get();
 }
