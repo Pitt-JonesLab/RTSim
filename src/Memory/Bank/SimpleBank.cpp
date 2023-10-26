@@ -1,9 +1,9 @@
 #include "Memory/Bank/SimpleBank.h"
 
 #include "Logging/Logging.h"
-#include "Memory/WaitingCommand.h"
 #include "Memory/ChainedCommand.h"
 #include "Memory/Decoder.h"
+#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
@@ -11,13 +11,13 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func, uint64_t address) {
+std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func,
+                                                     uint64_t address) {
     auto row = Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, address);
-    std::vector<CommandFunc> bankCmds = 
-        {[this, row]() { return subArrays[0]->switchRow(row); }, func};
+    std::vector<CommandFunc> bankCmds = {
+        [this, row]() { return subArrays[0]->switchRow(row); }, func};
 
-    auto subCmd = std::unique_ptr<Command>
-        (new ChainedCommand(bankCmds));
+    auto subCmd = std::unique_ptr<Command>(new ChainedCommand(bankCmds));
 
     return std::move(subCmd);
 }
@@ -75,8 +75,16 @@ StatBlock SimpleBank::getStats(std::string tag) const {
     stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < subArrays.size(); i++) {
-        stats.addChild(
-            subArrays[i]->getStats(tag + ".subArray" + std::to_string(i)));
+        auto subArrayStats =
+            subArrays[i]->getStats(tag + ".subArray" + std::to_string(i));
+        stats.addChildStat(subArrayStats, "activate_energy", "nJ");
+        stats.addChildStat(subArrayStats, "read_energy", "nJ");
+        stats.addChildStat(subArrayStats, "write_energy", "nJ");
+        stats.addChildStat(subArrayStats, "reads");
+        stats.addChildStat(subArrayStats, "writes");
+        stats.addChildStat(subArrayStats, "activates");
+        stats.addChildStat(subArrayStats, "precharges");
+        stats.addChild(subArrayStats);
     }
 
     return stats;

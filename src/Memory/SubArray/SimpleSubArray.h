@@ -26,9 +26,10 @@ class SimpleSubArray : public SubArray {
     unsigned int totalWrites;
     unsigned int totalActivates;
     unsigned int totalPrecharges;
+    unsigned int totalShifts;
     unsigned int rowBufferHits;
 
-    double actEnergy, readEnergy, writeEnergy;
+    double actEnergy, readEnergy, writeEnergy, shiftEnergy;
 
     std::unique_ptr<Command> currentCommand;
 

@@ -72,7 +72,15 @@ StatBlock SimpleRank::getStats(std::string tag) const {
     stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < banks.size(); i++) {
-        stats.addChild(banks[i]->getStats(tag + ".bank" + std::to_string(i)));
+        auto bankStats = banks[i]->getStats(tag + ".bank" + std::to_string(i));
+        stats.addChildStat(bankStats, "activate_energy", "nJ");
+        stats.addChildStat(bankStats, "read_energy", "nJ");
+        stats.addChildStat(bankStats, "write_energy", "nJ");
+        stats.addChildStat(bankStats, "reads");
+        stats.addChildStat(bankStats, "writes");
+        stats.addChildStat(bankStats, "activates");
+        stats.addChildStat(bankStats, "precharges");
+        stats.addChild(bankStats);
     }
 
     return stats;

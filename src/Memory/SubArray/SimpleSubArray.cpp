@@ -19,6 +19,8 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
     actEnergy(0),
     writeEnergy(0),
     readEnergy(0),
+    totalShifts(0),
+    shiftEnergy(0),
     currentCommand(nullptr),
     rowControl(rows, {1, 1}) {}
 
@@ -29,7 +31,9 @@ Command* SimpleSubArray::read(uint64_t address,
     if (currentCommand) {
         log() << LogLevel::EVENT << "SubArray received read\n";
         totalReads++;
+        totalShifts++;
         readEnergy += 0.11;
+        shiftEnergy += 0.03;
     }
     return currentCommand.get();
 }
@@ -41,7 +45,9 @@ Command* SimpleSubArray::write(uint64_t address,
     if (currentCommand) {
         log() << LogLevel::EVENT << "SubArray received write\n";
         totalWrites++;
+        totalShifts;
         writeEnergy += 18.3;
+        shiftEnergy += 0.03;
     }
     return currentCommand.get();
 }
@@ -62,10 +68,12 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&totalWrites, "writes");
     stats.addStat(&totalActivates, "activates");
     stats.addStat(&totalPrecharges, "precharges");
+    stats.addStat(&totalShifts, "shifts");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
     stats.addStat(&actEnergy, "activate_energy");
     stats.addStat(&readEnergy, "read_energy");
     stats.addStat(&writeEnergy, "write_energy");
+    stats.addStat(&shiftEnergy, "shift_energy");
 
     return stats;
 }

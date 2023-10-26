@@ -9,6 +9,7 @@
 
 namespace NVM::Memory {
 
+// TODO: Stats should take by value
 class StatValue {
     private:
     class Printable {
@@ -58,6 +59,8 @@ class StatValue {
         return *this;
     }
 
+    std::string getName() const { return name; }
+
     friend std::ostream& operator<<(std::ostream&, const StatValue&);
 };
 
@@ -76,6 +79,8 @@ class StatBlock {
     }
 
     void addChild(StatBlock childBlock);
+    void addChildStat(StatBlock childBlock, std::string name,
+                      std::string unit = "");
     void log() const;
     void log(std::ostream& out) const;
 };
