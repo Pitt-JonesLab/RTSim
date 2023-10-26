@@ -28,6 +28,8 @@ class SimpleSubArray : public SubArray {
     unsigned int totalPrecharges;
     unsigned int rowBufferHits;
 
+    double actEnergy, readEnergy, writeEnergy;
+
     std::unique_ptr<Command> currentCommand;
 
     RowController rowControl;

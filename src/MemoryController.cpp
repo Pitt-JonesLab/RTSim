@@ -61,10 +61,10 @@
 #include <csignal>
 #include <cstdlib>
 #include <functional>
+#include <iostream>
 #include <limits>
 #include <numeric>
 #include <sstream>
-#include <iostream>
 
 using namespace NVM;
 using namespace NVM::Logging;
@@ -424,6 +424,19 @@ void MemoryController::handleActivate(NVMainRequest* req) {
 }
 
 bool MemoryController::IssueMemoryCommands(NVMainRequest* req) {
+    log() << LogLevel::DEBUG << "Handling request " << req->arrivalCycle
+          << '\n';
+
+    if (req->address.IsTranslated()) {
+        log() << LogLevel::DEBUG << "Address is translated...\n";
+        log() << std::hex << req->address.GetPhysicalAddress() << '\n';
+        log() << "Row: " << req->address.GetRow() << '\n';
+        log() << "Col: " << req->address.GetCol() << '\n';
+        log() << "Rank: " << req->address.GetRank() << '\n';
+        log() << "Bank: " << req->address.GetBank() << '\n';
+        log() << "Channel: " << req->address.GetChannel() << '\n';
+    }
+
     // TODO clean up this function
     if (req->type == ROWCLONE_SRC || req->type == ROWCLONE_DEST) {
         handleActivate(req);

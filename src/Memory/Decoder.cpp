@@ -1,8 +1,8 @@
 #include "Memory/Decoder.h"
 
-#include <sstream>
 #include <cmath>
 #include <iostream>
+#include <sstream>
 
 using namespace NVM::Memory::Decoder;
 
@@ -27,11 +27,16 @@ unsigned int minBits(unsigned int count) {
 
 unsigned int getBitLength(AddressSymbol symbol, ComponentCounts counts) {
     switch (symbol) {
-        case AddressSymbol::ROW: return minBits(counts.rows);
-        case AddressSymbol::COL: return minBits(counts.cols);
-        case AddressSymbol::CHANNEL: return minBits(counts.channels);
-        case AddressSymbol::RANK: return minBits(counts.ranks);
-        case AddressSymbol::BANK: return minBits(counts.banks);
+        case AddressSymbol::ROW:
+            return minBits(counts.rows);
+        case AddressSymbol::COL:
+            return minBits(counts.cols);
+        case AddressSymbol::CHANNEL:
+            return minBits(counts.channels);
+        case AddressSymbol::RANK:
+            return minBits(counts.ranks);
+        case AddressSymbol::BANK:
+            return minBits(counts.banks);
     }
     return 0;
 }
@@ -45,12 +50,13 @@ std::vector<std::string> splitTokens(std::string order) {
     return std::vector<std::string>(tokens.rbegin(), tokens.rend());
 }
 
-void NVM::Memory::Decoder::setScheme(std::string order, ComponentCounts counts) {
+void NVM::Memory::Decoder::setScheme(std::string order,
+                                     ComponentCounts counts) {
     unsigned int lsb = 0;
     for (auto token : splitTokens(order)) {
         auto symbol = stringToSymbol(token);
         auto bitLength = getBitLength(symbol, counts);
-        symbolPositions[symbol] = {lsb+bitLength, lsb};
+        symbolPositions[symbol] = {lsb + bitLength, lsb};
         lsb += bitLength + 1;
     }
 }
@@ -58,16 +64,18 @@ void NVM::Memory::Decoder::setScheme(std::string order, ComponentCounts counts) 
 unsigned int getBitRange(uint64_t val, unsigned int msb, unsigned int lsb) {
     val >>= lsb;
     uint64_t mask = 1;
-    for (int i = 0; i < (msb-lsb); i++) {
+    for (int i = 0; i < (msb - lsb); i++) {
         mask <<= 1;
         mask++;
     }
     return val & mask;
 }
 
-unsigned int NVM::Memory::Decoder::decodeSymbol(AddressSymbol symbol, uint64_t address) {
+unsigned int NVM::Memory::Decoder::decodeSymbol(AddressSymbol symbol,
+                                                uint64_t address) {
     // Truncating bus offset and burst length TODO: find these numbers
-    address >>= 5;
+    address >>= 6;
     if (!symbolPositions.count(symbol)) return 0;
-    return getBitRange(address, symbolPositions[symbol].first, symbolPositions[symbol].second);
+    return getBitRange(address, symbolPositions[symbol].first,
+                       symbolPositions[symbol].second);
 }

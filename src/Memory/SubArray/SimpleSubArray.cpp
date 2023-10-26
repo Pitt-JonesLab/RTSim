@@ -16,6 +16,9 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
     totalActivates(0),
     totalPrecharges(0),
     rowBufferHits(0),
+    actEnergy(0),
+    writeEnergy(0),
+    readEnergy(0),
     currentCommand(nullptr),
     rowControl(rows, {1, 1}) {}
 
@@ -26,6 +29,7 @@ Command* SimpleSubArray::read(uint64_t address,
     if (currentCommand) {
         log() << LogLevel::EVENT << "SubArray received read\n";
         totalReads++;
+        readEnergy += 0.11;
     }
     return currentCommand.get();
 }
@@ -37,6 +41,7 @@ Command* SimpleSubArray::write(uint64_t address,
     if (currentCommand) {
         log() << LogLevel::EVENT << "SubArray received write\n";
         totalWrites++;
+        writeEnergy += 18.3;
     }
     return currentCommand.get();
 }
@@ -58,6 +63,9 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&totalActivates, "activates");
     stats.addStat(&totalPrecharges, "precharges");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
+    stats.addStat(&actEnergy, "activate_energy");
+    stats.addStat(&readEnergy, "read_energy");
+    stats.addStat(&writeEnergy, "write_energy");
 
     return stats;
 }
@@ -74,9 +82,10 @@ Command* SimpleSubArray::switchRow(unsigned int row) {
     // TODO: RowController should handle these stats
     totalActivates++;
     totalPrecharges++;
+    actEnergy += 0.080096;
     std::vector<std::function<Command*()>> switchCmds = {
         [this]() { return rowControl.closeRow(); },
-        [this,row]() { return rowControl.activate(row); }};
+        [this, row]() { return rowControl.activate(row); }};
 
     currentCommand.reset(new ChainedCommand(switchCmds));
     return currentCommand.get();
