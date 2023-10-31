@@ -1,9 +1,9 @@
 #include "Memory/Bank/SimpleBank.h"
 
 #include "Logging/Logging.h"
-#include "Memory/ChainedCommand.h"
+#include "Memory/Command/ChainedCommand.h"
+#include "Memory/Command/WaitingCommand.h"
 #include "Memory/Decoder.h"
-#include "Memory/WaitingCommand.h"
 
 #include <functional>
 
@@ -121,8 +121,8 @@ void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {
 StatBlock SimpleBank::getStats(std::string tag) const {
     StatBlock stats(tag);
 
-    //stats.addStat(&totalReads, "reads");
-    //stats.addStat(&totalWrites, "writes");
+    // stats.addStat(&totalReads, "reads");
+    // stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < subArrays.size(); i++) {
         auto subArrayStats =

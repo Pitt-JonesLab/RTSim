@@ -1,11 +1,11 @@
 set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
-    TimedCommand.cpp
-    WaitingCommand.cpp
-    ChainedCommand.cpp
-    NullCommand.cpp
-    TriggeredCommand.cpp
+    Command/TimedCommand.cpp
+    Command/WaitingCommand.cpp
+    Command/ChainedCommand.cpp
+    Command/NullCommand.cpp
+    Command/TriggeredCommand.cpp
     Decoder.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp

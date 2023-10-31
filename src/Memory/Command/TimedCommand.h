@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Memory/Command.h"
+#include "Memory/Command/Command.h"
 
 namespace NVM::Memory {
 
 /*
-*   Simple Command that simply waits for the given number of cycles
-*/
+ *   Simple Command that simply waits for the given number of cycles
+ */
 class TimedCommand : public Command {
     public:
     TimedCommand(unsigned int cycles = 5);

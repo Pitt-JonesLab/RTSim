@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/MemorySystem.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
 #include <vector>
 

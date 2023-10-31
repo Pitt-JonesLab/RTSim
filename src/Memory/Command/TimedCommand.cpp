@@ -1,8 +1,10 @@
-#include "Memory/TimedCommand.h"
+#include "Memory/Command/TimedCommand.h"
 
 using namespace NVM::Memory;
 
-TimedCommand::TimedCommand(unsigned int cycles) : parent(nullptr), cyclesLeft(cycles) {}
+TimedCommand::TimedCommand(unsigned int cycles) :
+    parent(nullptr),
+    cyclesLeft(cycles) {}
 
 void TimedCommand::setParent(Command* p) { parent = p; }
 

@@ -1,4 +1,4 @@
-#include "Memory/TimedCommand.h"
+#include "Memory/Command/TimedCommand.h"
 
 #include <catch2/catch_test_macros.hpp>
 

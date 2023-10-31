@@ -1,16 +1,13 @@
 #pragma once
 
-#include "Memory/TimedCommand.h"
+#include "Memory/Command/TimedCommand.h"
 
-#include <vector>
 #include <memory>
+#include <vector>
 
 namespace NVM::Memory {
 
-enum class RowState {
-    OPEN,
-    CLOSED
-};
+enum class RowState { OPEN, CLOSED };
 
 struct RowTiming {
     unsigned int prechargeTime;
@@ -18,35 +15,35 @@ struct RowTiming {
 };
 
 /*
-*   Assigns each row in a SubArray to a state.
-*   Also handles ACTIVATE and PRECHARGE
-*/
+ *   Assigns each row in a SubArray to a state.
+ *   Also handles ACTIVATE and PRECHARGE
+ */
 class RowController {
     public:
-        RowController(unsigned int rows, RowTiming timing);
+    RowController(unsigned int rows, RowTiming timing);
 
-        RowState getState(unsigned int row) const;
-        void setState(unsigned int row, RowState state);
+    RowState getState(unsigned int row) const;
+    void setState(unsigned int row, RowState state);
 
-        RowState& operator[](unsigned int row);
-        const RowState& operator[](unsigned int row) const;
+    RowState& operator[](unsigned int row);
+    const RowState& operator[](unsigned int row) const;
 
-        Command* activate(unsigned int row);
-        Command* precharge(unsigned int row);
+    Command* activate(unsigned int row);
+    Command* precharge(unsigned int row);
 
-        void cycle(unsigned int cycles);
+    void cycle(unsigned int cycles);
 
-        Command* closeRow();
-        bool rowIsOpen(unsigned int row);
+    Command* closeRow();
+    bool rowIsOpen(unsigned int row);
 
     private:
-        std::vector<RowState> rowStates;
+    std::vector<RowState> rowStates;
 
-        unsigned int prechargeTime; // tRP
-        unsigned int activateTime; // tRCD
-        unsigned int openRow;
+    unsigned int prechargeTime; // tRP
+    unsigned int activateTime;  // tRCD
+    unsigned int openRow;
 
-        std::unique_ptr<TimedCommand> currentCmd;
+    std::unique_ptr<TimedCommand> currentCmd;
 };
 
-}
+} // namespace NVM::Memory

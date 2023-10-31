@@ -1,4 +1,4 @@
-#include "Memory/TriggeredCommand.h"
+#include "Memory/Command/TriggeredCommand.h"
 
 using namespace NVM::Memory;
 

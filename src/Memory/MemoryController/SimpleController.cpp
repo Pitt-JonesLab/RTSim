@@ -1,7 +1,7 @@
 #include "Memory/MemoryController/SimpleController.h"
 
 #include "Logging/Logging.h"
-#include "Memory/WaitingCommand.h"
+#include "Memory/Command/WaitingCommand.h"
 
 #include <functional>
 

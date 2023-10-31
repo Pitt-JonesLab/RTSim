@@ -1,9 +1,9 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
 #include "Logging/Logging.h"
-#include "Memory/ChainedCommand.h"
-#include "Memory/NullCommand.h"
-#include "Memory/TimedCommand.h"
+#include "Memory/Command/ChainedCommand.h"
+#include "Memory/Command/NullCommand.h"
+#include "Memory/Command/TimedCommand.h"
 
 #include <functional>
 

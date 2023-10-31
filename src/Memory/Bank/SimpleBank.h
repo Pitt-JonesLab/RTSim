@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/Bank.h"
+#include "Memory/Bank/Bank.h"
 
 #include <functional>
 #include <vector>

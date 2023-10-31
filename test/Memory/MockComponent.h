@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Memory/Bank.h"
+#include "Memory/Bank/Bank.h"
+#include "Memory/Command/NullCommand.h"
 #include "Memory/Component.h"
-#include "Memory/Interconnect.h"
-#include "Memory/MemoryController.h"
-#include "Memory/NullCommand.h"
-#include "Memory/Rank.h"
+#include "Memory/Interconnect/Interconnect.h"
+#include "Memory/MemoryController/MemoryController.h"
+#include "Memory/Rank/Rank.h"
 #include "Memory/SubArray/SubArray.h"
 #include "Simulation/DataBlock.h"
 #include "Simulation/MemorySystem.h"
@@ -69,13 +69,13 @@ template<typename T> class MockComponent : public T {
 
     void cycle(unsigned int cycles) { currentCycle += cycles; }
 
-    virtual StatBlock getStats(std::string tag) const { 
+    virtual StatBlock getStats(std::string tag) const {
         StatBlock stats(tag);
 
         stats.addStat(&totalReads, "reads");
         stats.addStat(&totalWrites, "writes");
 
-        return stats; 
+        return stats;
     }
 };
 

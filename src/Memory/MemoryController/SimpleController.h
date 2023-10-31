@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Memory/MemoryController.h"
+#include "Memory/Command/TriggeredCommand.h"
+#include "Memory/MemoryController/MemoryController.h"
 
-#include "Memory/TriggeredCommand.h"
-
-#include <vector>
 #include <queue>
+#include <vector>
 
 namespace NVM::Memory {
 

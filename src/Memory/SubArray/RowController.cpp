@@ -1,8 +1,8 @@
 #include "Memory/SubArray/RowController.h"
 
 #include "Logging/Logging.h"
-#include "Memory/NullCommand.h"
-#include "Memory/TimedCommand.h"
+#include "Memory/Command/NullCommand.h"
+#include "Memory/Command/TimedCommand.h"
 
 using namespace NVM::Memory;
 using namespace NVM::Logging;

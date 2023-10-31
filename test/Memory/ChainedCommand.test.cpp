@@ -1,4 +1,4 @@
-#include "Memory/ChainedCommand.h"
+#include "Memory/Command/ChainedCommand.h"
 
 #include "MockComponent.h"
 
@@ -8,9 +8,7 @@ using namespace NVM::Memory;
 
 MockCommand* mock;
 
-Command* makeMock() {
-    return mock;
-}
+Command* makeMock() { return mock; }
 
 TEST_CASE("Works properly", "[ChainedCommand], [Memory]") {
     mock = new MockCommand();
@@ -18,13 +16,13 @@ TEST_CASE("Works properly", "[ChainedCommand], [Memory]") {
 
     SECTION("Waits on all Commands in chain") {
         REQUIRE_FALSE(cmd.isDone());
-        
+
         // Make new mock and finish current
         auto currentMock = mock;
         mock = new MockCommand();
         currentMock->notify();
         REQUIRE_FALSE(cmd.isDone());
-        
+
         // cmd is waiting on mock now
         mock->notify();
         REQUIRE(cmd.isDone());

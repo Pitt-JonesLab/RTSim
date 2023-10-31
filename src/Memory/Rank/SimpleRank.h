@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/Rank.h"
+#include "Memory/Rank/Rank.h"
 
 #include <vector>
 

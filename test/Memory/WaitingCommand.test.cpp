@@ -1,4 +1,4 @@
-#include "Memory/WaitingCommand.h"
+#include "Memory/Command/WaitingCommand.h"
 
 #include "MockComponent.h"
 

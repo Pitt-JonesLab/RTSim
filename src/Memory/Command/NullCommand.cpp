@@ -1,12 +1,10 @@
-#include "Memory/NullCommand.h"
+#include "Memory/Command/NullCommand.h"
 
 using namespace NVM::Memory;
 
 NullCommand nullCmd;
 
-Command* NVM::Memory::sendNull() {
-    return &nullCmd;
-}
+Command* NVM::Memory::sendNull() { return &nullCmd; }
 
 NullCommand::NullCommand() {}
 
