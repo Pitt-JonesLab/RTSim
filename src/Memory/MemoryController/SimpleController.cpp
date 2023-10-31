@@ -22,41 +22,42 @@ std::unique_ptr<Command> makeControllerCommand(CommandFunc& func) {
     return std::move(systemCommand);
 }
 
-SimpleController::SimpleController() : totalReads(0), totalWrites(0), bankQueues(1) {}
+SimpleController::SimpleController() :
+    totalReads(0),
+    totalWrites(0),
+    bankQueues(1) {}
 
 Command* SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return nullptr;
-    if (currentCommand) return nullptr;
+    if (systemCmd) return nullptr;
     if (bankQueues[0].size() == 10) return nullptr;
 
     CommandFunc readFunc = [&]() {
         return interconnects[0]->read(address, data);
     };
 
-    currentCommand = std::move(makeControllerCommand(readFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleController received read\n";
-        totalReads++;
-    }
-    return currentCommand.get();
+    systemCmd.reset(new TriggeredCommand(readFunc));
+    log() << LogLevel::EVENT << "SimpleController received read\n";
+    totalReads++;
+
+    return systemCmd.get();
 }
 
 Command* SimpleController::write(uint64_t address,
                                  NVM::Simulation::DataBlock data) {
     if (interconnects.empty()) return nullptr;
-    if (currentCommand) return nullptr;
+    if (systemCmd) return nullptr;
     if (bankQueues[0].size() == 10) return nullptr;
 
     CommandFunc writeFunc = [&]() {
         return interconnects[0]->write(address, data);
     };
 
-    currentCommand = std::move(makeControllerCommand(writeFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleController received write\n";
-        totalWrites++;
-    }
-    return currentCommand.get();
+    systemCmd.reset(new TriggeredCommand(writeFunc));
+    log() << LogLevel::EVENT << "SimpleController received write\n";
+    totalWrites++;
+
+    return systemCmd.get();
 }
 
 Command* SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
@@ -111,10 +112,37 @@ Command* SimpleController::transverseWrite(
 }
 
 void SimpleController::cycle(unsigned int cycles) {
+    if (cycles == 0) return;
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
-    if (!currentCommand) return;
-    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
-        currentCommand.reset();
+    if (currentCommand) {
+        if (currentCommand->isDone()) currentCommand.reset();
+    }
+
+    if (systemCmd) {
+        log() << LogLevel::DEBUG
+              << "SimpleController: Moving issued command to bank queue\n";
+        bankQueues[0].push(std::move(systemCmd));
+        systemCmd.reset();
+    }
+    while (cycles && !bankQueues[0].empty()) {
+        bankQueues[0].front()->cycle(1);
+        if (bankQueues[0].front()->isDone()) {
+            log() << LogLevel::DEBUG
+                  << "SimpleController: Queue command finished\n";
+            bankQueues[0].pop();
+        }
+        issueFromQueue();
+
+        cycles--;
+    }
+}
+
+void SimpleController::issueFromQueue() {
+    if (!bankQueues[0].empty() && !bankQueues[0].front()->triggered()) {
+        log() << LogLevel::DEBUG
+              << "SimpleController: Issued command from queue\n";
+        bankQueues[0].front()->issue();
+    }
 }
 
 bool SimpleController::isEmpty() const { return currentCommand == nullptr; }

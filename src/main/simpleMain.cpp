@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl << std::endl;
 
     // Set up log
-    Logging::setLogLevel(LogLevel::EVENT);
+    Logging::setLogLevel(LogLevel::DEBUG);
 
     // Build dependencies
     NVM::Config* config = createConfig(argc, argv);

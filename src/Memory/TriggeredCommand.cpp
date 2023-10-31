@@ -2,29 +2,30 @@
 
 using namespace NVM::Memory;
 
-TriggeredCommand::TriggeredCommand(std::function<Command*()> func) : parent(nullptr), cmd(nullptr), cmdFunc(func) {}
+TriggeredCommand::TriggeredCommand(std::function<Command*()> func) :
+    parent(nullptr),
+    cmd(nullptr),
+    cmdFunc(func),
+    done(false) {}
 
 void TriggeredCommand::setParent(Command* p) { parent = p; }
 
 void TriggeredCommand::notify() {
     if (parent) parent->notify();
+    cmd = nullptr;
+    done = true;
 }
 
-bool TriggeredCommand::isDone() const {
-    if (cmd) return cmd->isDone();
-    return false;
-}
+bool TriggeredCommand::isDone() const { return done; }
 
 void TriggeredCommand::cycle(unsigned int cycles) {
     if (cmd) cmd->cycle(cycles);
 }
 
 void TriggeredCommand::issue() {
-    if (cmd) return; 
-    cmd.reset(cmdFunc());
-    cmd->setParent(this);
+    if (cmd) return;
+    cmd = cmdFunc();
+    if (cmd) cmd->setParent(this);
 }
 
-bool TriggeredCommand::triggered() const {
-    return cmd.get() != nullptr;
-}
+bool TriggeredCommand::triggered() const { return cmd; }

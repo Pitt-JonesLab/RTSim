@@ -22,11 +22,13 @@ TEST_CASE("Sends requests to Interconnect", "[SimpleController], [Memory]") {
 
     SECTION("Interconnect gets write") {
         REQUIRE(controller.write(0, {}));
+        controller.cycle(2);
         REQUIRE(interconnectPtr->writeFlag);
     }
 
     SECTION("Interconnect gets read") {
         REQUIRE(controller.read(0, {}));
+        controller.cycle(2);
         REQUIRE(interconnectPtr->readFlag);
     }
 }

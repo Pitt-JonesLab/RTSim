@@ -2,6 +2,8 @@
 
 #include "Memory/MemoryController.h"
 
+#include "Memory/TriggeredCommand.h"
+
 #include <vector>
 #include <queue>
 
@@ -34,8 +36,11 @@ class SimpleController : public MemoryController {
     std::vector<std::unique_ptr<Interconnect>> interconnects;
     std::unique_ptr<Command> currentCommand;
 
-    using CommandQueue = std::queue<std::unique_ptr<Command>>;
+    using CommandQueue = std::queue<std::unique_ptr<TriggeredCommand>>;
+    std::unique_ptr<TriggeredCommand> systemCmd;
     std::vector<CommandQueue> bankQueues;
+
+    void issueFromQueue();
 };
 
 } // namespace NVM::Memory
