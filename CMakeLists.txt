@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(RTSim)
 
 set(buildtype "debug" CACHE STRING "Build type for RTSim")
+set(coverage FALSE CACHE BOOL "Whether to track code coverage")
 
 set(RTSIM_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -13,6 +14,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${RTSIM_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${RTSIM_DIR}/lib/debug)
 
 set(CMAKE_CXX_STANDARD 17)
+
+set(CXXFLAGS "-O0 -g")
+
+if(coverage)
+	set(CXXFLAGS "${CXXFLAGS} --coverage")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 
 # Lib dirs
 add_subdirectory(src)

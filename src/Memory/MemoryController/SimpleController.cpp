@@ -32,7 +32,7 @@ Command* SimpleController::read(uint64_t address, DataBlock data) {
     if (systemCmd) return nullptr;
     if (bankQueues[0].size() == 10) return nullptr;
 
-    CommandFunc readFunc = [&]() {
+    CommandFunc readFunc = [this, address, data]() {
         return interconnects[0]->read(address, data);
     };
 
@@ -49,7 +49,7 @@ Command* SimpleController::write(uint64_t address,
     if (systemCmd) return nullptr;
     if (bankQueues[0].size() == 10) return nullptr;
 
-    CommandFunc writeFunc = [&]() {
+    CommandFunc writeFunc = [this, address, data]() {
         return interconnects[0]->write(address, data);
     };
 
