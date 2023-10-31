@@ -22,11 +22,12 @@ std::unique_ptr<Command> makeControllerCommand(CommandFunc& func) {
     return std::move(systemCommand);
 }
 
-SimpleController::SimpleController() : totalReads(0), totalWrites(0) {}
+SimpleController::SimpleController() : totalReads(0), totalWrites(0), bankQueues(1) {}
 
 Command* SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return nullptr;
     if (currentCommand) return nullptr;
+    if (bankQueues[0].size() == 10) return nullptr;
 
     CommandFunc readFunc = [&]() {
         return interconnects[0]->read(address, data);
@@ -44,6 +45,7 @@ Command* SimpleController::write(uint64_t address,
                                  NVM::Simulation::DataBlock data) {
     if (interconnects.empty()) return nullptr;
     if (currentCommand) return nullptr;
+    if (bankQueues[0].size() == 10) return nullptr;
 
     CommandFunc writeFunc = [&]() {
         return interconnects[0]->write(address, data);

@@ -3,6 +3,7 @@
 #include "Memory/MemoryController.h"
 
 #include <vector>
+#include <queue>
 
 namespace NVM::Memory {
 
@@ -32,6 +33,9 @@ class SimpleController : public MemoryController {
 
     std::vector<std::unique_ptr<Interconnect>> interconnects;
     std::unique_ptr<Command> currentCommand;
+
+    using CommandQueue = std::queue<std::unique_ptr<Command>>;
+    std::vector<CommandQueue> bankQueues;
 };
 
 } // namespace NVM::Memory
