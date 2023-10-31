@@ -36,7 +36,6 @@
 				"-B",
 				"build",
 				"-Dbuildtype=fast",
-				"-DCMAKE_BUILD_TYPE=Debug"
 			]
 		},
 		{

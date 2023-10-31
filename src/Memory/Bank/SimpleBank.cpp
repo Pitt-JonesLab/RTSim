@@ -75,7 +75,7 @@ SimpleBank::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     if (subArrays.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
-    CommandFunc writeFunc = [&]() {
+    CommandFunc writeFunc = [this, baseAddress, destAddress, data]() {
         return subArrays[0]->transverseRead(baseAddress, destAddress, data);
     };
 
@@ -92,7 +92,7 @@ SimpleBank::transverseWrite(uint64_t address,
     if (subArrays.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
-    CommandFunc writeFunc = [&]() {
+    CommandFunc writeFunc = [this, address, data]() {
         return subArrays[0]->transverseWrite(address, data);
     };
 
@@ -121,8 +121,8 @@ void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {
 StatBlock SimpleBank::getStats(std::string tag) const {
     StatBlock stats(tag);
 
-    stats.addStat(&totalReads, "reads");
-    stats.addStat(&totalWrites, "writes");
+    //stats.addStat(&totalReads, "reads");
+    //stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < subArrays.size(); i++) {
         auto subArrayStats =

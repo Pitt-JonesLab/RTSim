@@ -69,6 +69,7 @@ Command* SimpleSubArray::rowClone(uint64_t srcAddress, uint64_t destAddress,
 Command*
 SimpleSubArray::transverseRead(uint64_t baseAddress, uint64_t destAddress,
                                std::vector<NVM::Simulation::DataBlock> data) {
+    // TODO: TRs should take 1.6x read time
     if (currentCommand) return nullptr;
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received transverse read\n";

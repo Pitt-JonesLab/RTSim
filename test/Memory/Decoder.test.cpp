@@ -14,7 +14,7 @@ TEST_CASE("Decodes properly", "[Decoder], [Memory]") {
 
     Decoder::setScheme("RK:BK:CH:R:C", counts);
 
-    uint64_t testAddress = 0x3;
+    uint64_t testAddress = 0xC0;
 
     REQUIRE(Decoder::decodeSymbol(Decoder::AddressSymbol::COL, testAddress) == 3);
     testAddress <<= 2;

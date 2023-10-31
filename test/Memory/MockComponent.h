@@ -35,15 +35,18 @@ template<typename T> class MockComponent : public T {
     bool readFlag = false, writeFlag = false;
     bool empty = true;
     unsigned int currentCycle = 0;
+    unsigned int totalReads = 0, totalWrites = 0;
     MockCommand command;
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data) {
         readFlag = true;
+        totalReads++;
         return &command;
     }
 
     Command* write(uint64_t address, NVM::Simulation::DataBlock data) {
         writeFlag = true;
+        totalWrites++;
         return &command;
     }
 
@@ -66,10 +69,18 @@ template<typename T> class MockComponent : public T {
 
     void cycle(unsigned int cycles) { currentCycle += cycles; }
 
-    StatBlock getStats(std::string tag) const { return StatBlock(); }
+    virtual StatBlock getStats(std::string tag) const { 
+        StatBlock stats(tag);
+
+        stats.addStat(&totalReads, "reads");
+        stats.addStat(&totalWrites, "writes");
+
+        return stats; 
+    }
 };
 
 class MockSubArray : public MockComponent<SubArray> {
+    public:
     Command* switchRow(unsigned int row) { return sendNull(); }
 };
 
