@@ -12,6 +12,7 @@ void TriggeredCommand::setParent(Command* p) { parent = p; }
 
 void TriggeredCommand::notify() {
     if (parent) parent->notify();
+    parent = nullptr;
     cmd = nullptr;
     done = true;
 }

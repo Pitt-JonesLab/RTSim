@@ -4,6 +4,10 @@ using namespace NVM::Memory;
 
 WaitingCommand::WaitingCommand() : parent(nullptr), completed(false) {}
 
+WaitingCommand::WaitingCommand(Command* child) : WaitingCommand() {
+    child->setParent(this);
+}
+
 void WaitingCommand::setParent(Command* p) { parent = p; }
 
 void WaitingCommand::notify() {

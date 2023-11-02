@@ -10,6 +10,7 @@ namespace NVM::Memory {
 class WaitingCommand : public Command {
     public:
     WaitingCommand();
+    WaitingCommand(Command* child);
 
     void setParent(Command* p);
     void notify();

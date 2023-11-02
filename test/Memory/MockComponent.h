@@ -33,18 +33,20 @@ class MockCommand : public Command {
 template<typename T> class MockComponent : public T {
     public:
     bool readFlag = false, writeFlag = false;
-    bool empty = true;
+    bool empty = true, available = true;
     unsigned int currentCycle = 0;
     unsigned int totalReads = 0, totalWrites = 0;
     MockCommand command;
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data) {
+        if (!available) return nullptr;
         readFlag = true;
         totalReads++;
         return &command;
     }
 
     Command* write(uint64_t address, NVM::Simulation::DataBlock data) {
+        if (!available) return nullptr;
         writeFlag = true;
         totalWrites++;
         return &command;

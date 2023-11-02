@@ -15,97 +15,49 @@ bool SimpleSystem::issue(NVMainRequest* req) { return false; }
 
 using CommandFunc = std::function<Command*()>;
 
-std::unique_ptr<Command> makeSystemCommand(CommandFunc& func) {
-    auto interconnectCommand = func();
-    if (!interconnectCommand) return nullptr;
-
-    auto systemCommand = std::unique_ptr<Command>(new WaitingCommand());
-    interconnectCommand->setParent(systemCommand.get());
-    return std::move(systemCommand);
-}
-
 SimpleSystem::SimpleSystem() : totalReads(0), totalWrites(0), currentCycle(0) {}
 
 bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
                         unsigned int cycle) {
-    if (channels.empty()) return false;
-    if (currentCommand) return false;
+    if (!available()) return false;
 
-    CommandFunc readFunc = [&]() { return channels[0]->read(address, data); };
-
-    currentCommand = std::move(makeSystemCommand(readFunc));
-    if (currentCommand) {
-        totalReads++;
-        log() << LogLevel::EVENT << "SimpleSystem received read\n";
-    }
-    return currentCommand != nullptr;
+    auto channelCmd = channels[0]->read(address, data);
+    if (!channelCmd) return false;
+    totalReads++;
+    log() << LogLevel::EVENT << "SimpleSystem received read\n";
+    runningCommands.push_back(std::make_unique<WaitingCommand>(channelCmd));
+    return true;
 }
 
 bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
                          unsigned int threadId, unsigned int cycle) {
-    if (channels.empty()) return false;
-    if (currentCommand) return false;
+    if (!available()) return false;
 
-    CommandFunc writeFunc = [&]() { return channels[0]->write(address, data); };
-
-    currentCommand = std::move(makeSystemCommand(writeFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleSystem received write\n";
-        totalWrites++;
-    }
-    return currentCommand != nullptr;
+    auto channelCmd = channels[0]->write(address, data);
+    if (!channelCmd) return false;
+    totalWrites++;
+    log() << LogLevel::EVENT << "SimpleSystem received write\n";
+    runningCommands.push_back(std::make_unique<WaitingCommand>(channelCmd));
+    return true;
 }
 
 bool SimpleSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
                             NVM::Simulation::DataBlock data,
                             unsigned int threadId, unsigned int cycle) {
-    if (channels.empty()) return false;
-    if (currentCommand) return false;
-
-    CommandFunc rowCloneFunc = [&]() {
-        return channels[0]->rowClone(srcAddress, destAddress, data);
-    };
-
-    currentCommand = std::move(makeSystemCommand(rowCloneFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleSystem received row clone\n";
-    }
-    return currentCommand != nullptr;
+    return true;
 }
 
 bool SimpleSystem::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> inputRows, unsigned int threadId,
     unsigned int cycle) {
-    if (channels.empty()) return false;
-    if (currentCommand) return false;
-
-    CommandFunc trFunc = [&]() {
-        return channels[0]->transverseRead(baseAddress, destAddress, inputRows);
-    };
-
-    currentCommand = std::move(makeSystemCommand(trFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleSystem received transverse read\n";
-    }
-    return currentCommand != nullptr;
+    return true;
 }
 
 bool SimpleSystem::transverseWrite(
     uint64_t baseAddress, std::vector<NVM::Simulation::DataBlock> writeData,
     unsigned int threadId, unsigned int cycle) {
-    if (channels.empty()) return false;
-    if (currentCommand) return false;
-
-    CommandFunc twFunc = [&]() {
-        return channels[0]->transverseWrite(baseAddress, writeData);
-    };
-
-    currentCommand = std::move(makeSystemCommand(twFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleSystem received transverse write\n";
-    }
-    return currentCommand != nullptr;
+    return true;
 }
 
 bool SimpleSystem::shift(uint64_t address, unsigned int shiftAmount,
@@ -114,15 +66,19 @@ bool SimpleSystem::shift(uint64_t address, unsigned int shiftAmount,
     return true;
 }
 
+bool SimpleSystem::available() const { return !channels.empty(); }
+
 void SimpleSystem::cycle(unsigned int cycles) {
     if (!channels.empty()) channels[0]->cycle(cycles);
     currentCycle += cycles;
-    if (!currentCommand) return;
-    if (static_cast<WaitingCommand*>(currentCommand.get())->isDone())
-        currentCommand.reset();
+    auto it = std::remove_if(runningCommands.begin(), runningCommands.end(),
+                   [](const std::unique_ptr<WaitingCommand>& cmd) {
+                       return cmd->isDone();
+                   });
+    runningCommands.erase(it, runningCommands.end());
 }
 
-bool SimpleSystem::isEmpty() const { return currentCommand == nullptr; }
+bool SimpleSystem::isEmpty() const { return runningCommands.empty(); }
 
 void SimpleSystem::addController(
     std::unique_ptr<MemoryController> interconnect) {

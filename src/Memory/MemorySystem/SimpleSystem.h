@@ -2,6 +2,8 @@
 
 #include "Memory/MemorySystem/MemorySystem.h"
 
+#include "Memory/Command/WaitingCommand.h"
+
 #include <vector>
 
 namespace NVM::Memory {
@@ -44,10 +46,12 @@ class SimpleSystem : public MemorySystem {
     void addController(std::unique_ptr<MemoryController> controller);
 
     private:
+    bool available() const;
+
     unsigned int totalReads, totalWrites, currentCycle;
 
     std::vector<std::unique_ptr<MemoryController>> channels;
-    std::unique_ptr<Command> currentCommand;
+    std::vector<std::unique_ptr<WaitingCommand>> runningCommands;
 };
 
 } // namespace NVM::Memory

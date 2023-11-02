@@ -38,20 +38,18 @@ TEST_CASE("Handles requests properly", "[SimpleSystem], [Memory]") {
     SimpleSystem system;
     system.addController(std::move(controller));
 
-    SECTION("One read at a time") {
+    SECTION("Checks if child is available - read") {
         REQUIRE(system.read(0, {}, 0, 0));
+        REQUIRE(system.read(0, {}, 0, 0));
+        controllerPtr->available = false;
         REQUIRE_FALSE(system.read(0, {}, 0, 0));
-        controllerPtr->command.notify();
-        system.cycle(1);
-        REQUIRE(system.read(0, {}, 0, 0));
     }
 
-    SECTION("One write at a time") {
+    SECTION("Checks if child is available - write") {
         REQUIRE(system.write(0, {}, 0, 0));
+        REQUIRE(system.write(0, {}, 0, 0));
+        controllerPtr->available = false;
         REQUIRE_FALSE(system.write(0, {}, 0, 0));
-        controllerPtr->command.notify();
-        system.cycle(1);
-        REQUIRE(system.write(0, {}, 0, 0));
     }
 }
 
