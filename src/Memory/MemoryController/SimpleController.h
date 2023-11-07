@@ -36,6 +36,10 @@ class SimpleController : public MemoryController {
     std::unique_ptr<TriggeredCommand> systemCmd;
     std::vector<CommandQueue> bankQueues;
 
+    std::unique_ptr<Instruction> receivedInst;
+    using InstructionQueue = std::queue<std::unique_ptr<Instruction>>;
+    std::vector<InstructionQueue> commandQueues;
+
     void issueFromQueue();
 };
 

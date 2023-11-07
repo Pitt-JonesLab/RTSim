@@ -11,33 +11,17 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-using CommandFunc = std::function<Command*()>;
-
-std::unique_ptr<Command> makeControllerCommand(CommandFunc& func) {
-    auto interconnectCommand = func();
-    if (!interconnectCommand) return nullptr;
-
-    auto systemCommand = std::unique_ptr<Command>(new WaitingCommand());
-    interconnectCommand->setParent(systemCommand.get());
-    return std::move(systemCommand);
-}
-
 SimpleController::SimpleController() :
     totalReads(0),
     totalWrites(0),
-    bankQueues(1) {}
+    commandQueues(1) {}
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return false;
-    if (systemCmd) return false;
-    if (bankQueues[0].size() == 10) return false;
+    if (commandQueues[0].size() == 10) return false;
+    if (receivedInst) return false;
 
-    CommandFunc readFunc = [this, address, data]() {
-        ReadInstruction inst(address, data);
-        return interconnects[0]->issue(inst);
-    };
-
-    systemCmd.reset(new TriggeredCommand(readFunc));
+    receivedInst = std::make_unique<ReadInstruction>(address, data);
     log() << LogLevel::EVENT << "SimpleController received read\n";
     totalReads++;
 
@@ -45,17 +29,12 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 }
 
 bool SimpleController::write(uint64_t address,
-                                 NVM::Simulation::DataBlock data) {
+                             NVM::Simulation::DataBlock data) {
     if (interconnects.empty()) return false;
-    if (systemCmd) return false;
-    if (bankQueues[0].size() == 10) return false;
+    if (commandQueues[0].size() == 10) return false;
+    if (receivedInst) return false;
 
-    CommandFunc writeFunc = [this, address, data]() {
-        WriteInstruction inst(address, data);
-        return interconnects[0]->issue(inst);
-    };
-
-    systemCmd.reset(new TriggeredCommand(writeFunc));
+    receivedInst = std::make_unique<WriteInstruction>(address, data);
     log() << LogLevel::EVENT << "SimpleController received write\n";
     totalWrites++;
 
@@ -63,13 +42,13 @@ bool SimpleController::write(uint64_t address,
 }
 
 bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
-                                    NVM::Simulation::DataBlock data) {
+                                NVM::Simulation::DataBlock data) {
     return false;
 }
 
-bool
-SimpleController::transverseRead(uint64_t baseAddress, uint64_t destAddress,
-                                 std::vector<NVM::Simulation::DataBlock> data) {
+bool SimpleController::transverseRead(
+    uint64_t baseAddress, uint64_t destAddress,
+    std::vector<NVM::Simulation::DataBlock> data) {
     return false;
 }
 
@@ -81,37 +60,28 @@ bool SimpleController::transverseWrite(
 void SimpleController::cycle(unsigned int cycles) {
     if (cycles == 0) return;
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
-
-    if (systemCmd) {
-        log() << LogLevel::DEBUG
-              << "SimpleController: Moving issued command to bank queue\n";
-        bankQueues[0].push(std::move(systemCmd));
-        systemCmd.reset();
+    if (!commandQueues[0].empty()) issueFromQueue();
+    cycles--;
+    if (receivedInst) {
+        commandQueues[0].push(std::move(receivedInst));
+        receivedInst.reset();
     }
-    while (cycles && !bankQueues[0].empty()) {
-        bankQueues[0].front()->cycle(1);
-        if (bankQueues[0].front()->isDone()) {
-            log() << LogLevel::DEBUG
-                  << "SimpleController: Queue command finished\n";
-            bankQueues[0].pop();
-        }
+    while (cycles && !commandQueues[0].empty()) {
         issueFromQueue();
-
         cycles--;
     }
 }
 
 void SimpleController::issueFromQueue() {
-    if (!bankQueues[0].empty() && !bankQueues[0].front()->triggered()) {
-        log() << LogLevel::DEBUG
-              << "SimpleController: Issued command from queue\n";
-        bankQueues[0].front()->issue();
-    }
+    if (interconnects.empty()) return;
+    auto cmd = interconnects[0]->issue(*(commandQueues[0].front().get()));
+    if (cmd) commandQueues.front().pop();
 }
 
-bool SimpleController::isEmpty() const { 
+bool SimpleController::isEmpty() const {
     if (interconnects.empty()) return false;
-    return interconnects[0]->isEmpty() && bankQueues[0].empty() && !systemCmd;
+    return interconnects[0]->isEmpty() && commandQueues[0].empty() &&
+           !receivedInst;
 }
 
 StatBlock SimpleController::getStats(std::string tag) const {
