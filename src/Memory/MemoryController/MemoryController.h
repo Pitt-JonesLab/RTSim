@@ -9,19 +9,19 @@ namespace NVM::Memory {
 
 class MemoryController {
     public:
-    virtual Command* read(uint64_t address,
+    virtual bool read(uint64_t address,
                           NVM::Simulation::DataBlock data) = 0;
-    virtual Command* write(uint64_t address,
+    virtual bool write(uint64_t address,
                            NVM::Simulation::DataBlock data) = 0;
 
-    virtual Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
+    virtual bool rowClone(uint64_t srcAddress, uint64_t destAddress,
                               NVM::Simulation::DataBlock data) = 0;
 
-    virtual Command*
+    virtual bool
     transverseRead(uint64_t baseAddress, uint64_t destAddress,
                    std::vector<NVM::Simulation::DataBlock> data) = 0;
 
-    virtual Command*
+    virtual bool
     transverseWrite(uint64_t address,
                     std::vector<NVM::Simulation::DataBlock> data) = 0;
 

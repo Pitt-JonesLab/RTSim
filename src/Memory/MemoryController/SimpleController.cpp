@@ -27,10 +27,10 @@ SimpleController::SimpleController() :
     totalWrites(0),
     bankQueues(1) {}
 
-Command* SimpleController::read(uint64_t address, DataBlock data) {
-    if (interconnects.empty()) return nullptr;
-    if (systemCmd) return nullptr;
-    if (bankQueues[0].size() == 10) return nullptr;
+bool SimpleController::read(uint64_t address, DataBlock data) {
+    if (interconnects.empty()) return false;
+    if (systemCmd) return false;
+    if (bankQueues[0].size() == 10) return false;
 
     CommandFunc readFunc = [this, address, data]() {
         ReadInstruction inst(address, data);
@@ -41,14 +41,14 @@ Command* SimpleController::read(uint64_t address, DataBlock data) {
     log() << LogLevel::EVENT << "SimpleController received read\n";
     totalReads++;
 
-    return systemCmd.get();
+    return true;
 }
 
-Command* SimpleController::write(uint64_t address,
+bool SimpleController::write(uint64_t address,
                                  NVM::Simulation::DataBlock data) {
-    if (interconnects.empty()) return nullptr;
-    if (systemCmd) return nullptr;
-    if (bankQueues[0].size() == 10) return nullptr;
+    if (interconnects.empty()) return false;
+    if (systemCmd) return false;
+    if (bankQueues[0].size() == 10) return false;
 
     CommandFunc writeFunc = [this, address, data]() {
         WriteInstruction inst(address, data);
@@ -59,23 +59,23 @@ Command* SimpleController::write(uint64_t address,
     log() << LogLevel::EVENT << "SimpleController received write\n";
     totalWrites++;
 
-    return systemCmd.get();
+    return true;
 }
 
-Command* SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
+bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                     NVM::Simulation::DataBlock data) {
-    return nullptr;
+    return false;
 }
 
-Command*
+bool
 SimpleController::transverseRead(uint64_t baseAddress, uint64_t destAddress,
                                  std::vector<NVM::Simulation::DataBlock> data) {
-    return nullptr;
+    return false;
 }
 
-Command* SimpleController::transverseWrite(
+bool SimpleController::transverseWrite(
     uint64_t address, std::vector<NVM::Simulation::DataBlock> data) {
-    return nullptr;
+    return false;
 }
 
 void SimpleController::cycle(unsigned int cycles) {
