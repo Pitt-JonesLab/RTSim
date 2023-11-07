@@ -9,6 +9,8 @@ namespace NVM::Memory {
 
 class Interconnect {
     public:
+    Command* issue(Instruction& instruction);
+
     virtual Command* read(uint64_t address,
                           NVM::Simulation::DataBlock data) = 0;
     virtual Command* write(uint64_t address,
@@ -29,9 +31,12 @@ class Interconnect {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    virtual StatBlock getStats(std::string tag) const = 0;
+    StatBlock getStats(std::string tag) const;
 
-    virtual void addRank(std::unique_ptr<Rank> rank) = 0;
+    void addRank(std::unique_ptr<Rank> rank);
+
+    protected:
+    std::vector<std::unique_ptr<Rank>> ranks;
 };
 
 } // namespace NVM::Memory

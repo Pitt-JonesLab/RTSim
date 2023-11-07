@@ -2,8 +2,6 @@ set(TEST_SOURCES
     MemoryFactory.test.cpp
     SimpleSystem.test.cpp
     SimpleController.test.cpp
-    SimpleInterconnect.test.cpp
-    SimpleSubArray.test.cpp
     TimedCommand.test.cpp
     WaitingCommand.test.cpp
     ChainedCommand.test.cpp

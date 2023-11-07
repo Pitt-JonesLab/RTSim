@@ -11,6 +11,7 @@ set(MEMORY_SOURCES
     Bank/Bank.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
+    Interconnect/Interconnect.cpp
     MemoryController/SimpleController.cpp
     MemorySystem/SimpleSystem.cpp
     Rank/Rank.cpp
