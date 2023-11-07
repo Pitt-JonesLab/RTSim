@@ -25,8 +25,6 @@ class SimpleBank : public Bank {
 
     bool isEmpty() const;
 
-    void addSubArray(std::unique_ptr<SubArray> subArray);
-
     StatBlock getStats(std::string tag) const;
 
     private:
@@ -37,8 +35,6 @@ class SimpleBank : public Bank {
 
     unsigned int totalReads;
     unsigned int totalWrites;
-
-    std::vector<std::unique_ptr<SubArray>> subArrays;
 
     std::unique_ptr<Command> currentCommand;
 };

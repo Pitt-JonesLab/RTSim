@@ -2,13 +2,19 @@
 
 #include "Memory/SubArray/SubArray.h"
 #include "Simulation/MemorySystem.h"
+#include "Memory/Instruction.h"
 
 #include <memory>
 
 namespace NVM::Memory {
 
 class Bank {
+    protected:
+    std::vector<std::unique_ptr<SubArray>> subArrays;
+
     public:
+    Command* issue(Instruction& instruction);
+
     virtual Command* read(uint64_t address,
                           NVM::Simulation::DataBlock data) = 0;
     virtual Command* write(uint64_t address,
@@ -31,7 +37,7 @@ class Bank {
 
     virtual StatBlock getStats(std::string tag) const = 0;
 
-    virtual void addSubArray(std::unique_ptr<SubArray> subArray) = 0;
+    void addSubArray(std::unique_ptr<SubArray> subArray);
 };
 
 } // namespace NVM::Memory

@@ -1,12 +1,14 @@
 set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
+    Instruction.cpp
+    Decoder.cpp
     Command/TimedCommand.cpp
     Command/WaitingCommand.cpp
     Command/ChainedCommand.cpp
     Command/NullCommand.cpp
     Command/TriggeredCommand.cpp
-    Decoder.cpp
+    Bank/Bank.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp

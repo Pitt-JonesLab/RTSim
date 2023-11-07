@@ -85,13 +85,16 @@ class MockSubArray : public MockComponent<SubArray> {
     public:
     Command* switchRow(unsigned int row) { return sendNull(); }
 
-    Command* activate(uint64_t address) { return nullptr; }
-    Command* precharge() { return nullptr; }
-    Command* refresh() { return nullptr; }
+    Command* activate(uint64_t address) { return &command; }
+    Command* precharge() { return &command; }
+    Command* refresh() { return &command; }
 };
 
 class MockBank : public MockComponent<Bank> {
-    void addSubArray(std::unique_ptr<SubArray>) {}
+    public:
+    MockBank() {
+        addSubArray(std::make_unique<MockSubArray>());
+    }
 };
 
 class MockRank : public MockComponent<Rank> {

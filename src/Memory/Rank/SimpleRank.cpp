@@ -2,6 +2,7 @@
 
 #include "Logging/Logging.h"
 #include "Memory/Command/WaitingCommand.h"
+#include "Memory/Instruction.h"
 
 #include <functional>
 
@@ -28,13 +29,15 @@ Command* SimpleRank::read(uint64_t address, DataBlock data) {
     if (banks.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
-    CommandFunc readFunc = [&]() { return banks[0]->read(address, data); };
+    ReadInstruction inst(address, data);
+    CommandFunc readFunc = [&]() { return banks[0]->issue(inst); };
 
     currentCommand = std::move(makeRankCommand(readFunc));
     if (currentCommand) {
         log() << LogLevel::EVENT << "SimpleRank received read\n";
         totalReads++;
     }
+
     return currentCommand.get();
 }
 
@@ -42,7 +45,8 @@ Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
     if (banks.empty()) return nullptr;
     if (currentCommand) return nullptr;
 
-    CommandFunc writeFunc = [&]() { return banks[0]->write(address, data); };
+    WriteInstruction inst(address, data);
+    CommandFunc writeFunc = [&]() { return banks[0]->issue(inst); };
 
     currentCommand = std::move(makeRankCommand(writeFunc));
     if (currentCommand) {

@@ -114,10 +114,6 @@ void SimpleBank::cycle(unsigned int cycles) {
 
 bool SimpleBank::isEmpty() const { return currentCommand == nullptr; }
 
-void SimpleBank::addSubArray(std::unique_ptr<SubArray> subArray) {
-    subArrays.emplace_back(std::move(subArray));
-}
-
 StatBlock SimpleBank::getStats(std::string tag) const {
     StatBlock stats(tag);
 
