@@ -81,9 +81,6 @@ bool SimpleController::transverseWrite(
 void SimpleController::cycle(unsigned int cycles) {
     if (cycles == 0) return;
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
-    if (currentCommand) {
-        if (currentCommand->isDone()) currentCommand.reset();
-    }
 
     if (systemCmd) {
         log() << LogLevel::DEBUG
@@ -115,11 +112,6 @@ void SimpleController::issueFromQueue() {
 bool SimpleController::isEmpty() const { 
     if (interconnects.empty()) return false;
     return interconnects[0]->isEmpty() && bankQueues[0].empty() && !systemCmd;
-}
-
-void SimpleController::addInterconnect(
-    std::unique_ptr<Interconnect> interconnect) {
-    interconnects.emplace_back(std::move(interconnect));
 }
 
 StatBlock SimpleController::getStats(std::string tag) const {

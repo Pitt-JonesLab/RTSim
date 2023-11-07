@@ -9,13 +9,11 @@ namespace NVM::Memory {
 
 class MemoryController {
     public:
-    virtual bool read(uint64_t address,
-                          NVM::Simulation::DataBlock data) = 0;
-    virtual bool write(uint64_t address,
-                           NVM::Simulation::DataBlock data) = 0;
+    virtual bool read(uint64_t address, NVM::Simulation::DataBlock data) = 0;
+    virtual bool write(uint64_t address, NVM::Simulation::DataBlock data) = 0;
 
     virtual bool rowClone(uint64_t srcAddress, uint64_t destAddress,
-                              NVM::Simulation::DataBlock data) = 0;
+                          NVM::Simulation::DataBlock data) = 0;
 
     virtual bool
     transverseRead(uint64_t baseAddress, uint64_t destAddress,
@@ -31,8 +29,10 @@ class MemoryController {
 
     virtual StatBlock getStats(std::string tag) const = 0;
 
-    virtual void
-    addInterconnect(std::unique_ptr<Interconnect> interconnect) = 0;
+    void addInterconnect(std::unique_ptr<Interconnect> interconnect);
+
+    protected:
+    std::vector<std::unique_ptr<Interconnect>> interconnects;
 };
 
 } // namespace NVM::Memory

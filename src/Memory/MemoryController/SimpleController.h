@@ -32,9 +32,6 @@ class SimpleController : public MemoryController {
     private:
     unsigned int totalReads, totalWrites;
 
-    std::vector<std::unique_ptr<Interconnect>> interconnects;
-    std::unique_ptr<Command> currentCommand;
-
     using CommandQueue = std::queue<std::unique_ptr<TriggeredCommand>>;
     std::unique_ptr<TriggeredCommand> systemCmd;
     std::vector<CommandQueue> bankQueues;
