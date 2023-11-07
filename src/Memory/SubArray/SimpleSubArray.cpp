@@ -95,6 +95,12 @@ SimpleSubArray::transverseWrite(uint64_t address,
     return currentCommand.get();
 }
 
+Command* SimpleSubArray::activate(uint64_t address) { return nullptr; }
+
+Command* SimpleSubArray::precharge() { return nullptr; }
+
+Command* SimpleSubArray::refresh() { return nullptr; }
+
 void SimpleSubArray::cycle(unsigned int cycles) {
     if (!currentCommand) return;
     currentCommand->cycle(cycles);

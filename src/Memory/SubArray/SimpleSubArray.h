@@ -20,6 +20,9 @@ class SimpleSubArray : public SubArray {
                             std::vector<NVM::Simulation::DataBlock> data);
     Command* transverseWrite(uint64_t address,
                              std::vector<NVM::Simulation::DataBlock> data);
+    Command* activate(uint64_t address);
+    Command* precharge();
+    Command* refresh();
 
     void cycle(unsigned int cycles);
 

@@ -29,6 +29,10 @@ class SubArray {
     virtual StatBlock getStats(std::string tag) const = 0;
 
     virtual Command* switchRow(unsigned int row) = 0;
+
+    virtual Command* activate(uint64_t address) = 0;
+    virtual Command* precharge() = 0;
+    virtual Command* refresh() = 0;
 };
 
 } // namespace NVM::Memory

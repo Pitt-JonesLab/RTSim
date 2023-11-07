@@ -84,6 +84,10 @@ template<typename T> class MockComponent : public T {
 class MockSubArray : public MockComponent<SubArray> {
     public:
     Command* switchRow(unsigned int row) { return sendNull(); }
+
+    Command* activate(uint64_t address) { return nullptr; }
+    Command* precharge() { return nullptr; }
+    Command* refresh() { return nullptr; }
 };
 
 class MockBank : public MockComponent<Bank> {
