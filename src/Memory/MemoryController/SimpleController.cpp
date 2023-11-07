@@ -112,7 +112,10 @@ void SimpleController::issueFromQueue() {
     }
 }
 
-bool SimpleController::isEmpty() const { return currentCommand == nullptr; }
+bool SimpleController::isEmpty() const { 
+    if (interconnects.empty()) return false;
+    return interconnects[0]->isEmpty() && bankQueues[0].empty() && !systemCmd;
+}
 
 void SimpleController::addInterconnect(
     std::unique_ptr<Interconnect> interconnect) {

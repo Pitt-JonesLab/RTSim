@@ -51,7 +51,6 @@ class SimpleSystem : public MemorySystem {
     unsigned int totalReads, totalWrites, currentCycle;
 
     std::vector<std::unique_ptr<MemoryController>> channels;
-    std::vector<std::unique_ptr<WaitingCommand>> runningCommands;
 };
 
 } // namespace NVM::Memory

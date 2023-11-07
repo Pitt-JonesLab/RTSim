@@ -25,7 +25,6 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     if (!channelCmd) return false;
     totalReads++;
     log() << LogLevel::EVENT << "SimpleSystem received read\n";
-    runningCommands.push_back(std::make_unique<WaitingCommand>(channelCmd));
     return true;
 }
 
@@ -37,7 +36,6 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
     if (!channelCmd) return false;
     totalWrites++;
     log() << LogLevel::EVENT << "SimpleSystem received write\n";
-    runningCommands.push_back(std::make_unique<WaitingCommand>(channelCmd));
     return true;
 }
 
@@ -71,18 +69,16 @@ bool SimpleSystem::available() const { return !channels.empty(); }
 void SimpleSystem::cycle(unsigned int cycles) {
     if (!channels.empty()) channels[0]->cycle(cycles);
     currentCycle += cycles;
-    auto it = std::remove_if(runningCommands.begin(), runningCommands.end(),
-                   [](const std::unique_ptr<WaitingCommand>& cmd) {
-                       return cmd->isDone();
-                   });
-    runningCommands.erase(it, runningCommands.end());
 }
 
-bool SimpleSystem::isEmpty() const { return runningCommands.empty(); }
+bool SimpleSystem::isEmpty() const { 
+    if (channels.empty()) return false;
+    return channels[0]->isEmpty();
+}
 
 void SimpleSystem::addController(
-    std::unique_ptr<MemoryController> interconnect) {
-    channels.emplace_back(std::move(interconnect));
+    std::unique_ptr<MemoryController> controller) {
+    channels.emplace_back(std::move(controller));
 }
 
 void SimpleSystem::printStats(std::ostream& statStream) {
