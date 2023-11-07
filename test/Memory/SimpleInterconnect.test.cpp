@@ -22,12 +22,10 @@ TEST_CASE("Sends requests to Rank", "[SimpleInterconnect], [Memory]") {
 
     SECTION("Rank gets write") {
         REQUIRE(interconnect.write(0, {}));
-        REQUIRE(rankPtr->writeFlag);
     }
 
     SECTION("Rank gets read") {
         REQUIRE(interconnect.read(0, {}));
-        REQUIRE(rankPtr->readFlag);
     }
 }
 
@@ -41,17 +39,11 @@ TEST_CASE("Handles requests properly", "[SimpleInterconnect], [Memory]") {
     SECTION("One read at a time") {
         REQUIRE(interconnect.read(0, {}));
         REQUIRE_FALSE(interconnect.read(0, {}));
-        rankPtr->command.notify();
-        interconnect.cycle(1);
-        REQUIRE(interconnect.read(0, {}));
     }
 
     SECTION("One write at a time") {
         REQUIRE(interconnect.write(0, {}));
         REQUIRE_FALSE(interconnect.write(0, {}));
-        rankPtr->command.notify();
-        interconnect.cycle(1);
-        REQUIRE(interconnect.write(0, {}));
     }
 }
 

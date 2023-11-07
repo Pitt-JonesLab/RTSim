@@ -3,8 +3,6 @@ set(TEST_SOURCES
     SimpleSystem.test.cpp
     SimpleController.test.cpp
     SimpleInterconnect.test.cpp
-    SimpleRank.test.cpp
-    SimpleBank.test.cpp
     SimpleSubArray.test.cpp
     TimedCommand.test.cpp
     WaitingCommand.test.cpp

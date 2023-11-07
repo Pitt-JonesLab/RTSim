@@ -11,9 +11,6 @@ class SimpleBank : public Bank {
     public:
     SimpleBank();
 
-    Command* read(uint64_t address, NVM::Simulation::DataBlock data);
-
-    Command* write(uint64_t address, NVM::Simulation::DataBlock data);
     Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
                       NVM::Simulation::DataBlock data);
     Command* transverseRead(uint64_t baseAddress, uint64_t destAddress,

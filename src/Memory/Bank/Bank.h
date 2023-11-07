@@ -15,11 +15,6 @@ class Bank {
     public:
     Command* issue(Instruction& instruction);
 
-    virtual Command* read(uint64_t address,
-                          NVM::Simulation::DataBlock data) = 0;
-    virtual Command* write(uint64_t address,
-                           NVM::Simulation::DataBlock data) = 0;
-
     virtual Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
                               NVM::Simulation::DataBlock data) = 0;
 
@@ -35,7 +30,7 @@ class Bank {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    virtual StatBlock getStats(std::string tag) const = 0;
+    StatBlock getStats(std::string tag) const;
 
     void addSubArray(std::unique_ptr<SubArray> subArray);
 };

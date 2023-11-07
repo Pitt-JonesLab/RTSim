@@ -13,6 +13,7 @@ set(MEMORY_SOURCES
     Interconnect/SimpleInterconnect.cpp
     MemoryController/SimpleController.cpp
     MemorySystem/SimpleSystem.cpp
+    Rank/Rank.cpp
     Rank/SimpleRank.cpp
     SubArray/SimpleSubArray.cpp
     SubArray/RowController.cpp)

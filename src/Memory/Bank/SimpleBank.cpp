@@ -24,35 +24,6 @@ std::unique_ptr<Command> SimpleBank::makeBankCommand(CommandFunc& func,
 
 SimpleBank::SimpleBank() : totalReads(0), totalWrites(0) {}
 
-Command* SimpleBank::read(uint64_t address, DataBlock data) {
-    if (subArrays.empty()) return nullptr;
-    if (currentCommand) return nullptr;
-
-    CommandFunc readFunc = [&]() { return subArrays[0]->read(address, data); };
-
-    currentCommand = std::move(makeBankCommand(readFunc, address));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleBank received read\n";
-        totalReads++;
-    }
-    return currentCommand.get();
-}
-
-Command* SimpleBank::write(uint64_t address, NVM::Simulation::DataBlock data) {
-    if (subArrays.empty()) return nullptr;
-    if (currentCommand) return nullptr;
-
-    CommandFunc writeFunc = [&]() {
-        return subArrays[0]->write(address, data);
-    };
-
-    currentCommand = std::move(makeBankCommand(writeFunc, address));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleBank received write\n";
-    }
-    return currentCommand.get();
-}
-
 Command* SimpleBank::rowClone(uint64_t srcAddress, uint64_t destAddress,
                               NVM::Simulation::DataBlock data) {
     if (subArrays.empty()) return nullptr;
@@ -113,28 +84,3 @@ void SimpleBank::cycle(unsigned int cycles) {
 }
 
 bool SimpleBank::isEmpty() const { return currentCommand == nullptr; }
-
-StatBlock SimpleBank::getStats(std::string tag) const {
-    StatBlock stats(tag);
-
-    // stats.addStat(&totalReads, "reads");
-    // stats.addStat(&totalWrites, "writes");
-
-    for (int i = 0; i < subArrays.size(); i++) {
-        auto subArrayStats =
-            subArrays[i]->getStats(tag + ".subArray" + std::to_string(i));
-        stats.addChildStat(subArrayStats, "activate_energy", "nJ");
-        stats.addChildStat(subArrayStats, "read_energy", "nJ");
-        stats.addChildStat(subArrayStats, "write_energy", "nJ");
-        stats.addChildStat(subArrayStats, "reads");
-        stats.addChildStat(subArrayStats, "writes");
-        stats.addChildStat(subArrayStats, "activates");
-        stats.addChildStat(subArrayStats, "precharges");
-        stats.addChildStat(subArrayStats, "row_clones");
-        stats.addChildStat(subArrayStats, "transverse_reads");
-        stats.addChildStat(subArrayStats, "transverse_writes");
-        stats.addChild(subArrayStats);
-    }
-
-    return stats;
-}

@@ -25,37 +25,6 @@ std::unique_ptr<Command> makeRankCommand(CommandFunc& func) {
 
 SimpleRank::SimpleRank() : totalReads(0), totalWrites(0) {}
 
-Command* SimpleRank::read(uint64_t address, DataBlock data) {
-    if (banks.empty()) return nullptr;
-    if (currentCommand) return nullptr;
-
-    ReadInstruction inst(address, data);
-    CommandFunc readFunc = [&]() { return banks[0]->issue(inst); };
-
-    currentCommand = std::move(makeRankCommand(readFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleRank received read\n";
-        totalReads++;
-    }
-
-    return currentCommand.get();
-}
-
-Command* SimpleRank::write(uint64_t address, NVM::Simulation::DataBlock data) {
-    if (banks.empty()) return nullptr;
-    if (currentCommand) return nullptr;
-
-    WriteInstruction inst(address, data);
-    CommandFunc writeFunc = [&]() { return banks[0]->issue(inst); };
-
-    currentCommand = std::move(makeRankCommand(writeFunc));
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SimpleRank received read\n";
-        totalWrites++;
-    }
-    return currentCommand.get();
-}
-
 Command* SimpleRank::rowClone(uint64_t srcAddress, uint64_t destAddress,
                               NVM::Simulation::DataBlock data) {
     if (banks.empty()) return nullptr;
@@ -115,15 +84,8 @@ void SimpleRank::cycle(unsigned int cycles) {
 
 bool SimpleRank::isEmpty() const { return currentCommand == nullptr; }
 
-void SimpleRank::addBank(std::unique_ptr<Bank> bank) {
-    banks.emplace_back(std::move(bank));
-}
-
 StatBlock SimpleRank::getStats(std::string tag) const {
     StatBlock stats(tag);
-
-    stats.addStat(&totalReads, "reads");
-    stats.addStat(&totalWrites, "writes");
 
     for (int i = 0; i < banks.size(); i++) {
         auto bankStats = banks[i]->getStats(tag + ".bank" + std::to_string(i));

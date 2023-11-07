@@ -98,7 +98,10 @@ class MockBank : public MockComponent<Bank> {
 };
 
 class MockRank : public MockComponent<Rank> {
-    void addBank(std::unique_ptr<Bank>) {}
+    public:
+    MockRank() { 
+        addBank(std::make_unique<MockBank>());
+    }
 };
 
 class MockInterconnect : public MockComponent<Interconnect> {

@@ -9,10 +9,7 @@ namespace NVM::Memory {
 
 class Rank {
     public:
-    virtual Command* read(uint64_t address,
-                          NVM::Simulation::DataBlock data) = 0;
-    virtual Command* write(uint64_t address,
-                           NVM::Simulation::DataBlock data) = 0;
+    Command* issue(Instruction& instruction);
 
     virtual Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
                               NVM::Simulation::DataBlock data) = 0;
@@ -31,7 +28,10 @@ class Rank {
 
     virtual StatBlock getStats(std::string tag) const = 0;
 
-    virtual void addBank(std::unique_ptr<Bank> bank) = 0;
+    void addBank(std::unique_ptr<Bank> bank);
+
+    protected:
+    std::vector<std::unique_ptr<Bank>> banks;
 };
 
 } // namespace NVM::Memory
