@@ -68,11 +68,16 @@ def run_test(test_data):
         print('--------------------')
 
     if not passed:
-        sys.exit(1)
+        return False
+    return True
 
 testdata = get_tests()
 
+results = []
 for test in testdata["tests"]:
     sys.stdout.write(test["name"] + "...")
     sys.stdout.flush()
-    run_test(test)
+    results.append(run_test(test))
+
+if not all(results):
+    sys.exit(-1)
