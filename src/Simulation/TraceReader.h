@@ -44,15 +44,15 @@ class TraceReader {
     public:
     TraceReader(std::istream& trace);
 
+    virtual ~TraceReader() {}
+
     /**
      * Gets the next TraceCommand
      *
      * @return Next TraceCommand from the source. Returns nullptr if there are
      * no more commands remaining.
      */
-    virtual std::unique_ptr<TraceCommand> getNext() = 0;
-
-    virtual ~TraceReader() {}
+    virtual std::unique_ptr<TraceCommand> getNext();
 
     private:
     std::istream& trace;

@@ -2,10 +2,9 @@
 
 #include "Logging/Logging.h"
 #include "Memory/Command/WaitingCommand.h"
+#include "Memory/Decoder.h"
 
 #include <functional>
-
-using namespace NVM::Memory;
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -24,7 +23,9 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     auto channelCmd = channels[0]->read(address, data);
     if (!channelCmd) return false;
     totalReads++;
-    log() << LogLevel::EVENT << "SimpleSystem received read\n";
+    log() << LogLevel::EVENT << "SimpleSystem received read at row "
+          << Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, address)
+          << "\n";
     return true;
 }
 
@@ -71,13 +72,12 @@ void SimpleSystem::cycle(unsigned int cycles) {
     currentCycle += cycles;
 }
 
-bool SimpleSystem::isEmpty() const { 
+bool SimpleSystem::isEmpty() const {
     if (channels.empty()) return false;
     return channels[0]->isEmpty();
 }
 
-void SimpleSystem::addController(
-    std::unique_ptr<MemoryController> controller) {
+void SimpleSystem::addController(std::unique_ptr<MemoryController> controller) {
     channels.emplace_back(std::move(controller));
 }
 

@@ -13,6 +13,7 @@ class MockMemorySystem : public MemorySystem {
         lastData = data;
         lastThread = threadId;
         lastCycle = cycle;
+        readFlag = true;
         return available;
     }
 
@@ -46,7 +47,10 @@ class MockMemorySystem : public MemorySystem {
         return true;
     }
 
-    void cycle(unsigned int cycles) { currentCycle += cycles; }
+    void cycle(unsigned int cycles) {
+        currentCycle += cycles;
+        available = true;
+    }
 
     bool isEmpty() const { return currentCycle > lastCycle + 10; }
 
@@ -60,5 +64,6 @@ class MockMemorySystem : public MemorySystem {
     DataBlock lastData;
     unsigned int lastThread = 0;
     unsigned int lastCycle = 0;
+    bool readFlag = false;
 };
 } // namespace NVM::Simulation
