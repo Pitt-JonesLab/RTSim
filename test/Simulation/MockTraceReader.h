@@ -11,7 +11,7 @@ namespace NVM::Simulation {
  */
 class MockTraceReader : public TraceReader {
     public:
-    MockTraceReader() {}
+    MockTraceReader() : TraceReader(std::cin) {}
 
     std::unique_ptr<TraceCommand> getNext() {
         if (commands.empty()) return nullptr;

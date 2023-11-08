@@ -4,6 +4,7 @@
 #include "Simulation/TraceCommand.h"
 
 #include <array>
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -41,6 +42,8 @@ struct TraceLine {
  */
 class TraceReader {
     public:
+    TraceReader(std::istream& trace);
+
     /**
      * Gets the next TraceCommand
      *
@@ -50,6 +53,9 @@ class TraceReader {
     virtual std::unique_ptr<TraceCommand> getNext() = 0;
 
     virtual ~TraceReader() {}
+
+    private:
+    std::istream& trace;
 };
 
 } // namespace NVM::Simulation

@@ -15,20 +15,6 @@
 using namespace NVM;
 using namespace NVM::Simulation;
 
-int readTraceVersion(std::ifstream& file) {
-    std::string line;
-    int currentPos = file.tellg();
-    getline(file, line);
-
-    if (line.substr(0, 4) == "NVMV") {
-        std::string versionString = line.substr(4, std::string::npos);
-        return atoi(versionString.c_str());
-    }
-
-    // file.seekg(currentPos, std::ios_base::beg);
-    return 0;
-}
-
 std::string getNextToken(std::istringstream& inStream) {
     std::string token;
     while (getline(inStream, token, ' ')) {
@@ -84,15 +70,15 @@ NVMDataBlock readData(std::istringstream& inStream) {
 
 FileTraceReader::FileTraceReader(std::string traceFilename) :
     traceFile(traceFilename),
-    traceVersion(-1) {}
+    traceVersion(-1),
+    TraceReader(traceFile) {}
 
 std::unique_ptr<TraceCommand> FileTraceReader::getNext() {
     if (!traceFile.good()) return nullptr;
-    if (traceVersion == -1) traceVersion = readTraceVersion(traceFile);
     std::string fullLine;
     getline(traceFile, fullLine);
     if (traceFile.eof()) {
-        std::cout << "NVMainTraceReader: Reached EOF!" << std::endl;
+        std::cout << "TraceReader: Reached EOF!" << std::endl;
         return nullptr;
     }
 

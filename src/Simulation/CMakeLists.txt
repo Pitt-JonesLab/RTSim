@@ -2,6 +2,7 @@ set(SIMULATION_SOURCES
     CycleTimer.cpp
     TraceIssuer.cpp
     TraceSimulator.cpp
+    TraceReader.cpp
     FileTraceReader.cpp
     ReadCommand.cpp
     WriteCommand.cpp

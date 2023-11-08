@@ -1,0 +1,191 @@
+NVMain command line is:
+bin/rtsim.fast Config/RM.config test/Traces/read/random_reads.nvt 0 
+
+Reading config info from Config/RM.config
+MemType = RTM
+CLK = 2000
+RATE = 2
+BusWidth = 32
+DeviceWidth = 32
+CPUFreq = 2000
+BANKS = 1
+RANKS = 1
+CHANNELS = 1
+DBCS = 256
+DOMAINS = 64
+WordSize = 32
+MATHeight = 256
+nPorts = 2
+PortAccess = static
+PortUpdate = lazy
+UseRefresh = false
+RefreshRows = 1
+BanksPerRefresh = 1
+DelayedRefreshThreshold = 1
+MEM_CTL = RTM
+ClosePage = 0
+AddressMappingScheme = RK:BK:CH:R:C
+Decoder = DRCDecoder
+INTERCONNECT = OffChipBus
+tSH = 1
+tRD = 1
+tWR = 2
+tACT = 1
+tRAS = 0
+tCMD = 1
+tBURST = 4
+tRCD = 2
+tWP = 4
+tRP = 1
+tCAS = 1
+tAL = 0
+tCCD = 1
+tCWD = 1
+tWTR = 3
+tRTRS = 1
+tRTP = 1
+tOST = 0
+tRRDR = 4
+tRRDW = 4
+RAW = 4
+tRAW = 4
+tRDPDEN = 5
+tWRPDEN = 6
+tWRAPDEN = 6
+tPD = 1
+tXP = 3
+tXPDLL = 200000
+tRFC = 100
+tREFW = 42666667
+EnergyModel = energy
+Erd = 0.080096
+Eopenrd = 0.000126318
+Ewr = 0.108981
+Esh = 0.0195
+Ewrpb = =1.242
+Eleak = 3120.202
+Eopen = 0
+Eclosed = 0
+Epdpf = 0
+Epdps = 0
+Epda = 0
+Eref = 0
+Voltage = 1.8
+EIDD0 = 85
+EIDD1 = 85
+EIDD2P0 = 20
+EIDD2P1 = 42
+EIDD2N = 55
+EIDD2NT = 55
+EIDD3P = 68
+EIDD3N = 67
+EIDD4R = 207
+EIDD4W = 185
+EIDD5B = 230
+EIDD6 = 22
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+SubArray received read
+SimpleController received read
+SimpleSystem received read
+TraceReader: Reached EOF!
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+SubArray received read
+Exiting at cycle 97 because simCycles 0 reached.
+system.reads 19
+system.writes 0
+system.channel0.reads 19
+system.channel0.writes 0
+system.channel0.i0.activate_energy 0
+system.channel0.i0.read_energy 2.09
+system.channel0.i0.write_energy 0
+system.channel0.i0.reads 19
+system.channel0.i0.writes 0
+system.channel0.i0.activates 0
+system.channel0.i0.precharges 0
+system.channel0.i0.row_clones 0
+system.channel0.i0.transverse_reads 0
+system.channel0.i0.transverse_writes 0
+system.channel0.i0.rank0.activate_energy 0
+system.channel0.i0.rank0.read_energy 2.09
+system.channel0.i0.rank0.write_energy 0
+system.channel0.i0.rank0.reads 19
+system.channel0.i0.rank0.writes 0
+system.channel0.i0.rank0.activates 0
+system.channel0.i0.rank0.precharges 0
+system.channel0.i0.rank0.row_clones 0
+system.channel0.i0.rank0.transverse_reads 0
+system.channel0.i0.rank0.transverse_writes 0
+system.channel0.i0.rank0.bank0.activate_energy 0
+system.channel0.i0.rank0.bank0.read_energy 2.09
+system.channel0.i0.rank0.bank0.write_energy 0
+system.channel0.i0.rank0.bank0.reads 19
+system.channel0.i0.rank0.bank0.writes 0
+system.channel0.i0.rank0.bank0.activates 0
+system.channel0.i0.rank0.bank0.precharges 0
+system.channel0.i0.rank0.bank0.row_clones 0
+system.channel0.i0.rank0.bank0.transverse_reads 0
+system.channel0.i0.rank0.bank0.transverse_writes 0
+system.channel0.i0.rank0.bank0.subArray0.reads 19
+system.channel0.i0.rank0.bank0.subArray0.writes 0
+system.channel0.i0.rank0.bank0.subArray0.activates 0
+system.channel0.i0.rank0.bank0.subArray0.precharges 0
+system.channel0.i0.rank0.bank0.subArray0.shifts 19
+system.channel0.i0.rank0.bank0.subArray0.row_clones 0
+system.channel0.i0.rank0.bank0.subArray0.transverse_reads 0
+system.channel0.i0.rank0.bank0.subArray0.transverse_writes 0
+system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 0
+system.channel0.i0.rank0.bank0.subArray0.activate_energy 0
+system.channel0.i0.rank0.bank0.subArray0.read_energy 2.09
+system.channel0.i0.rank0.bank0.subArray0.write_energy 0
+system.channel0.i0.rank0.bank0.subArray0.shift_energy 0.57
