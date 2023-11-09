@@ -95,9 +95,19 @@ SimpleSubArray::transverseWrite(uint64_t address,
     return currentCommand.get();
 }
 
-Command* SimpleSubArray::activate(uint64_t address) { return nullptr; }
+Command* SimpleSubArray::activate(uint64_t address) {
+    if (currentCommand) return nullptr;
+    currentCommand = std::make_unique<TimedCommand>(5);
+    totalActivates++;
+    return currentCommand.get();
+}
 
-Command* SimpleSubArray::precharge() { return nullptr; }
+Command* SimpleSubArray::precharge() {
+    if (currentCommand) return nullptr;
+    currentCommand = std::make_unique<TimedCommand>(5);
+    totalPrecharges++;
+    return currentCommand.get();
+}
 
 Command* SimpleSubArray::refresh() { return nullptr; }
 

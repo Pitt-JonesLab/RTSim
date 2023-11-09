@@ -15,11 +15,11 @@ class SimpleController : public MemoryController {
     bool read(uint64_t address, NVM::Simulation::DataBlock data);
     bool write(uint64_t address, NVM::Simulation::DataBlock data);
     bool rowClone(uint64_t srcAddress, uint64_t destAddress,
-                      NVM::Simulation::DataBlock data);
+                  NVM::Simulation::DataBlock data);
     bool transverseRead(uint64_t baseAddress, uint64_t destAddress,
-                            std::vector<NVM::Simulation::DataBlock> data);
+                        std::vector<NVM::Simulation::DataBlock> data);
     bool transverseWrite(uint64_t address,
-                             std::vector<NVM::Simulation::DataBlock> data);
+                         std::vector<NVM::Simulation::DataBlock> data);
 
     void cycle(unsigned int cycles);
 
@@ -31,16 +31,15 @@ class SimpleController : public MemoryController {
 
     private:
     unsigned int totalReads, totalWrites;
-
-    using CommandQueue = std::queue<std::unique_ptr<TriggeredCommand>>;
-    std::unique_ptr<TriggeredCommand> systemCmd;
-    std::vector<CommandQueue> bankQueues;
+    int openRow;
 
     std::unique_ptr<Instruction> receivedInst;
     using InstructionQueue = std::queue<std::unique_ptr<Instruction>>;
-    std::vector<InstructionQueue> commandQueues;
+    std::vector<InstructionQueue> highLevelInstructions;
+    std::vector<InstructionQueue> lowLevelInstructions;
 
     void issueFromQueue();
+    void parseTransaction();
 };
 
 } // namespace NVM::Memory

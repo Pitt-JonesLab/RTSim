@@ -8,7 +8,7 @@
             "type": "gdb",
             "request": "launch",
             "name": "GDB",
-            "program": "${workspaceFolder}/bin/debug/rtsim.fast",
+            "program": "${workspaceFolder}/bin/rtsim.fast",
             "stopOnEntry": true,
             "arguments": "${workspaceFolder}/Config/RM.config ${workspaceFolder}/test/Traces/hello_world.nvt 0"
         }

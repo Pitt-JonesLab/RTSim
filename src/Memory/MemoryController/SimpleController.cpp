@@ -2,6 +2,7 @@
 
 #include "Logging/Logging.h"
 #include "Memory/Command/WaitingCommand.h"
+#include "Memory/Decoder.h"
 
 #include <functional>
 
@@ -14,11 +15,13 @@ using namespace NVM::Logging;
 SimpleController::SimpleController() :
     totalReads(0),
     totalWrites(0),
-    commandQueues(1) {}
+    highLevelInstructions(1),
+    lowLevelInstructions(1),
+    openRow(-1) {}
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return false;
-    if (commandQueues[0].size() == 10) return false;
+    if (highLevelInstructions[0].size() == 10) return false;
     if (receivedInst) return false;
 
     receivedInst = std::make_unique<ReadInstruction>(address, data);
@@ -31,7 +34,7 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 bool SimpleController::write(uint64_t address,
                              NVM::Simulation::DataBlock data) {
     if (interconnects.empty()) return false;
-    if (commandQueues[0].size() == 10) return false;
+    if (highLevelInstructions[0].size() == 10) return false;
     if (receivedInst) return false;
 
     receivedInst = std::make_unique<WriteInstruction>(address, data);
@@ -60,13 +63,15 @@ bool SimpleController::transverseWrite(
 void SimpleController::cycle(unsigned int cycles) {
     if (cycles == 0) return;
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
-    if (!commandQueues[0].empty()) issueFromQueue();
+    parseTransaction();
+    issueFromQueue();
     cycles--;
     if (receivedInst) {
-        commandQueues[0].push(std::move(receivedInst));
+        highLevelInstructions[0].push(std::move(receivedInst));
         receivedInst.reset();
     }
-    while (cycles && !commandQueues[0].empty()) {
+    while (cycles && !highLevelInstructions[0].empty()) {
+        parseTransaction();
         issueFromQueue();
         cycles--;
     }
@@ -74,14 +79,16 @@ void SimpleController::cycle(unsigned int cycles) {
 
 void SimpleController::issueFromQueue() {
     if (interconnects.empty()) return;
-    auto cmd = interconnects[0]->issue(*(commandQueues[0].front().get()));
-    if (cmd) commandQueues.front().pop();
+    if (lowLevelInstructions[0].empty()) return;
+    auto cmd =
+        interconnects[0]->issue(*(lowLevelInstructions[0].front().get()));
+    if (cmd) lowLevelInstructions[0].pop();
 }
 
 bool SimpleController::isEmpty() const {
     if (interconnects.empty()) return false;
-    return interconnects[0]->isEmpty() && commandQueues[0].empty() &&
-           !receivedInst;
+    return interconnects[0]->isEmpty() && highLevelInstructions[0].empty() &&
+           lowLevelInstructions[0].empty() && !receivedInst;
 }
 
 StatBlock SimpleController::getStats(std::string tag) const {
@@ -96,4 +103,29 @@ StatBlock SimpleController::getStats(std::string tag) const {
     }
 
     return stats;
+}
+
+void SimpleController::parseTransaction() {
+    if (!lowLevelInstructions[0].empty()) return;
+    if (highLevelInstructions[0].empty()) return;
+
+    auto& nextInst = highLevelInstructions[0].front();
+
+    auto nextRow = Decoder::decodeSymbol(Decoder::AddressSymbol::ROW,
+                                         nextInst->getAddress());
+    if (openRow != nextRow) {
+        if (openRow != -1)
+            lowLevelInstructions[0].push(
+                std::make_unique<PrechargeInstruction>(nextInst->getAddress()));
+        lowLevelInstructions[0].push(
+            std::make_unique<ActivateInstruction>(nextInst->getAddress()));
+        openRow = nextRow;
+
+        log() << LogLevel::EVENT << "Switching to row " << openRow << '\n';
+    } else {
+        log() << LogLevel::EVENT << "Row buffer hit\n";
+    }
+
+    lowLevelInstructions[0].push(std::move(nextInst));
+    highLevelInstructions[0].pop();
 }
