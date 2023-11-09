@@ -30,16 +30,17 @@ class SimpleController : public MemoryController {
     StatBlock getStats(std::string tag) const;
 
     private:
-    unsigned int totalReads, totalWrites;
+    unsigned int totalReads, totalWrites, rowBufferHits;
     int openRow;
 
     std::unique_ptr<Instruction> receivedInst;
-    using InstructionQueue = std::queue<std::unique_ptr<Instruction>>;
+    using InstructionQueue = std::vector<std::unique_ptr<Instruction>>;
     std::vector<InstructionQueue> highLevelInstructions;
     std::vector<InstructionQueue> lowLevelInstructions;
 
     void issueFromQueue();
     void parseTransaction();
+    std::unique_ptr<Instruction> getNextInstruction();
 };
 
 } // namespace NVM::Memory

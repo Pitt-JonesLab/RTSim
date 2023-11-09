@@ -44,7 +44,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.reads 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 20",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 19",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 0"
+                "system.channel0.row_buffer_hits 0"
             ]
         },
         {
@@ -69,7 +69,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.reads 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 3",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 2",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 17"
+                "system.channel0.row_buffer_hits 17"
             ]
         },
         {
@@ -94,7 +94,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.reads 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 1",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 0",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 20"
+                "system.channel0.row_buffer_hits 19"
             ]
         },
         {
@@ -119,7 +119,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.writes 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 20",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 19",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 0"
+                "system.channel0.row_buffer_hits 0"
             ]
         },
         {
@@ -144,7 +144,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.writes 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 3",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 2",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 17"
+                "system.channel0.row_buffer_hits 17"
             ]
         },
         {
@@ -169,7 +169,7 @@
                 "system.channel0.i0.rank0.bank0.subArray0.writes 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 1",
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 0",
-                "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 20"
+                "system.channel0.row_buffer_hits 19"
             ]
         },
         {

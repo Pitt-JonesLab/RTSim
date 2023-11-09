@@ -4,6 +4,7 @@
 #include "Memory/Command/WaitingCommand.h"
 #include "Memory/Decoder.h"
 
+#include <algorithm>
 #include <functional>
 
 using namespace NVM::Memory;
@@ -15,13 +16,14 @@ using namespace NVM::Logging;
 SimpleController::SimpleController() :
     totalReads(0),
     totalWrites(0),
+    rowBufferHits(0),
     highLevelInstructions(1),
     lowLevelInstructions(1),
     openRow(-1) {}
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 10) return false;
+    if (highLevelInstructions[0].size() == 20) return false;
     if (receivedInst) return false;
 
     receivedInst = std::make_unique<ReadInstruction>(address, data);
@@ -34,7 +36,7 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 bool SimpleController::write(uint64_t address,
                              NVM::Simulation::DataBlock data) {
     if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 10) return false;
+    if (highLevelInstructions[0].size() == 20) return false;
     if (receivedInst) return false;
 
     receivedInst = std::make_unique<WriteInstruction>(address, data);
@@ -67,7 +69,7 @@ void SimpleController::cycle(unsigned int cycles) {
     issueFromQueue();
     cycles--;
     if (receivedInst) {
-        highLevelInstructions[0].push(std::move(receivedInst));
+        highLevelInstructions[0].push_back(std::move(receivedInst));
         receivedInst.reset();
     }
     while (cycles && !highLevelInstructions[0].empty()) {
@@ -82,7 +84,7 @@ void SimpleController::issueFromQueue() {
     if (lowLevelInstructions[0].empty()) return;
     auto cmd =
         interconnects[0]->issue(*(lowLevelInstructions[0].front().get()));
-    if (cmd) lowLevelInstructions[0].pop();
+    if (cmd) lowLevelInstructions[0].erase(lowLevelInstructions[0].begin());
 }
 
 bool SimpleController::isEmpty() const {
@@ -96,6 +98,7 @@ StatBlock SimpleController::getStats(std::string tag) const {
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");
+    stats.addStat(&rowBufferHits, "row_buffer_hits");
 
     for (int i = 0; i < interconnects.size(); i++) {
         stats.addChild(
@@ -105,27 +108,52 @@ StatBlock SimpleController::getStats(std::string tag) const {
     return stats;
 }
 
+std::unique_ptr<Instruction> SimpleController::getNextInstruction() {
+    if (highLevelInstructions[0].empty()) return nullptr;
+
+    // Try to send row buffer hit
+    auto it =
+        std::find_if(highLevelInstructions[0].begin(),
+                     highLevelInstructions[0].end(), [this](const auto& inst) {
+                         auto row = Decoder::decodeSymbol(
+                             Decoder::AddressSymbol::ROW, inst->getAddress());
+                         return row == openRow;
+                     });
+
+    if (it != highLevelInstructions[0].end()) {
+        auto nextInst = std::move(*it);
+        highLevelInstructions[0].erase(it);
+        return nextInst;
+    }
+
+    // Send next instruction in queue
+    auto nextInst = std::move(highLevelInstructions[0].front());
+    highLevelInstructions[0].erase(highLevelInstructions[0].begin());
+    return std::move(nextInst);
+}
+
 void SimpleController::parseTransaction() {
     if (!lowLevelInstructions[0].empty()) return;
     if (highLevelInstructions[0].empty()) return;
 
-    auto& nextInst = highLevelInstructions[0].front();
+    auto nextInst = getNextInstruction();
+    if (!nextInst) return;
 
     auto nextRow = Decoder::decodeSymbol(Decoder::AddressSymbol::ROW,
                                          nextInst->getAddress());
     if (openRow != nextRow) {
         if (openRow != -1)
-            lowLevelInstructions[0].push(
+            lowLevelInstructions[0].push_back(
                 std::make_unique<PrechargeInstruction>(nextInst->getAddress()));
-        lowLevelInstructions[0].push(
+        lowLevelInstructions[0].push_back(
             std::make_unique<ActivateInstruction>(nextInst->getAddress()));
         openRow = nextRow;
 
         log() << LogLevel::EVENT << "Switching to row " << openRow << '\n';
     } else {
         log() << LogLevel::EVENT << "Row buffer hit\n";
+        rowBufferHits++;
     }
 
-    lowLevelInstructions[0].push(std::move(nextInst));
-    highLevelInstructions[0].pop();
+    lowLevelInstructions[0].push_back(std::move(nextInst));
 }
