@@ -171,6 +171,24 @@
                 "system.channel0.i0.rank0.bank0.subArray0.precharges 0",
                 "system.channel0.i0.rank0.bank0.subArray0.row_buffer_hits 20"
             ]
+        },
+        {
+            "name": "Local RowClones",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/rowclone/local_rowclones.nvt",
+            "config": "Config/RM.config",
+            "cycles": "0",
+            "overrides": "",
+            "checks": []
+        },
+        {
+            "name": "Local PIM",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/pim/local_pim.nvt",
+            "config": "Config/RM.config",
+            "cycles": "0",
+            "overrides": "",
+            "checks": []
         }
     ]
 }
