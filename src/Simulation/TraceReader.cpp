@@ -15,6 +15,10 @@
 using namespace NVM;
 using namespace NVM::Simulation;
 
+enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
+
+enum class Opcode2 { NONE };
+
 TraceReader::TraceReader(std::istream& trace) : trace(trace) {}
 
 std::string getNextToken(std::istringstream& inStream) {
