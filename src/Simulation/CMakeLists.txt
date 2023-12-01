@@ -9,7 +9,7 @@ set(SIMULATION_SOURCES
     TransverseReadCommand.cpp
     TransverseWriteCommand.cpp
     RowCloneCommand.cpp
-    ${RTSIM_DIR}/include/NVMDataBlock.cpp
+    ${RTSIM_DIR}/src/old/NVMDataBlock.cpp
     Config.cpp)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})

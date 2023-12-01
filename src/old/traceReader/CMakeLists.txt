@@ -1,0 +1,4 @@
+set(TRACEREADER_SOURCES
+    ${RTSIM_DIR}/src/old/traceReader/TraceLine.cpp)
+
+set(ALL_SOURCES ${ALL_SOURCES} ${TRACEREADER_SOURCES} PARENT_SCOPE)

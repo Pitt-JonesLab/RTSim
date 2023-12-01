@@ -1,9 +1,9 @@
 #include "src/main/RTSystem.h"
 
-#include "NVM/nvmain.h"
-#include "SimInterface/NullInterface/NullInterface.h"
-#include "src/EventQueue.h"
-#include "Utils/HookFactory.h"
+#include "src/old/EventQueue.h"
+#include "src/old/NVM/nvmain.h"
+#include "src/old/SimInterface/NullInterface/NullInterface.h"
+#include "src/old/Utils/HookFactory.h"
 
 using namespace NVM;
 using namespace NVM::Simulation;

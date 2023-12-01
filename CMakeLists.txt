@@ -25,24 +25,9 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 
 # Lib dirs
 add_subdirectory(src)
-add_subdirectory(Utils)
-add_subdirectory(traceWriter)
-add_subdirectory(traceReader)
-add_subdirectory(Ranks)
-add_subdirectory(Prefetchers)
-add_subdirectory(MemControl)
-add_subdirectory(Banks)
-add_subdirectory(DataEncoders)
-add_subdirectory(Decoders)
-add_subdirectory(Endurance)
-add_subdirectory(FaultModels)
-add_subdirectory(Interconnect)
-add_subdirectory(include)
-add_subdirectory(NVM)
-add_subdirectory(SimInterface)
 
 add_library(RTSim ${ALL_SOURCES})
-target_include_directories(RTSim PUBLIC ${RTSIM_DIR} ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)
+target_include_directories(RTSim PUBLIC ${RTSIM_DIR} ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src ${RTSIM_DIR}/src/old)
 target_link_libraries(RTSim PUBLIC RTSim_Simulation RTSim_Logging RTSim_Memory)
 
 # If this is the top-level project, build the tests

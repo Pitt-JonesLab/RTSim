@@ -1,11 +1,11 @@
 #include "Simulation/TraceReader.h"
 
-#include "NVMDataBlock.h"
 #include "Simulation/ReadCommand.h"
 #include "Simulation/RowCloneCommand.h"
 #include "Simulation/TransverseReadCommand.h"
 #include "Simulation/TransverseWriteCommand.h"
 #include "Simulation/WriteCommand.h"
+#include "src/old/NVMDataBlock.h"
 
 #include <arpa/inet.h>
 #include <cstring>

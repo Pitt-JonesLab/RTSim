@@ -1,11 +1,11 @@
-#include "Config.h"
 #include "Logging/Logging.h"
+#include "Memory/Decoder.h"
 #include "Memory/MemoryFactory.h"
-#include "NVMTypes.h"
 #include "Simulation/Config.h"
 #include "Simulation/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
-#include "Memory/Decoder.h"
+#include "src/old/Config.h"
+#include "src/old/NVMTypes.h"
 
 #include <cmath>
 #include <fstream>

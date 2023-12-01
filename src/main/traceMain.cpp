@@ -31,30 +31,31 @@
  *                     Website: http://www.cse.psu.edu/~poremba/ )
  *******************************************************************************/
 
-#include "Decoders/DecoderFactory.h"
-#include "Endurance/EnduranceDistributionFactory.h"
-#include "include/NVMHelpers.h"
-#include "Interconnect/InterconnectFactory.h"
 #include "Logging/Logging.h"
-#include "MemControl/MemoryControllerFactory.h"
-#include "NVM/nvmain.h"
-#include "SimInterface/NullInterface/NullInterface.h"
-#include "src/AddressTranslator.h"
-#include "src/Config.h"
-#include "src/EventQueue.h"
-#include "src/Interconnect.h"
-#include "src/main/RTSystem.h"
-#include "src/MemoryController.h"
-#include "src/Simulation/FileTraceReader.h"
-#include "src/Simulation/TraceSimulator.h"
-#include "src/TranslationMethod.h"
-#include "Utils/HookFactory.h"
+#include "main/RTSystem.h"
+#include "Simulation/FileTraceReader.h"
+#include "Simulation/TraceSimulator.h"
+#include "src/old/AddressTranslator.h"
+#include "src/old/Config.h"
+#include "src/old/Decoders/DecoderFactory.h"
+#include "src/old/Endurance/EnduranceDistributionFactory.h"
+#include "src/old/EventQueue.h"
+#include "src/old/Interconnect.h"
+#include "src/old/Interconnect/InterconnectFactory.h"
+#include "src/old/MemControl/MemoryControllerFactory.h"
+#include "src/old/MemoryController.h"
+#include "src/old/NVM/nvmain.h"
+#include "src/old/NVMHelpers.h"
+#include "src/old/SimInterface/NullInterface/NullInterface.h"
+#include "src/old/TranslationMethod.h"
+#include "src/old/Utils/HookFactory.h"
 
 #include <cmath>
 #include <fstream>
 #include <memory>
 #include <sstream>
 #include <stdlib.h>
+
 
 using namespace NVM;
 using namespace NVM::Simulation;

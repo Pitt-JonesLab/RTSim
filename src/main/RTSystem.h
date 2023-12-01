@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/NVMObject.h"
+#include "src/old/NVMObject.h"
 #include "src/Simulation/MemorySystem.h"
 
 namespace NVM::Main {

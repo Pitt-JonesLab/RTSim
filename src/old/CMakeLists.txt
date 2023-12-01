@@ -1,0 +1,48 @@
+add_subdirectory(Banks)
+add_subdirectory(DataEncoders)
+add_subdirectory(Decoders)
+add_subdirectory(Endurance)
+add_subdirectory(FaultModels)
+add_subdirectory(Interconnect)
+add_subdirectory(MemControl)
+add_subdirectory(NVM)
+add_subdirectory(Prefetchers)
+add_subdirectory(Ranks)
+add_subdirectory(SimInterface)
+add_subdirectory(traceReader)
+add_subdirectory(traceWriter)
+add_subdirectory(Utils)
+
+set(MAIN_SOURCES
+    ${RTSIM_DIR}/src/old/AddressTranslator.cpp 
+    ${RTSIM_DIR}/src/old/Bank.cpp
+    ${RTSIM_DIR}/src/old/BankCounter.cpp
+    ${RTSIM_DIR}/src/old/CommandQueues.cpp
+    ${RTSIM_DIR}/src/old/Config.cpp 
+    ${RTSIM_DIR}/src/old/DataEncoder.cpp 
+    ${RTSIM_DIR}/src/old/Debug.cpp 
+    ${RTSIM_DIR}/src/old/EnduranceModel.cpp 
+    ${RTSIM_DIR}/src/old/EventQueue.cpp 
+    ${RTSIM_DIR}/src/old/FaultModel.cpp 
+    ${RTSIM_DIR}/src/old/Interconnect.cpp 
+    ${RTSIM_DIR}/src/old/MemoryController.cpp
+    ${RTSIM_DIR}/src/old/ModuleTiming.cpp
+    ${RTSIM_DIR}/src/old/NVMAddress.cpp
+    ${RTSIM_DIR}/src/old/NVMDataBlock.cpp
+    ${RTSIM_DIR}/src/old/NVMHelpers.cpp
+    ${RTSIM_DIR}/src/old/NVMObject.cpp 
+    ${RTSIM_DIR}/src/old/Params.cpp 
+    ${RTSIM_DIR}/src/old/Prefetcher.cpp 
+    ${RTSIM_DIR}/src/old/Rank.cpp  
+    ${RTSIM_DIR}/src/old/RefreshHandler.cpp
+    ${RTSIM_DIR}/src/old/RequestFinder.cpp
+    ${RTSIM_DIR}/src/old/RequestMaker.cpp
+    ${RTSIM_DIR}/src/old/SimInterface.cpp 
+    ${RTSIM_DIR}/src/old/Stats.cpp  
+    ${RTSIM_DIR}/src/old/SubArray.cpp 
+    ${RTSIM_DIR}/src/old/SubArrayCounter.cpp
+    ${RTSIM_DIR}/src/old/TagGenerator.cpp 
+    ${RTSIM_DIR}/src/old/TranslationMethod.cpp
+    ${RTSIM_DIR}/src/old/SubArrayCounter.cpp)
+
+set(ALL_SOURCES ${ALL_SOURCES} ${MAIN_SOURCES} PARENT_SCOPE)

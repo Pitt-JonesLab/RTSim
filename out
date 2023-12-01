@@ -1,3 +1,0 @@
-NVMain command line is:
-bin/rtsim.fast Config/RM.config test/Traces/hello_world.nvt 0 
-
