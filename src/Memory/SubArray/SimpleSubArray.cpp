@@ -60,9 +60,6 @@ Command* SimpleSubArray::rowClone(uint64_t srcAddress, uint64_t destAddress,
     log() << LogLevel::EVENT << "SubArray received row clone\n";
     totalRCs++;
     totalActivates++;
-    totalPrecharges++;
-    rowBufferHits = 0;
-    actEnergy += 0.080096;
     return currentCommand.get();
 }
 

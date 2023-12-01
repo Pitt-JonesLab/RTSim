@@ -184,17 +184,17 @@
                 "system.channel0.row_clones 20",
                 "system.channel0.i0.row_clones 20",
                 "system.channel0.i0.activates 40",
-                "system.channel0.i0.precharges 40",
+                "system.channel0.i0.precharges 20",
                 "system.channel0.i0.rank0.row_clones 20",
                 "system.channel0.i0.rank0.activates 40",
-                "system.channel0.i0.rank0.precharges 40",
+                "system.channel0.i0.rank0.precharges 20",
                 "system.channel0.i0.rank0.bank0.row_clones 20",
                 "system.channel0.i0.rank0.bank0.activates 40",
-                "system.channel0.i0.rank0.bank0.precharges 40",
+                "system.channel0.i0.rank0.bank0.precharges 20",
                 "system.channel0.i0.rank0.bank0.subArray0.row_clones 20",
                 "system.channel0.i0.rank0.bank0.subArray0.activates 40",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 40",
-                "system.channel0.row_buffer_hits 1"
+                "system.channel0.i0.rank0.bank0.subArray0.precharges 20",
+                "system.channel0.row_buffer_hits 0"
             ]
         },
         {

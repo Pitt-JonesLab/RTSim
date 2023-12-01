@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Memory/Command/TriggeredCommand.h"
+#include "Memory/MemoryController/InstructionTranslator.h"
 #include "Memory/MemoryController/MemoryController.h"
 
 #include <queue>
@@ -30,8 +31,10 @@ class SimpleController : public MemoryController {
     StatBlock getStats(std::string tag) const;
 
     private:
-    unsigned int totalReads, totalWrites, rowBufferHits;
+    unsigned int totalReads, totalWrites, totalRowClones, rowBufferHits;
     int openRow;
+
+    InstructionTranslator translator;
 
     std::unique_ptr<Instruction> receivedInst;
     using InstructionQueue = std::vector<std::unique_ptr<Instruction>>;

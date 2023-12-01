@@ -14,6 +14,7 @@ set(MEMORY_SOURCES
     Interconnect/Interconnect.cpp
     MemoryController/SimpleController.cpp
     MemoryController/MemoryController.cpp
+    MemoryController/InstructionTranslator.cpp
     MemorySystem/SimpleSystem.cpp
     Rank/Rank.cpp
     Rank/SimpleRank.cpp

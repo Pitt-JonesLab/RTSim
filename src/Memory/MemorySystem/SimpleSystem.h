@@ -48,7 +48,7 @@ class SimpleSystem : public MemorySystem {
     private:
     bool available() const;
 
-    unsigned int totalReads, totalWrites, currentCycle;
+    unsigned int totalReads, totalWrites, totalRowClones, currentCycle;
 
     std::vector<std::unique_ptr<MemoryController>> channels;
 };

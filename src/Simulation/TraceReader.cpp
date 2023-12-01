@@ -17,7 +17,7 @@ using namespace NVM::Simulation;
 
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
-enum class Opcode2 { NONE };
+enum class Opcode2 { BITWISE, ROWCLONE, NONE };
 
 TraceReader::TraceReader(std::istream& trace) : trace(trace) {}
 
@@ -40,6 +40,15 @@ Opcode1 readOperation(std::istringstream& inStream) {
     if (opString == "P") return Opcode1::PIM;
     if (opString == "S") return Opcode1::SHIFT;
     if (opString == "T") return Opcode1::TRANSVERSE_WRITE;
+    throw std::invalid_argument("Unknown operation in trace file!");
+}
+
+Opcode2 readOp2(std::istringstream& inStream) {
+    auto opString = getNextToken(inStream);
+    if (opString == "RC") return Opcode2::ROWCLONE;
+    if (opString == "AND") return Opcode2::BITWISE;
+    if (opString == "OR") return Opcode2::BITWISE;
+    if (opString == "XOR") return Opcode2::BITWISE;
     throw std::invalid_argument("Unknown operation in trace file!");
 }
 
@@ -88,7 +97,8 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
 
     unsigned int cycle;
     Opcode1 operation;
-    uint64_t address;
+    Opcode2 op2;
+    uint64_t address, address2;
     NVMDataBlock dataBlock;
     unsigned int threadId;
 
@@ -96,6 +106,10 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
         cycle = readCycle(lineStream);
         operation = readOperation(lineStream);
         address = readAddress(lineStream);
+        if (operation == Opcode1::PIM) {
+            op2 = readOp2(lineStream);
+            address2 = readAddress(lineStream);
+        }
         dataBlock = readData(lineStream);
         threadId = readCycle(lineStream);
     } catch (...) {
@@ -106,18 +120,6 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
     DataBlock data;
     for (int i = 0; i < 64; i++) data.bytes[i] = dataBlock.GetByte(i);
 
-    if (operation == Opcode1::TRANSVERSE_WRITE) {
-        return std::unique_ptr<TraceCommand>(new TransverseWriteCommand());
-    }
-    if (operation == Opcode1::PIM) {
-        getNextToken(lineStream);
-        auto pimOp = getNextToken(lineStream);
-        if (pimOp == "RC") {
-            return std::unique_ptr<TraceCommand>(new RowCloneCommand());
-        }
-        return std::unique_ptr<TraceCommand>(new TransverseReadCommand());
-    }
-
     switch (operation) {
         case Opcode1::READ:
             return std::unique_ptr<TraceCommand>(
@@ -125,6 +127,11 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
         case Opcode1::WRITE:
             return std::unique_ptr<TraceCommand>(
                 new WriteCommand(cycle, address, data, threadId));
+        case Opcode1::PIM: {
+            if (op2 == Opcode2::ROWCLONE) {
+                return std::unique_ptr<TraceCommand>(new RowCloneCommand());
+            }
+        }
         default:
             throw std::runtime_error("Unknown trace operation!");
     }

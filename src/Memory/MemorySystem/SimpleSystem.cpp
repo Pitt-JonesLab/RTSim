@@ -14,7 +14,11 @@ bool SimpleSystem::issue(NVMainRequest* req) { return false; }
 
 using CommandFunc = std::function<Command*()>;
 
-SimpleSystem::SimpleSystem() : totalReads(0), totalWrites(0), currentCycle(0) {}
+SimpleSystem::SimpleSystem() :
+    totalReads(0),
+    totalWrites(0),
+    totalRowClones(0),
+    currentCycle(0) {}
 
 bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
                         unsigned int cycle) {
@@ -43,6 +47,12 @@ bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
 bool SimpleSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
                             NVM::Simulation::DataBlock data,
                             unsigned int threadId, unsigned int cycle) {
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->rowClone(srcAddress, destAddress, data);
+    if (!channelCmd) return false;
+    totalRowClones++;
+    log() << LogLevel::EVENT << "SimpleSystem received RowClone\n";
     return true;
 }
 
@@ -86,6 +96,7 @@ void SimpleSystem::printStats(std::ostream& statStream) {
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");
+    stats.addStat(&totalRowClones, "row_clones");
 
     for (int i = 0; i < channels.size(); i++) {
         stats.addChild(

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 using namespace NVM::Memory;
 
@@ -16,6 +17,7 @@ using namespace NVM::Logging;
 SimpleController::SimpleController() :
     totalReads(0),
     totalWrites(0),
+    totalRowClones(0),
     rowBufferHits(0),
     highLevelInstructions(1),
     lowLevelInstructions(1),
@@ -48,7 +50,16 @@ bool SimpleController::write(uint64_t address,
 
 bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                 NVM::Simulation::DataBlock data) {
-    return false;
+    if (interconnects.empty()) return false;
+    if (highLevelInstructions[0].size() == 20) return false;
+    if (receivedInst) return false;
+
+    receivedInst =
+        std::make_unique<RowCloneInstruction>(srcAddress, destAddress, data);
+    log() << LogLevel::EVENT << "SimpleController received RowClone\n";
+    totalRowClones++;
+
+    return true;
 }
 
 bool SimpleController::transverseRead(
@@ -98,6 +109,7 @@ StatBlock SimpleController::getStats(std::string tag) const {
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");
+    stats.addStat(&totalRowClones, "row_clones");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
 
     for (int i = 0; i < interconnects.size(); i++) {
@@ -117,10 +129,12 @@ std::unique_ptr<Instruction> SimpleController::getNextInstruction() {
                      highLevelInstructions[0].end(), [this](const auto& inst) {
                          auto row = Decoder::decodeSymbol(
                              Decoder::AddressSymbol::ROW, inst->getAddress());
-                         return row == openRow;
+                         return row == translator.getOpenRow();
                      });
 
     if (it != highLevelInstructions[0].end()) {
+        log() << LogLevel::EVENT << "Row buffer hit\n";
+        rowBufferHits++;
         auto nextInst = std::move(*it);
         highLevelInstructions[0].erase(it);
         return nextInst;
@@ -139,21 +153,11 @@ void SimpleController::parseTransaction() {
     auto nextInst = getNextInstruction();
     if (!nextInst) return;
 
-    auto nextRow = Decoder::decodeSymbol(Decoder::AddressSymbol::ROW,
-                                         nextInst->getAddress());
-    if (openRow != nextRow) {
-        if (openRow != -1)
-            lowLevelInstructions[0].push_back(
-                std::make_unique<PrechargeInstruction>(nextInst->getAddress()));
-        lowLevelInstructions[0].push_back(
-            std::make_unique<ActivateInstruction>(nextInst->getAddress()));
-        openRow = nextRow;
-
-        log() << LogLevel::EVENT << "Switching to row " << openRow << '\n';
-    } else {
-        log() << LogLevel::EVENT << "Row buffer hit\n";
-        rowBufferHits++;
-    }
-
-    lowLevelInstructions[0].push_back(std::move(nextInst));
+    auto lowLevelInsts = nextInst->translate(translator);
+    lowLevelInstructions[0].reserve(lowLevelInstructions[0].size() +
+                                    lowLevelInsts.size());
+    lowLevelInstructions[0].insert(
+        lowLevelInstructions[0].end(),
+        std::make_move_iterator(lowLevelInsts.begin()),
+        std::make_move_iterator(lowLevelInsts.end()));
 }
