@@ -33,7 +33,7 @@
 
 #include "Logging/Logging.h"
 #include "main/RTSystem.h"
-#include "Simulation/FileTraceReader.h"
+#include "Simulation/TraceReader/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
 #include "src/old/AddressTranslator.h"
 #include "src/old/Config.h"
@@ -55,7 +55,6 @@
 #include <memory>
 #include <sstream>
 #include <stdlib.h>
-
 
 using namespace NVM;
 using namespace NVM::Simulation;

@@ -64,4 +64,25 @@ InstructionTranslator::doRowClone(RowCloneInstruction& inst) {
     return instructions;
 }
 
+std::vector<std::unique_ptr<Instruction>>
+InstructionTranslator::doPIM(PIMInstruction& inst) {
+    std::vector<std::unique_ptr<Instruction>> instructions;
+
+    auto nextRow =
+        Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, inst.getAddress());
+    if (nextRow != openRow) {
+        if (openRow != -1) {
+            instructions.emplace_back(
+                new PrechargeInstruction(inst.getAddress()));
+        }
+        instructions.emplace_back(new ActivateInstruction(inst.getAddress()));
+    }
+
+    instructions.emplace_back(new PIMInstruction(inst));
+    instructions.emplace_back(new PrechargeInstruction(inst.getAddress()));
+    openRow = -1;
+
+    return instructions;
+}
+
 int InstructionTranslator::getOpenRow() const { return openRow; }

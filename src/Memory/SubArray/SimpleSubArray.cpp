@@ -71,8 +71,6 @@ SimpleSubArray::transverseRead(uint64_t baseAddress, uint64_t destAddress,
     currentCommand = std::unique_ptr<Command>(new TimedCommand());
     log() << LogLevel::EVENT << "SubArray received transverse read\n";
     totalTRs++;
-    totalActivates++;
-    totalPrecharges++;
     rowBufferHits = 0;
     actEnergy += 0.080096;
     return currentCommand.get();

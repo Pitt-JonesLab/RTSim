@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Memory/MemorySystem/MemorySystem.h"
-
 #include "Memory/Command/WaitingCommand.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
 #include <vector>
 
@@ -48,7 +47,8 @@ class SimpleSystem : public MemorySystem {
     private:
     bool available() const;
 
-    unsigned int totalReads, totalWrites, totalRowClones, currentCycle;
+    unsigned int totalReads, totalWrites, totalRowClones, totalPIMs,
+        currentCycle;
 
     std::vector<std::unique_ptr<MemoryController>> channels;
 };

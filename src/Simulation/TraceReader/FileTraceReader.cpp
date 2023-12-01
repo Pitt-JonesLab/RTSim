@@ -1,4 +1,4 @@
-#include "Simulation/FileTraceReader.h"
+#include "Simulation/TraceReader/FileTraceReader.h"
 
 using namespace NVM::Simulation;
 

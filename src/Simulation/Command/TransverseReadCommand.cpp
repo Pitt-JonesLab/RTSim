@@ -1,4 +1,4 @@
-#include "Simulation/TransverseReadCommand.h"
+#include "Simulation/Command/TransverseReadCommand.h"
 
 #include "Simulation/MemorySystem.h"
 

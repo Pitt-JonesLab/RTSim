@@ -1,4 +1,4 @@
-#include "Simulation/ReadCommand.h"
+#include "Simulation/Command/ReadCommand.h"
 
 #include "Simulation/MemorySystem.h"
 

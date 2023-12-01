@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Simulation/Command/TraceCommand.h"
 #include "Simulation/DataBlock.h"
-#include "Simulation/TraceCommand.h"
 
 #include <cstdint>
 

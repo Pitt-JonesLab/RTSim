@@ -83,4 +83,19 @@ class PrechargeInstruction : public Instruction {
     translate(InstructionTranslator& translator);
 };
 
+class PIMInstruction : public Instruction {
+    public:
+    PIMInstruction(uint64_t baseAddress, uint64_t destAddress,
+                   std::vector<NVM::Simulation::DataBlock> data);
+
+    Command* execute(SubArray& subArray);
+
+    std::vector<std::unique_ptr<Instruction>>
+    translate(InstructionTranslator& translator);
+
+    private:
+    uint64_t destAddress;
+    std::vector<NVM::Simulation::DataBlock> data;
+};
+
 } // namespace NVM::Memory

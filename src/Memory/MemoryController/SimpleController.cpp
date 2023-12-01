@@ -15,9 +15,6 @@ using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
 SimpleController::SimpleController() :
-    totalReads(0),
-    totalWrites(0),
-    totalRowClones(0),
     rowBufferHits(0),
     highLevelInstructions(1),
     lowLevelInstructions(1),
@@ -30,7 +27,6 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 
     receivedInst = std::make_unique<ReadInstruction>(address, data);
     log() << LogLevel::EVENT << "SimpleController received read\n";
-    totalReads++;
 
     return true;
 }
@@ -43,7 +39,6 @@ bool SimpleController::write(uint64_t address,
 
     receivedInst = std::make_unique<WriteInstruction>(address, data);
     log() << LogLevel::EVENT << "SimpleController received write\n";
-    totalWrites++;
 
     return true;
 }
@@ -57,7 +52,6 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
     receivedInst =
         std::make_unique<RowCloneInstruction>(srcAddress, destAddress, data);
     log() << LogLevel::EVENT << "SimpleController received RowClone\n";
-    totalRowClones++;
 
     return true;
 }
@@ -65,7 +59,15 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
 bool SimpleController::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> data) {
-    return false;
+    if (interconnects.empty()) return false;
+    if (highLevelInstructions[0].size() == 20) return false;
+    if (receivedInst) return false;
+
+    receivedInst =
+        std::make_unique<PIMInstruction>(baseAddress, destAddress, data);
+    log() << LogLevel::EVENT << "SimpleController received RowClone\n";
+
+    return true;
 }
 
 bool SimpleController::transverseWrite(
@@ -107,14 +109,22 @@ bool SimpleController::isEmpty() const {
 StatBlock SimpleController::getStats(std::string tag) const {
     StatBlock stats(tag);
 
-    stats.addStat(&totalReads, "reads");
-    stats.addStat(&totalWrites, "writes");
-    stats.addStat(&totalRowClones, "row_clones");
     stats.addStat(&rowBufferHits, "row_buffer_hits");
 
     for (int i = 0; i < interconnects.size(); i++) {
-        stats.addChild(
-            interconnects[i]->getStats(tag + ".i" + std::to_string(i)));
+        auto interStats =
+            interconnects[i]->getStats(tag + ".i" + std::to_string(i));
+        stats.addChildStat(interStats, "activate_energy", "nJ");
+        stats.addChildStat(interStats, "read_energy", "nJ");
+        stats.addChildStat(interStats, "write_energy", "nJ");
+        stats.addChildStat(interStats, "reads");
+        stats.addChildStat(interStats, "writes");
+        stats.addChildStat(interStats, "activates");
+        stats.addChildStat(interStats, "precharges");
+        stats.addChildStat(interStats, "row_clones");
+        stats.addChildStat(interStats, "transverse_reads");
+        stats.addChildStat(interStats, "transverse_writes");
+        stats.addChild(interStats);
     }
 
     return stats;

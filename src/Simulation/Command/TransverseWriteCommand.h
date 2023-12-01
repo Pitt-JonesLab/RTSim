@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Simulation/TraceCommand.h"
+#include "Simulation/Command/TraceCommand.h"
 
 namespace NVM::Simulation {
 
-class RowCloneCommand : public TraceCommand {
+class TransverseWriteCommand : public TraceCommand {
     public:
     bool issue(MemorySystem* memory);
 };

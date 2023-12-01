@@ -1,10 +1,10 @@
-#include "Simulation/TraceReader.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
-#include "Simulation/ReadCommand.h"
-#include "Simulation/RowCloneCommand.h"
-#include "Simulation/TransverseReadCommand.h"
-#include "Simulation/TransverseWriteCommand.h"
-#include "Simulation/WriteCommand.h"
+#include "Simulation/Command/ReadCommand.h"
+#include "Simulation/Command/RowCloneCommand.h"
+#include "Simulation/Command/TransverseReadCommand.h"
+#include "Simulation/Command/TransverseWriteCommand.h"
+#include "Simulation/Command/WriteCommand.h"
 #include "src/old/NVMDataBlock.h"
 
 #include <arpa/inet.h>
@@ -131,6 +131,7 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
             if (op2 == Opcode2::ROWCLONE) {
                 return std::unique_ptr<TraceCommand>(new RowCloneCommand());
             }
+            return std::unique_ptr<TraceCommand>(new TransverseReadCommand());
         }
         default:
             throw std::runtime_error("Unknown trace operation!");

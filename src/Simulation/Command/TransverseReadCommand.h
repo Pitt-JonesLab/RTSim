@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Simulation/TraceCommand.h"
+#include "Simulation/Command/TraceCommand.h"
 
 namespace NVM::Simulation {
 

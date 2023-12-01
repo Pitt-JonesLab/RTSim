@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Simulation/CycleTimer.h"
-#include "Simulation/TraceReader.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
 namespace NVM::Simulation {
 

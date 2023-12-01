@@ -31,7 +31,7 @@ class SimpleController : public MemoryController {
     StatBlock getStats(std::string tag) const;
 
     private:
-    unsigned int totalReads, totalWrites, totalRowClones, rowBufferHits;
+    unsigned int rowBufferHits;
     int openRow;
 
     InstructionTranslator translator;

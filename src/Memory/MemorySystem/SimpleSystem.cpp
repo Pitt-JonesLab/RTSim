@@ -18,6 +18,7 @@ SimpleSystem::SimpleSystem() :
     totalReads(0),
     totalWrites(0),
     totalRowClones(0),
+    totalPIMs(0),
     currentCycle(0) {}
 
 bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
@@ -60,6 +61,13 @@ bool SimpleSystem::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> inputRows, unsigned int threadId,
     unsigned int cycle) {
+    if (!available()) return false;
+
+    auto channelCmd =
+        channels[0]->transverseRead(baseAddress, destAddress, inputRows);
+    if (!channelCmd) return false;
+    totalPIMs++;
+    log() << LogLevel::EVENT << "SimpleSystem received RowClone\n";
     return true;
 }
 

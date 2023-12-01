@@ -204,7 +204,23 @@
             "config": "Config/RM.config",
             "cycles": "0",
             "overrides": "",
-            "checks": []
+            "checks": [
+                "system.channel0.activates 20",
+                "system.channel0.precharges 20",
+                "system.channel0.i0.activates 20",
+                "system.channel0.i0.precharges 20",
+                "system.channel0.i0.transverse_reads 20",
+                "system.channel0.i0.rank0.activates 20",
+                "system.channel0.i0.rank0.precharges 20",
+                "system.channel0.i0.rank0.transverse_reads 20",
+                "system.channel0.i0.rank0.bank0.activates 20",
+                "system.channel0.i0.rank0.bank0.precharges 20",
+                "system.channel0.i0.rank0.bank0.transverse_reads 20",
+                "system.channel0.i0.rank0.bank0.subArray0.activates 20",
+                "system.channel0.i0.rank0.bank0.subArray0.precharges 20",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads 20",
+                "system.channel0.row_buffer_hits 0"
+            ]
         }
     ]
 }

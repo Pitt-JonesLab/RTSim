@@ -2,7 +2,7 @@
 
 #include "MockMemorySystem.h"
 #include "MockTraceReader.h"
-#include "Simulation/ReadCommand.h"
+#include "Simulation/Command/ReadCommand.h"
 
 #include <catch2/catch_test_macros.hpp>
 

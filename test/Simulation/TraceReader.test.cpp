@@ -1,4 +1,4 @@
-#include "Simulation/TraceReader.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
 #include "MockMemorySystem.h"
 

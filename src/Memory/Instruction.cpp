@@ -75,3 +75,18 @@ std::vector<std::unique_ptr<Instruction>>
 RowCloneInstruction::translate(InstructionTranslator& translator) {
     return translator.doRowClone(*this);
 }
+
+PIMInstruction::PIMInstruction(uint64_t baseAddress, uint64_t destAddress,
+                               std::vector<NVM::Simulation::DataBlock> data) :
+    Instruction(baseAddress),
+    destAddress(destAddress),
+    data(data) {}
+
+Command* PIMInstruction::execute(SubArray& subArray) {
+    return subArray.transverseRead(getAddress(), destAddress, data);
+}
+
+std::vector<std::unique_ptr<Instruction>>
+PIMInstruction::translate(InstructionTranslator& translator) {
+    return translator.doPIM(*this);
+}

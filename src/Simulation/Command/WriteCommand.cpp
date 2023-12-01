@@ -1,4 +1,4 @@
-#include "Simulation/WriteCommand.h"
+#include "Simulation/Command/WriteCommand.h"
 
 #include "Simulation/MemorySystem.h"
 

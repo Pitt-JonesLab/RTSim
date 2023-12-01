@@ -52,6 +52,18 @@ class InstructionTranslator {
     doRowClone(RowCloneInstruction& inst);
 
     /**
+     * Converts high-level PIM to low-level instructions.
+     *
+     * Adds precharge and activate to source row if necessary, followed by
+     * destination RowClone and precharge.
+     *
+     * @param inst PIM instruction to translate
+     *
+     * @return Low-level instructions to execute
+     */
+    std::vector<std::unique_ptr<Instruction>> doPIM(PIMInstruction& inst);
+
+    /**
      * Returns currently activated row
      *
      * @return Current activated row or -1 is no row is active

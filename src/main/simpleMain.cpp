@@ -2,7 +2,7 @@
 #include "Memory/Decoder.h"
 #include "Memory/MemoryFactory.h"
 #include "Simulation/Config.h"
-#include "Simulation/FileTraceReader.h"
+#include "Simulation/TraceReader/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
 #include "src/old/Config.h"
 #include "src/old/NVMTypes.h"
