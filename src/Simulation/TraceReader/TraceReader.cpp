@@ -1,5 +1,6 @@
 #include "Simulation/TraceReader/TraceReader.h"
 
+#include "Logging/Logging.h"
 #include "Simulation/Command/ReadCommand.h"
 #include "Simulation/Command/RowCloneCommand.h"
 #include "Simulation/Command/TransverseReadCommand.h"
@@ -49,6 +50,8 @@ Opcode2 readOp2(std::istringstream& inStream) {
     if (opString == "AND") return Opcode2::BITWISE;
     if (opString == "OR") return Opcode2::BITWISE;
     if (opString == "XOR") return Opcode2::BITWISE;
+    if (opString == "NAND") return Opcode2::BITWISE;
+    if (opString == "NOR") return Opcode2::BITWISE;
     throw std::invalid_argument("Unknown operation in trace file!");
 }
 
@@ -64,8 +67,13 @@ uint64_t readAddress(std::istringstream& inStream) {
 NVMDataBlock readData(std::istringstream& inStream) {
     auto field = getNextToken(inStream);
 
-    if (field.length() != 128)
-        throw std::invalid_argument("Invalid data block!");
+    if (field.find_first_of("0x") == 0)
+        field = field.substr(2, field.size() - 1);
+
+    if (field.size() % 8 != 0) {
+        auto padding = 8 - (field.size() % 8);
+        for (int i = 0; i < padding; i++) field = '0' + field;
+    }
 
     NVMDataBlock data;
     data.SetSize(64);
@@ -73,7 +81,7 @@ NVMDataBlock readData(std::istringstream& inStream) {
     uint32_t* rawData = reinterpret_cast<uint32_t*>(data.rawData);
     memset(rawData, 0, 64);
 
-    for (int byte = 0; byte < 16; byte++) {
+    for (int byte = 0; byte < field.size() / 8; byte++) {
         std::stringstream fmat;
 
         fmat << std::hex << field.substr(byte * 8, 8);
@@ -104,11 +112,21 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
 
     try {
         cycle = readCycle(lineStream);
+        Logging::log() << Logging::LogLevel::DEBUG << std::dec << "Read cycle "
+                       << cycle << '\n';
         operation = readOperation(lineStream);
+        Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
+                       << (int) operation << '\n';
         address = readAddress(lineStream);
+        Logging::log() << Logging::LogLevel::DEBUG << "Read address "
+                       << std::hex << address << '\n';
         if (operation == Opcode1::PIM) {
             op2 = readOp2(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 "
+                           << (int) op2 << '\n';
             address2 = readAddress(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG << "Read address2 "
+                           << std::hex << address2 << '\n';
         }
         dataBlock = readData(lineStream);
         threadId = readCycle(lineStream);

@@ -1,6 +1,6 @@
 #include "Memory/MemoryController/InstructionTranslator.h"
 
-#include "Memory/Decoder.h"
+#include "Modeling/Decoder.h"
 
 using namespace NVM::Memory;
 

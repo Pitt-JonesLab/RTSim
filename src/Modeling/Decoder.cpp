@@ -1,4 +1,4 @@
-#include "Memory/Decoder.h"
+#include "Modeling/Decoder.h"
 
 #include <cmath>
 #include <iostream>

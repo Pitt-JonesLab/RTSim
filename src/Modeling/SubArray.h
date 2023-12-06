@@ -1,0 +1,14 @@
+#pragma once
+
+#include "Modeling/Types.h"
+
+namespace NVM::Modeling {
+
+class SubArray {
+    virtual RowNumber getOpenRow() const = 0;
+    virtual bool isOpen() const = 0;
+    virtual void closeRow() = 0;
+    virtual void openRow(RowNumber row) = 0;
+};
+
+} // namespace NVM::Modeling

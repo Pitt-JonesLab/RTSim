@@ -9,4 +9,5 @@ add_subdirectory(Command)
 add_subdirectory(TraceReader)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})
-target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src ${RTSIM_DIR}) 
+target_include_directories(RTSim_Simulation PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src ${RTSIM_DIR})
+target_link_libraries(RTSim_Simulation RTSim_Logging)

@@ -1,6 +1,6 @@
 #include "Logging/Logging.h"
-#include "Memory/Decoder.h"
 #include "Memory/MemoryFactory.h"
+#include "Modeling/Decoder.h"
 #include "Simulation/Config.h"
 #include "Simulation/TraceReader/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"

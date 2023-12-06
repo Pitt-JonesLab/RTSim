@@ -221,6 +221,36 @@
                 "system.channel0.i0.rank0.bank0.subArray0.transverse_reads 20",
                 "system.channel0.row_buffer_hits 0"
             ]
+        },
+        {
+            "name": "Non-predicated Counting",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
+            "config": "Config/RM.config",
+            "cycles": "0",
+            "overrides": "",
+            "checks": [
+                "system.channel0.transverse_reads 255",
+                "system.channel0.row_clones 175",
+                "system.channel0.reads 205",
+                "system.channel0.writes 0",
+                "system.channel0.i0.transverse_reads 255",
+                "system.channel0.i0.row_clones 175",
+                "system.channel0.i0.reads 205",
+                "system.channel0.i0.writes 0",
+                "system.channel0.i0.rank0.transverse_reads 255",
+                "system.channel0.i0.rank0.row_clones 175",
+                "system.channel0.i0.rank0.reads 205",
+                "system.channel0.i0.rank0.writes 0",
+                "system.channel0.i0.rank0.bank0.transverse_reads 255",
+                "system.channel0.i0.rank0.bank0.row_clones 175",
+                "system.channel0.i0.rank0.bank0.reads 205",
+                "system.channel0.i0.rank0.bank0.writes 0",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads 255",
+                "system.channel0.i0.rank0.bank0.subArray0.row_clones 175",
+                "system.channel0.i0.rank0.bank0.subArray0.reads 205",
+                "system.channel0.i0.rank0.bank0.subArray0.writes 0"
+            ]
         }
     ]
 }

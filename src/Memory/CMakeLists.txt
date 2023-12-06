@@ -2,7 +2,6 @@ set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
     Instruction.cpp
-    Decoder.cpp
     Command/TimedCommand.cpp
     Command/WaitingCommand.cpp
     Command/ChainedCommand.cpp
@@ -23,4 +22,4 @@ set(MEMORY_SOURCES
 
 add_library(RTSim_Memory ${MEMORY_SOURCES})
 target_include_directories(RTSim_Memory PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)
-target_link_libraries(RTSim_Memory PUBLIC RTSim_Logging)
+target_link_libraries(RTSim_Memory PUBLIC RTSim_Logging RTSim_Modeling)

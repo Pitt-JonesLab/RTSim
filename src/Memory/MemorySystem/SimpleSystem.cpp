@@ -2,7 +2,7 @@
 
 #include "Logging/Logging.h"
 #include "Memory/Command/WaitingCommand.h"
-#include "Memory/Decoder.h"
+#include "Modeling/Decoder.h"
 
 #include <functional>
 
