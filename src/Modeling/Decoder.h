@@ -1,20 +1,12 @@
 #pragma once
 
-#include <map>
-#include <utility>
-#include <vector>
-#include <cstdint>
+#include "Modeling/Types.h"
+
 #include <string>
 
-namespace NVM::Memory::Decoder {
+namespace NVM::Modeling {
 
-enum class AddressSymbol {
-    CHANNEL,
-    RANK,
-    BANK,
-    ROW,
-    COL
-};
+enum class AddressSymbol { CHANNEL, RANK, BANK, ROW, COL };
 
 struct ComponentCounts {
     unsigned int channels, ranks, banks, rows, cols;
@@ -22,6 +14,6 @@ struct ComponentCounts {
 
 void setScheme(std::string order, ComponentCounts counts);
 
-unsigned int decodeSymbol(AddressSymbol, uint64_t address);
+unsigned int decodeSymbol(AddressSymbol, Address address);
 
-}
+} // namespace NVM::Modeling

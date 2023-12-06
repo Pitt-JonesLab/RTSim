@@ -3,13 +3,14 @@
 #include "Modeling/Decoder.h"
 
 using namespace NVM::Memory;
+using namespace NVM::Modeling;
 
 InstructionTranslator::InstructionTranslator() : openRow(-1) {}
 
 std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doRead(ReadInstruction& inst) {
     auto nextRow =
-        Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, inst.getAddress());
+        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
 
     std::vector<std::unique_ptr<Instruction>> instructions;
     if (nextRow != openRow) {
@@ -27,7 +28,7 @@ InstructionTranslator::doRead(ReadInstruction& inst) {
 std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doWrite(WriteInstruction& inst) {
     auto nextRow =
-        Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, inst.getAddress());
+        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
 
     std::vector<std::unique_ptr<Instruction>> instructions;
     if (nextRow != openRow) {
@@ -47,7 +48,7 @@ InstructionTranslator::doRowClone(RowCloneInstruction& inst) {
     std::vector<std::unique_ptr<Instruction>> instructions;
 
     auto nextRow =
-        Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, inst.getAddress());
+        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
     if (nextRow != openRow) {
         if (openRow != -1) {
             instructions.emplace_back(
@@ -69,7 +70,7 @@ InstructionTranslator::doPIM(PIMInstruction& inst) {
     std::vector<std::unique_ptr<Instruction>> instructions;
 
     auto nextRow =
-        Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, inst.getAddress());
+        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
     if (nextRow != openRow) {
         if (openRow != -1) {
             instructions.emplace_back(

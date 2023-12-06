@@ -18,6 +18,7 @@ using namespace NVM;
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
+using namespace NVM::Modeling;
 
 ncycle_t getMaxCycles(NVM::Config* config, char* arg) {
     ncycle_t maxCycles = 0;
@@ -51,7 +52,7 @@ NVM::Config* createConfig(int argc, char* argv[]) {
 }
 
 void setAddressScheme(const NVM::Simulation::Config& conf) {
-    Decoder::ComponentCounts counts;
+    ComponentCounts counts;
 
     counts.rows = conf.get<int>("DBCS");
     counts.cols = conf.get<int>("DOMAINS");
@@ -59,7 +60,7 @@ void setAddressScheme(const NVM::Simulation::Config& conf) {
     counts.banks = conf.get<int>("BANKS");
     counts.channels = conf.get<int>("CHANNELS");
 
-    Decoder::setScheme(conf.get<std::string>("AddressMappingScheme"), counts);
+    setScheme(conf.get<std::string>("AddressMappingScheme"), counts);
 }
 
 int main(int argc, char* argv[]) {

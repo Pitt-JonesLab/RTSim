@@ -2,9 +2,11 @@
 
 #include <cmath>
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <vector>
 
-using namespace NVM::Memory::Decoder;
+using namespace NVM::Modeling;
 
 std::map<AddressSymbol, std::pair<unsigned int, unsigned int>> symbolPositions;
 
@@ -50,8 +52,7 @@ std::vector<std::string> splitTokens(std::string order) {
     return std::vector<std::string>(tokens.rbegin(), tokens.rend());
 }
 
-void NVM::Memory::Decoder::setScheme(std::string order,
-                                     ComponentCounts counts) {
+void NVM::Modeling::setScheme(std::string order, ComponentCounts counts) {
     unsigned int lsb = 0;
     for (auto token : splitTokens(order)) {
         auto symbol = stringToSymbol(token);
@@ -71,8 +72,8 @@ unsigned int getBitRange(uint64_t val, unsigned int msb, unsigned int lsb) {
     return val & mask;
 }
 
-unsigned int NVM::Memory::Decoder::decodeSymbol(AddressSymbol symbol,
-                                                uint64_t address) {
+unsigned int NVM::Modeling::decodeSymbol(AddressSymbol symbol,
+                                         uint64_t address) {
     // Truncating bus offset and burst length TODO: find these numbers
     address >>= 6;
     if (!symbolPositions.count(symbol)) return 0;

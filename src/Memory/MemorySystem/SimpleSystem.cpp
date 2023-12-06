@@ -7,6 +7,7 @@
 #include <functional>
 
 using namespace NVM::Memory;
+using namespace NVM::Modeling;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
@@ -29,7 +30,7 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     if (!channelCmd) return false;
     totalReads++;
     log() << LogLevel::EVENT << "SimpleSystem received read at row "
-          << Decoder::decodeSymbol(Decoder::AddressSymbol::ROW, address)
+          << decodeSymbol(AddressSymbol::ROW, address)
           << "\n";
     return true;
 }

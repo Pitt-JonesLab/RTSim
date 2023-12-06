@@ -9,10 +9,9 @@
 #include <iterator>
 
 using namespace NVM::Memory;
-
-using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
+using namespace NVM::Modeling;
 
 SimpleController::SimpleController() :
     rowBufferHits(0),
@@ -137,8 +136,8 @@ std::unique_ptr<Instruction> SimpleController::getNextInstruction() {
     auto it =
         std::find_if(highLevelInstructions[0].begin(),
                      highLevelInstructions[0].end(), [this](const auto& inst) {
-                         auto row = Decoder::decodeSymbol(
-                             Decoder::AddressSymbol::ROW, inst->getAddress());
+                         auto row = decodeSymbol(
+                             AddressSymbol::ROW, inst->getAddress());
                          return row == translator.getOpenRow();
                      });
 
