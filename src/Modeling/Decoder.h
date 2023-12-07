@@ -16,4 +16,7 @@ void setScheme(std::string order, ComponentCounts counts);
 
 unsigned int decodeSymbol(AddressSymbol, Address address);
 
+Address replaceSymbol(Address address, AddressSymbol symbol,
+                      unsigned int newVal);
+
 } // namespace NVM::Modeling

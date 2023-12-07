@@ -1,5 +1,8 @@
 set(MODELING_SOURCES
     SubArray/SimpleSubArray.cpp
+    Bank/SimpleBank.cpp
+    Rank/SimpleRank.cpp
+    System/SimpleSystem.cpp
     Decoder.cpp)
 
 add_library(RTSim_Modeling ${MODELING_SOURCES})

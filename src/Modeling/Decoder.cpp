@@ -80,3 +80,18 @@ unsigned int NVM::Modeling::decodeSymbol(AddressSymbol symbol,
     return getBitRange(address, symbolPositions[symbol].first,
                        symbolPositions[symbol].second);
 }
+
+Address NVM::Modeling::replaceSymbol(Address address, AddressSymbol symbol,
+                                     unsigned int newVal) {
+    auto symbolLength =
+        symbolPositions[symbol].first - symbolPositions[symbol].second;
+    Address mask = 0;
+    for (int i = 0; i < symbolLength; i++) {
+        mask |= 1;
+        mask <<= 1;
+    }
+    mask <<= symbolPositions[symbol].second + 6;
+    address &= ~mask;
+    address |= (newVal << (symbolPositions[symbol].second + 6));
+    return address;
+}
