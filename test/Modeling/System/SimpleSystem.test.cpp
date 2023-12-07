@@ -1,7 +1,7 @@
 #include "Modeling/System/SimpleSystem.h"
 
 #include "Modeling/Decoder.h"
-#include "Rank/MockRank.h"
+#include "Modeling/Rank/MockRank.h"
 
 #include <catch2/catch_test_macros.hpp>
 

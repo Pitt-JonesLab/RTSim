@@ -68,6 +68,8 @@ class MemorySystem {
      * @param statStream Output stream to print stats
      */
     virtual void printStats(std::ostream& statStream) = 0;
+
+    virtual void failNext() = 0;
 };
 
 } // namespace NVM::Simulation

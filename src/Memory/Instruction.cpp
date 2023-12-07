@@ -4,13 +4,17 @@
 
 using namespace NVM::Memory;
 
-Instruction::Instruction(uint64_t address) : address(address) {}
+Instruction::Instruction(uint64_t address, bool fails) :
+    address(address),
+    failsECC(fails) {}
 
 uint64_t Instruction::getAddress() const { return address; }
 
+bool Instruction::checkECC() const { return failsECC; }
+
 ReadInstruction::ReadInstruction(uint64_t address,
-                                 NVM::Simulation::DataBlock data) :
-    Instruction(address),
+                                 NVM::Simulation::DataBlock data, bool fails) :
+    Instruction(address, fails),
     data(data) {}
 
 Command* ReadInstruction::execute(SubArray& subArray) {
@@ -23,8 +27,9 @@ ReadInstruction::translate(InstructionTranslator& translator) {
 }
 
 WriteInstruction::WriteInstruction(uint64_t address,
-                                   NVM::Simulation::DataBlock data) :
-    Instruction(address),
+                                   NVM::Simulation::DataBlock data,
+                                   bool fails) :
+    Instruction(address, fails),
     data(data) {}
 
 Command* WriteInstruction::execute(SubArray& subArray) {
@@ -62,8 +67,9 @@ PrechargeInstruction::translate(InstructionTranslator& translator) {
 
 RowCloneInstruction::RowCloneInstruction(uint64_t srcAddress,
                                          uint64_t destAddress,
-                                         NVM::Simulation::DataBlock data) :
-    Instruction(srcAddress),
+                                         NVM::Simulation::DataBlock data,
+                                         bool fails) :
+    Instruction(srcAddress, fails),
     destAddress(destAddress),
     data(data) {}
 
@@ -77,8 +83,9 @@ RowCloneInstruction::translate(InstructionTranslator& translator) {
 }
 
 PIMInstruction::PIMInstruction(uint64_t baseAddress, uint64_t destAddress,
-                               std::vector<NVM::Simulation::DataBlock> data) :
-    Instruction(baseAddress),
+                               std::vector<NVM::Simulation::DataBlock> data,
+                               bool fails) :
+    Instruction(baseAddress, fails),
     destAddress(destAddress),
     data(data) {}
 

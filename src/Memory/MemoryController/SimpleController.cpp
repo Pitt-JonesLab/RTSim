@@ -17,14 +17,18 @@ SimpleController::SimpleController() :
     rowBufferHits(0),
     highLevelInstructions(1),
     lowLevelInstructions(1),
-    openRow(-1) {}
+    openRow(-1),
+    fails(false) {}
+
+void SimpleController::failNext() { fails = true; }
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
     if (interconnects.empty()) return false;
     if (highLevelInstructions[0].size() == 20) return false;
     if (receivedInst) return false;
 
-    receivedInst = std::make_unique<ReadInstruction>(address, data);
+    receivedInst = std::make_unique<ReadInstruction>(address, data, fails);
+    fails = false;
     log() << LogLevel::EVENT << "SimpleController received read\n";
 
     return true;
@@ -36,7 +40,8 @@ bool SimpleController::write(uint64_t address,
     if (highLevelInstructions[0].size() == 20) return false;
     if (receivedInst) return false;
 
-    receivedInst = std::make_unique<WriteInstruction>(address, data);
+    receivedInst = std::make_unique<WriteInstruction>(address, data, fails);
+    fails = false;
     log() << LogLevel::EVENT << "SimpleController received write\n";
 
     return true;
@@ -48,8 +53,9 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
     if (highLevelInstructions[0].size() == 20) return false;
     if (receivedInst) return false;
 
-    receivedInst =
-        std::make_unique<RowCloneInstruction>(srcAddress, destAddress, data);
+    receivedInst = std::make_unique<RowCloneInstruction>(
+        srcAddress, destAddress, data, fails);
+    fails = false;
     log() << LogLevel::EVENT << "SimpleController received RowClone\n";
 
     return true;
@@ -63,7 +69,8 @@ bool SimpleController::transverseRead(
     if (receivedInst) return false;
 
     receivedInst =
-        std::make_unique<PIMInstruction>(baseAddress, destAddress, data);
+        std::make_unique<PIMInstruction>(baseAddress, destAddress, data, fails);
+    fails = false;
     log() << LogLevel::EVENT << "SimpleController received RowClone\n";
 
     return true;
@@ -133,13 +140,12 @@ std::unique_ptr<Instruction> SimpleController::getNextInstruction() {
     if (highLevelInstructions[0].empty()) return nullptr;
 
     // Try to send row buffer hit
-    auto it =
-        std::find_if(highLevelInstructions[0].begin(),
-                     highLevelInstructions[0].end(), [this](const auto& inst) {
-                         auto row = decodeSymbol(
-                             AddressSymbol::ROW, inst->getAddress());
-                         return row == translator.getOpenRow();
-                     });
+    auto it = std::find_if(
+        highLevelInstructions[0].begin(), highLevelInstructions[0].end(),
+        [this](const auto& inst) {
+            auto row = decodeSymbol(AddressSymbol::ROW, inst->getAddress());
+            return row == translator.getOpenRow();
+        });
 
     if (it != highLevelInstructions[0].end()) {
         log() << LogLevel::EVENT << "Row buffer hit\n";

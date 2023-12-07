@@ -30,8 +30,7 @@ bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
     if (!channelCmd) return false;
     totalReads++;
     log() << LogLevel::EVENT << "SimpleSystem received read at row "
-          << decodeSymbol(AddressSymbol::ROW, address)
-          << "\n";
+          << decodeSymbol(AddressSymbol::ROW, address) << "\n";
     return true;
 }
 
@@ -116,3 +115,5 @@ void SimpleSystem::printStats(std::ostream& statStream) {
 }
 
 unsigned int SimpleSystem::getCurrentCycle() { return currentCycle; }
+
+void SimpleSystem::failNext() { channels[0]->failNext(); }

@@ -28,11 +28,14 @@ class SimpleController : public MemoryController {
 
     void addInterconnect(std::unique_ptr<Interconnect> interconnect);
 
+    void failNext();
+
     StatBlock getStats(std::string tag) const;
 
     private:
     unsigned int rowBufferHits;
     int openRow;
+    bool fails;
 
     InstructionTranslator translator;
 

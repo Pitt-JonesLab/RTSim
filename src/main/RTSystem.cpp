@@ -158,3 +158,5 @@ void RTSystem::printStats(std::ostream& statStream) {
 unsigned int RTSystem::getCurrentCycle() {
     return GetEventQueue()->GetCurrentCycle();
 }
+
+void RTSystem::failNext() {}

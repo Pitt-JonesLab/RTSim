@@ -58,6 +58,8 @@ class MockMemorySystem : public MemorySystem {
 
     unsigned int getCurrentCycle() { return currentCycle; }
 
+    void failNext() {}
+
     bool available = true;
     unsigned int currentCycle = 0;
     uint64_t lastAddress = 0;

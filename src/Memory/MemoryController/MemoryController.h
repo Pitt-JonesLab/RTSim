@@ -25,6 +25,8 @@ class MemoryController {
 
     virtual bool isEmpty() const = 0;
 
+    virtual void failNext() = 0;
+
     virtual void cycle(unsigned int cycles) = 0;
 
     virtual StatBlock getStats(std::string tag) const = 0;

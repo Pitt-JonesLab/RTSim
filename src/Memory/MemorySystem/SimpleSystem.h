@@ -44,6 +44,8 @@ class SimpleSystem : public MemorySystem {
 
     void addController(std::unique_ptr<MemoryController> controller);
 
+    void failNext();
+
     private:
     bool available() const;
 

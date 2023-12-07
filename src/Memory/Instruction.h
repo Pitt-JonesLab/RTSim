@@ -10,9 +10,10 @@ class InstructionTranslator;
 class Instruction {
     private:
     uint64_t address;
+    bool failsECC;
 
     public:
-    Instruction(uint64_t address);
+    Instruction(uint64_t address, bool fails = false);
 
     virtual Command* execute(SubArray&) = 0;
 
@@ -20,6 +21,7 @@ class Instruction {
     translate(InstructionTranslator& translator) = 0;
 
     uint64_t getAddress() const;
+    bool checkECC() const;
 };
 
 class ReadInstruction : public Instruction {
@@ -27,7 +29,8 @@ class ReadInstruction : public Instruction {
     NVM::Simulation::DataBlock data;
 
     public:
-    ReadInstruction(uint64_t address, NVM::Simulation::DataBlock data);
+    ReadInstruction(uint64_t address, NVM::Simulation::DataBlock data,
+                    bool fails = false);
 
     Command* execute(SubArray& subArray);
 
@@ -40,7 +43,8 @@ class WriteInstruction : public Instruction {
     NVM::Simulation::DataBlock data;
 
     public:
-    WriteInstruction(uint64_t address, NVM::Simulation::DataBlock data);
+    WriteInstruction(uint64_t address, NVM::Simulation::DataBlock data,
+                     bool fails = false);
 
     Command* execute(SubArray& subArray);
 
@@ -55,7 +59,7 @@ class RowCloneInstruction : public Instruction {
 
     public:
     RowCloneInstruction(uint64_t srcAddress, uint64_t destAddress,
-                        NVM::Simulation::DataBlock data);
+                        NVM::Simulation::DataBlock data, bool fails = false);
 
     Command* execute(SubArray& subArray);
 
@@ -86,7 +90,8 @@ class PrechargeInstruction : public Instruction {
 class PIMInstruction : public Instruction {
     public:
     PIMInstruction(uint64_t baseAddress, uint64_t destAddress,
-                   std::vector<NVM::Simulation::DataBlock> data);
+                   std::vector<NVM::Simulation::DataBlock> data,
+                   bool fails = false);
 
     Command* execute(SubArray& subArray);
 

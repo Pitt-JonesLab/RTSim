@@ -9,8 +9,7 @@ InstructionTranslator::InstructionTranslator() : openRow(-1) {}
 
 std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doRead(ReadInstruction& inst) {
-    auto nextRow =
-        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
+    auto nextRow = decodeSymbol(AddressSymbol::ROW, inst.getAddress());
 
     std::vector<std::unique_ptr<Instruction>> instructions;
     if (nextRow != openRow) {
@@ -21,14 +20,14 @@ InstructionTranslator::doRead(ReadInstruction& inst) {
         openRow = nextRow;
     }
     instructions.emplace_back(new ReadInstruction(inst));
+    if (inst.checkECC()) instructions.emplace_back(new ReadInstruction(inst));
 
     return instructions;
 }
 
 std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doWrite(WriteInstruction& inst) {
-    auto nextRow =
-        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
+    auto nextRow = decodeSymbol(AddressSymbol::ROW, inst.getAddress());
 
     std::vector<std::unique_ptr<Instruction>> instructions;
     if (nextRow != openRow) {
@@ -39,6 +38,7 @@ InstructionTranslator::doWrite(WriteInstruction& inst) {
         openRow = nextRow;
     }
     instructions.emplace_back(new WriteInstruction(inst));
+    if (inst.checkECC()) instructions.emplace_back(new WriteInstruction(inst));
 
     return instructions;
 }
@@ -47,8 +47,7 @@ std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doRowClone(RowCloneInstruction& inst) {
     std::vector<std::unique_ptr<Instruction>> instructions;
 
-    auto nextRow =
-        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
+    auto nextRow = decodeSymbol(AddressSymbol::ROW, inst.getAddress());
     if (nextRow != openRow) {
         if (openRow != -1) {
             instructions.emplace_back(
@@ -58,6 +57,8 @@ InstructionTranslator::doRowClone(RowCloneInstruction& inst) {
     }
 
     instructions.emplace_back(new RowCloneInstruction(inst));
+    if (inst.checkECC())
+        instructions.emplace_back(new RowCloneInstruction(inst));
 
     instructions.emplace_back(new PrechargeInstruction(inst.getAddress()));
     openRow = -1;
@@ -69,8 +70,7 @@ std::vector<std::unique_ptr<Instruction>>
 InstructionTranslator::doPIM(PIMInstruction& inst) {
     std::vector<std::unique_ptr<Instruction>> instructions;
 
-    auto nextRow =
-        decodeSymbol(AddressSymbol::ROW, inst.getAddress());
+    auto nextRow = decodeSymbol(AddressSymbol::ROW, inst.getAddress());
     if (nextRow != openRow) {
         if (openRow != -1) {
             instructions.emplace_back(
@@ -80,6 +80,8 @@ InstructionTranslator::doPIM(PIMInstruction& inst) {
     }
 
     instructions.emplace_back(new PIMInstruction(inst));
+    if (inst.checkECC()) instructions.emplace_back(new PIMInstruction(inst));
+
     instructions.emplace_back(new PrechargeInstruction(inst.getAddress()));
     openRow = -1;
 

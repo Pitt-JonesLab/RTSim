@@ -39,6 +39,8 @@ class RTSystem : public NVM::Simulation::MemorySystem, NVM::NVMObject {
 
     unsigned int getCurrentCycle();
 
+    void failNext();
+
     private:
     unsigned int outstandingRequests;
 

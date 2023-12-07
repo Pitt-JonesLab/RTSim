@@ -1,6 +1,7 @@
 #include "Simulation/TraceReader/TraceReader.h"
 
 #include "Logging/Logging.h"
+#include "Simulation/Command/ECCCommand.h"
 #include "Simulation/Command/ReadCommand.h"
 #include "Simulation/Command/RowCloneCommand.h"
 #include "Simulation/Command/TransverseReadCommand.h"
@@ -100,6 +101,9 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
 
     std::string fullLine;
     getline(trace, fullLine);
+
+    if (fullLine == "ECC_FAIL")
+        return std::unique_ptr<TraceCommand>(new ECCCommand());
 
     std::istringstream lineStream(fullLine);
 
