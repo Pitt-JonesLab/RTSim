@@ -17,9 +17,7 @@ ReadInstruction::ReadInstruction(uint64_t address,
     Instruction(address, fails),
     data(data) {}
 
-Command* ReadInstruction::execute(SubArray& subArray) {
-    return subArray.read(getAddress(), data);
-}
+Command* ReadInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 ReadInstruction::translate(InstructionTranslator& translator) {
@@ -32,9 +30,7 @@ WriteInstruction::WriteInstruction(uint64_t address,
     Instruction(address, fails),
     data(data) {}
 
-Command* WriteInstruction::execute(SubArray& subArray) {
-    return subArray.write(getAddress(), data);
-}
+Command* WriteInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 WriteInstruction::translate(InstructionTranslator& translator) {
@@ -44,9 +40,7 @@ WriteInstruction::translate(InstructionTranslator& translator) {
 ActivateInstruction::ActivateInstruction(uint64_t address) :
     Instruction(address) {}
 
-Command* ActivateInstruction::execute(SubArray& subArray) {
-    return subArray.activate(getAddress());
-}
+Command* ActivateInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 ActivateInstruction::translate(InstructionTranslator& translator) {
@@ -56,9 +50,7 @@ ActivateInstruction::translate(InstructionTranslator& translator) {
 PrechargeInstruction::PrechargeInstruction(uint64_t address) :
     Instruction(address) {}
 
-Command* PrechargeInstruction::execute(SubArray& subArray) {
-    return subArray.precharge();
-}
+Command* PrechargeInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 PrechargeInstruction::translate(InstructionTranslator& translator) {
@@ -73,9 +65,7 @@ RowCloneInstruction::RowCloneInstruction(uint64_t srcAddress,
     destAddress(destAddress),
     data(data) {}
 
-Command* RowCloneInstruction::execute(SubArray& subArray) {
-    return subArray.rowClone(getAddress(), destAddress, data);
-}
+Command* RowCloneInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 RowCloneInstruction::translate(InstructionTranslator& translator) {
@@ -89,9 +79,7 @@ PIMInstruction::PIMInstruction(uint64_t baseAddress, uint64_t destAddress,
     destAddress(destAddress),
     data(data) {}
 
-Command* PIMInstruction::execute(SubArray& subArray) {
-    return subArray.transverseRead(getAddress(), destAddress, data);
-}
+Command* PIMInstruction::execute(SubArray& subArray) { return nullptr; }
 
 std::vector<std::unique_ptr<Instruction>>
 PIMInstruction::translate(InstructionTranslator& translator) {

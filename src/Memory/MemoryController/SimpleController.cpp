@@ -37,7 +37,6 @@ void SimpleController::failNext() { fails = true; }
 bool SimpleController::read(uint64_t address, DataBlock data) {
     if (received) return false;
 
-    receivedInst = std::make_unique<ReadInstruction>(address, data, fails);
     received = true;
     rInst = {NVM::Scheduling::InstructionType::READ, address};
     fails = false;
@@ -50,7 +49,6 @@ bool SimpleController::write(uint64_t address,
                              NVM::Simulation::DataBlock data) {
     if (received) return false;
 
-    receivedInst = std::make_unique<WriteInstruction>(address, data, fails);
     rInst = {NVM::Scheduling::InstructionType::WRITE, address};
     fails = false;
     received = true;
@@ -63,8 +61,6 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                 NVM::Simulation::DataBlock data) {
     if (received) return false;
 
-    receivedInst = std::make_unique<RowCloneInstruction>(
-        srcAddress, destAddress, data, fails);
     rInst = {NVM::Scheduling::InstructionType::ROWCLONE, srcAddress};
     fails = false;
     received = true;
@@ -79,8 +75,6 @@ bool SimpleController::transverseRead(
     std::vector<NVM::Simulation::DataBlock> data) {
     if (received) return false;
 
-    receivedInst =
-        std::make_unique<PIMInstruction>(baseAddress, destAddress, data, fails);
     rInst = {NVM::Scheduling::InstructionType::PIM, baseAddress};
     fails = false;
     received = true;
