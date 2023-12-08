@@ -1,12 +1,11 @@
 #pragma once
 
 #include "Modeling/MemorySystem.h"
+#include "Modeling/Rank.h"
 
 #include <vector>
 
 namespace NVM::Modeling {
-
-class Rank;
 
 class SimpleSystem : public MemorySystem {
     public:

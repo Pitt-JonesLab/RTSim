@@ -6,9 +6,9 @@
 
 namespace NVM::Scheduling {
 
-class FIFOScheduler : public Scheduler {
+class RBScheduler : public Scheduler {
     public:
-    FIFOScheduler();
+    RBScheduler();
 
     void enqueue(const Instruction& instruction);
 
@@ -18,8 +18,12 @@ class FIFOScheduler : public Scheduler {
 
     bool isEmpty() const;
 
+    int getRBHits() const;
+
     private:
     std::vector<Instruction> instQueue;
+
+    int rowBufferHits;
 };
 
 } // namespace NVM::Scheduling

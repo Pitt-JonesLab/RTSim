@@ -3,13 +3,16 @@
 #include "Memory/Rank/Rank.h"
 #include "Simulation/MemorySystem.h"
 
+
 #include <memory>
 
 namespace NVM::Memory {
 
 class Interconnect {
     public:
-    Command* issue(Instruction& instruction);
+    Command* issueInst(Instruction& instruction);
+
+    bool issue(NVM::Command cmd);
 
     virtual bool isEmpty() const = 0;
 

@@ -4,6 +4,8 @@
 
 namespace NVM::Timing {
 
+using NVM::Command;
+
 class SimpleTimer : public CommandTimer {
     public:
     SimpleTimer();
@@ -11,6 +13,9 @@ class SimpleTimer : public CommandTimer {
     void cycle();
     bool isAvailable(Address address) const;
     void issue(Command cmd);
+
+    private:
+    int remainingCycles;
 };
 
 } // namespace NVM::Timing

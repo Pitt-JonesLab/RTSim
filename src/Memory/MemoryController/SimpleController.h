@@ -3,6 +3,9 @@
 #include "Memory/Command/TriggeredCommand.h"
 #include "Memory/MemoryController/InstructionTranslator.h"
 #include "Memory/MemoryController/MemoryController.h"
+#include "Modeling/System/SimpleSystem.h"
+#include "Parsing/Parser/SimpleParser.h"
+#include "Scheduling/Scheduler/RBScheduler.h"
 
 #include <queue>
 #include <vector>
@@ -40,6 +43,8 @@ class SimpleController : public MemoryController {
     InstructionTranslator translator;
 
     std::unique_ptr<Instruction> receivedInst;
+    NVM::Scheduling::Instruction rInst;
+    bool received;
     using InstructionQueue = std::vector<std::unique_ptr<Instruction>>;
     std::vector<InstructionQueue> highLevelInstructions;
     std::vector<InstructionQueue> lowLevelInstructions;
@@ -47,6 +52,12 @@ class SimpleController : public MemoryController {
     void issueFromQueue();
     void parseTransaction();
     std::unique_ptr<Instruction> getNextInstruction();
+
+    NVM::Parsing::SimpleParser parser;
+    NVM::Scheduling::RBScheduler scheduler;
+    NVM::Modeling::SimpleSystem model;
+
+    std::vector<NVM::Command> cmdQueue;
 };
 
 } // namespace NVM::Memory

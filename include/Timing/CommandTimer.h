@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Command.h"
 #include "Modeling/Types.h"
-#include "Parsing/Command.h"
 
 namespace NVM::Timing {
 
+using NVM::Command;
 using NVM::Modeling::Address;
-using NVM::Parsing::Command;
 
 class CommandTimer {
     public:

@@ -1,13 +1,14 @@
 #pragma once
 
+#include "Command.h"
 #include "Modeling/MemorySystem.h"
-#include "Parsing/Command.h"
 #include "Scheduling/Instruction.h"
 
 #include <vector>
 
 namespace NVM::Parsing {
 
+using NVM::Command;
 using NVM::Modeling::MemorySystem;
 using NVM::Scheduling::Instruction;
 

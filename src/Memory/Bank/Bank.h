@@ -1,8 +1,9 @@
 #pragma once
 
+#include "Command.h"
+#include "Memory/Instruction.h"
 #include "Memory/SubArray/SubArray.h"
 #include "Simulation/MemorySystem.h"
-#include "Memory/Instruction.h"
 
 #include <memory>
 
@@ -13,7 +14,9 @@ class Bank {
     std::vector<std::unique_ptr<SubArray>> subArrays;
 
     public:
-    Command* issue(Instruction& instruction);
+    Command* issueInst(Instruction& instruction);
+
+    bool issue(NVM::Command cmd);
 
     virtual bool isEmpty() const = 0;
 

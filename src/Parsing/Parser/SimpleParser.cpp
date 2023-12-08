@@ -5,6 +5,7 @@
 using namespace NVM::Parsing;
 using namespace NVM::Modeling;
 using namespace NVM::Scheduling;
+using namespace NVM;
 
 SimpleParser::SimpleParser() {}
 
@@ -47,6 +48,12 @@ std::vector<Command> SimpleParser::parseCommands(const Instruction& transaction,
 
     commands.push_back(
         Command(instToCmd(transaction.getType()), transaction.getAddress()));
+
+    if (transaction.getType() == InstructionType::PIM ||
+        transaction.getType() == InstructionType::ROWCLONE) {
+        commands.push_back({CommandType::PRECHARGE, transaction.getAddress()});
+        system.closeRow(transaction.getAddress());
+    }
 
     return commands;
 }

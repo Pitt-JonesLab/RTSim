@@ -1,5 +1,6 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
+#include "Command.h"
 #include "Logging/Logging.h"
 #include "Memory/Command/ChainedCommand.h"
 #include "Memory/Command/NullCommand.h"
@@ -23,97 +24,87 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
     shiftEnergy(0),
     totalRCs(0),
     totalTRs(0),
-    totalTWs(0),
-    currentCommand(nullptr),
-    rowControl(rows, {1, 1}) {}
+    totalTWs(0) {}
 
 Command* SimpleSubArray::read(uint64_t address,
                               NVM::Simulation::DataBlock data) {
-    if (currentCommand) return nullptr;
-    currentCommand = std::unique_ptr<Command>(new TimedCommand());
-    if (currentCommand) {
-        log() << LogLevel::EVENT << "SubArray received read\n";
-        totalReads++;
-        totalShifts++;
-        readEnergy += 0.11;
-        shiftEnergy += 0.03;
-    }
-    return currentCommand.get();
+    if (!timer.isAvailable(address)) return nullptr;
+    timer.issue({NVM::CommandType::READ, address});
+    log() << LogLevel::EVENT << "SubArray received read\n";
+    totalReads++;
+    totalShifts++;
+    readEnergy += 0.11;
+    shiftEnergy += 0.03;
+    return (Command*) 1;
 }
 
 Command* SimpleSubArray::write(uint64_t address,
                                NVM::Simulation::DataBlock data) {
-    if (currentCommand) return nullptr;
-    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (!timer.isAvailable(address)) return nullptr;
+    timer.issue({NVM::CommandType::WRITE, address});
     log() << LogLevel::EVENT << "SubArray received write\n";
     totalWrites++;
     totalShifts++;
     writeEnergy += 18.3;
     shiftEnergy += 0.03;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command* SimpleSubArray::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                   NVM::Simulation::DataBlock data) {
-    if (currentCommand) return nullptr;
-    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (!timer.isAvailable(srcAddress)) return nullptr;
+    timer.issue({NVM::CommandType::ROWCLONE, srcAddress});
     log() << LogLevel::EVENT << "SubArray received row clone\n";
     totalRCs++;
     totalActivates++;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command*
 SimpleSubArray::transverseRead(uint64_t baseAddress, uint64_t destAddress,
                                std::vector<NVM::Simulation::DataBlock> data) {
-    // TODO: TRs should take 1.6x read time
-    if (currentCommand) return nullptr;
-    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (!timer.isAvailable(baseAddress)) return nullptr;
+    timer.issue({NVM::CommandType::PIM, baseAddress});
     log() << LogLevel::EVENT << "SubArray received transverse read\n";
     totalTRs++;
     rowBufferHits = 0;
     actEnergy += 0.080096;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command*
 SimpleSubArray::transverseWrite(uint64_t address,
                                 std::vector<NVM::Simulation::DataBlock> data) {
-    if (currentCommand) return nullptr;
-    currentCommand = std::unique_ptr<Command>(new TimedCommand());
+    if (!timer.isAvailable(address)) return nullptr;
+    timer.issue({NVM::CommandType::WRITE, address});
     log() << LogLevel::EVENT << "SubArray received transverse write\n";
     totalTWs++;
     totalActivates++;
     totalPrecharges++;
     rowBufferHits = 0;
     actEnergy += 0.080096;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command* SimpleSubArray::activate(uint64_t address) {
-    if (currentCommand) return nullptr;
-    currentCommand = std::make_unique<TimedCommand>(5);
+    if (!timer.isAvailable(address)) return nullptr;
+    timer.issue({NVM::CommandType::ACTIVATE, address});
     totalActivates++;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command* SimpleSubArray::precharge() {
-    if (currentCommand) return nullptr;
-    currentCommand = std::make_unique<TimedCommand>(5);
+    if (!timer.isAvailable(0)) return nullptr;
+    timer.issue({NVM::CommandType::PRECHARGE, 0});
     totalPrecharges++;
-    return currentCommand.get();
+    return (Command*) 1;
 }
 
 Command* SimpleSubArray::refresh() { return nullptr; }
 
-void SimpleSubArray::cycle(unsigned int cycles) {
-    if (!currentCommand) return;
-    currentCommand->cycle(cycles);
-    rowControl.cycle(cycles);
-    if (currentCommand->isDone()) currentCommand.reset();
-}
+void SimpleSubArray::cycle(unsigned int cycles) { timer.cycle(); }
 
-bool SimpleSubArray::isEmpty() const { return currentCommand == nullptr; }
+bool SimpleSubArray::isEmpty() const { return timer.isAvailable(0); }
 
 StatBlock SimpleSubArray::getStats(std::string tag) const {
     StatBlock stats(tag);
@@ -135,23 +126,38 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
     return stats;
 }
 
-Command* SimpleSubArray::switchRow(unsigned int row) {
-    if (currentCommand) return nullptr;
+bool SimpleSubArray::issue(NVM::Command cmd) {
+    if (!timer.isAvailable(cmd.getAddress())) return false;
+    timer.issue(cmd);
 
-    if (rowControl.rowIsOpen(row)) {
-        rowBufferHits++;
-        log() << LogLevel::EVENT << "Row " << row << " is already activated\n";
-        return sendNull();
+    switch (cmd.getType()) {
+        case CommandType::READ:
+            totalReads++;
+            totalShifts++;
+            readEnergy += 0.11;
+            shiftEnergy += 0.03;
+            break;
+        case CommandType::WRITE:
+            totalWrites++;
+            totalShifts++;
+            writeEnergy += 18.3;
+            shiftEnergy += 0.03;
+            break;
+        case CommandType::ROWCLONE:
+            totalRCs++;
+            totalActivates++;
+            break;
+        case CommandType::PIM:
+            totalTRs++;
+            actEnergy += 0.080096;
+            break;
+        case CommandType::ACTIVATE:
+            totalActivates++;
+            break;
+        case CommandType::PRECHARGE:
+            totalPrecharges++;
+            break;
     }
 
-    // TODO: RowController should handle these stats
-    totalActivates++;
-    totalPrecharges++;
-    actEnergy += 0.080096;
-    std::vector<std::function<Command*()>> switchCmds = {
-        [this]() { return rowControl.closeRow(); },
-        [this, row]() { return rowControl.activate(row); }};
-
-    currentCommand.reset(new ChainedCommand(switchCmds));
-    return currentCommand.get();
+    return true;
 }

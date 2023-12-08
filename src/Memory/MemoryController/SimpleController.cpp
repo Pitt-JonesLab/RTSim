@@ -2,7 +2,10 @@
 
 #include "Logging/Logging.h"
 #include "Memory/Command/WaitingCommand.h"
+#include "Modeling/Bank/SimpleBank.h"
 #include "Modeling/Decoder.h"
+#include "Modeling/Rank/SimpleRank.h"
+#include "Modeling/SubArray/SimpleSubArray.h"
 
 #include <algorithm>
 #include <functional>
@@ -18,16 +21,25 @@ SimpleController::SimpleController() :
     highLevelInstructions(1),
     lowLevelInstructions(1),
     openRow(-1),
-    fails(false) {}
+    fails(false),
+    received(false),
+    rInst(NVM::Scheduling::InstructionType::READ, 0) {
+    auto sa = std::make_unique<NVM::Modeling::SimpleSubArray>();
+    auto bank = std::make_unique<NVM::Modeling::SimpleBank>();
+    auto rank = std::make_unique<NVM::Modeling::SimpleRank>();
+    bank->addSubArray(std::move(sa));
+    rank->addBank(std::move(bank));
+    model.addRank(std::move(rank));
+}
 
 void SimpleController::failNext() { fails = true; }
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
-    if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 20) return false;
-    if (receivedInst) return false;
+    if (received) return false;
 
     receivedInst = std::make_unique<ReadInstruction>(address, data, fails);
+    received = true;
+    rInst = {NVM::Scheduling::InstructionType::READ, address};
     fails = false;
     log() << LogLevel::EVENT << "SimpleController received read\n";
 
@@ -36,12 +48,12 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 
 bool SimpleController::write(uint64_t address,
                              NVM::Simulation::DataBlock data) {
-    if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 20) return false;
-    if (receivedInst) return false;
+    if (received) return false;
 
     receivedInst = std::make_unique<WriteInstruction>(address, data, fails);
+    rInst = {NVM::Scheduling::InstructionType::WRITE, address};
     fails = false;
+    received = true;
     log() << LogLevel::EVENT << "SimpleController received write\n";
 
     return true;
@@ -49,14 +61,15 @@ bool SimpleController::write(uint64_t address,
 
 bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                 NVM::Simulation::DataBlock data) {
-    if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 20) return false;
-    if (receivedInst) return false;
+    if (received) return false;
 
     receivedInst = std::make_unique<RowCloneInstruction>(
         srcAddress, destAddress, data, fails);
+    rInst = {NVM::Scheduling::InstructionType::ROWCLONE, srcAddress};
     fails = false;
-    log() << LogLevel::EVENT << "SimpleController received RowClone\n";
+    received = true;
+    log() << LogLevel::EVENT << "SimpleController received PIM\n"
+          << "Address: " << srcAddress << "\n";
 
     return true;
 }
@@ -64,14 +77,15 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
 bool SimpleController::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> data) {
-    if (interconnects.empty()) return false;
-    if (highLevelInstructions[0].size() == 20) return false;
-    if (receivedInst) return false;
+    if (received) return false;
 
     receivedInst =
         std::make_unique<PIMInstruction>(baseAddress, destAddress, data, fails);
+    rInst = {NVM::Scheduling::InstructionType::PIM, baseAddress};
     fails = false;
-    log() << LogLevel::EVENT << "SimpleController received RowClone\n";
+    received = true;
+    log() << LogLevel::EVENT << "SimpleController received PIM\n"
+          << "Address: " << baseAddress << "\n";
 
     return true;
 }
@@ -84,6 +98,23 @@ bool SimpleController::transverseWrite(
 void SimpleController::cycle(unsigned int cycles) {
     if (cycles == 0) return;
     if (!interconnects.empty()) interconnects[0]->cycle(cycles);
+
+    if (received) {
+        scheduler.enqueue(rInst);
+        rInst = {NVM::Scheduling::InstructionType::READ, 0};
+        received = false;
+    }
+    if (cmdQueue.empty() && !scheduler.isEmpty()) {
+        cmdQueue = parser.parseCommands(scheduler.issue(model), model);
+        rowBufferHits = scheduler.getRBHits();
+    }
+    if (!cmdQueue.empty()) {
+        if (interconnects[0]->issue(cmdQueue[0])) {
+            cmdQueue.erase(cmdQueue.begin());
+        }
+    }
+
+    /*
     parseTransaction();
     issueFromQueue();
     cycles--;
@@ -95,21 +126,21 @@ void SimpleController::cycle(unsigned int cycles) {
         parseTransaction();
         issueFromQueue();
         cycles--;
-    }
+    }*/
 }
 
 void SimpleController::issueFromQueue() {
     if (interconnects.empty()) return;
     if (lowLevelInstructions[0].empty()) return;
     auto cmd =
-        interconnects[0]->issue(*(lowLevelInstructions[0].front().get()));
+        interconnects[0]->issueInst(*(lowLevelInstructions[0].front().get()));
     if (cmd) lowLevelInstructions[0].erase(lowLevelInstructions[0].begin());
 }
 
 bool SimpleController::isEmpty() const {
     if (interconnects.empty()) return false;
-    return interconnects[0]->isEmpty() && highLevelInstructions[0].empty() &&
-           lowLevelInstructions[0].empty() && !receivedInst;
+    return scheduler.isEmpty() && cmdQueue.empty() && !received &&
+           interconnects[0]->isEmpty();
 }
 
 StatBlock SimpleController::getStats(std::string tag) const {

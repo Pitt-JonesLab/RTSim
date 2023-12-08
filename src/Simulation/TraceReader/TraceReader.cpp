@@ -151,9 +151,11 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
                 new WriteCommand(cycle, address, data, threadId));
         case Opcode1::PIM: {
             if (op2 == Opcode2::ROWCLONE) {
-                return std::unique_ptr<TraceCommand>(new RowCloneCommand());
+                return std::unique_ptr<TraceCommand>(
+                    new RowCloneCommand(address, address2, data));
             }
-            return std::unique_ptr<TraceCommand>(new TransverseReadCommand());
+            return std::unique_ptr<TraceCommand>(
+                new TransverseReadCommand(address, address2));
         }
         default:
             throw std::runtime_error("Unknown trace operation!");

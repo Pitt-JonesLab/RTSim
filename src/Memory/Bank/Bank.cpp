@@ -6,10 +6,12 @@ void Bank::addSubArray(std::unique_ptr<SubArray> subArray) {
     subArrays.emplace_back(std::move(subArray));
 }
 
-Command* Bank::issue(Instruction& instruction) {
+Command* Bank::issueInst(Instruction& instruction) {
     if (subArrays.empty()) return nullptr;
     return instruction.execute(*subArrays[0].get());
 }
+
+bool Bank::issue(NVM::Command cmd) { return subArrays[0]->issue(cmd); }
 
 StatBlock Bank::getStats(std::string tag) const {
     StatBlock stats(tag);

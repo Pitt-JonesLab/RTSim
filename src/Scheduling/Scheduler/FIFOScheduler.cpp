@@ -22,3 +22,5 @@ Instruction FIFOScheduler::issue(const MemorySystem& system) {
     instQueue.erase(instQueue.begin());
     return inst;
 }
+
+bool FIFOScheduler::isEmpty() const { return instQueue.empty(); }

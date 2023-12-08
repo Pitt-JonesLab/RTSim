@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modeling/Types.h"
+#include <cstdint>
 
-namespace NVM::Parsing {
+namespace NVM {
 
-using NVM::Modeling::Address;
+using Address = uint64_t;
 
 enum class CommandType { READ, WRITE, ROWCLONE, PIM, ACTIVATE, PRECHARGE };
 
@@ -20,4 +20,4 @@ class Command {
     Address address;
 };
 
-} // namespace NVM::Parsing
+} // namespace NVM

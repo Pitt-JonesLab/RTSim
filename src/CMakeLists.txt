@@ -5,6 +5,7 @@ add_subdirectory(Modeling)
 add_subdirectory(Scheduling)
 add_subdirectory(Parsing)
 add_subdirectory(Timing)
+add_subdirectory(Utils)
 add_subdirectory(main)
 add_subdirectory(old)
 

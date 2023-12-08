@@ -1,6 +1,6 @@
-#include "Parsing/Command.h"
+#include "Command.h"
 
-using namespace NVM::Parsing;
+using namespace NVM;
 
 Command::Command(CommandType type, Address address) :
     type(type),

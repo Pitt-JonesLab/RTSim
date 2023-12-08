@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Memory/SubArray/RowController.h"
 #include "Memory/SubArray/SubArray.h"
+#include "Timing/Timer/SimpleTimer.h"
 
 #include <memory>
 
 namespace NVM::Memory {
+
+using NVM::Timing::SimpleTimer;
 
 class SimpleSubArray : public SubArray {
     public:
@@ -13,7 +15,6 @@ class SimpleSubArray : public SubArray {
 
     Command* read(uint64_t address, NVM::Simulation::DataBlock data);
     Command* write(uint64_t address, NVM::Simulation::DataBlock data);
-    Command* switchRow(unsigned int row);
     Command* rowClone(uint64_t srcAddress, uint64_t destAddress,
                       NVM::Simulation::DataBlock data);
     Command* transverseRead(uint64_t baseAddress, uint64_t destAddress,
@@ -23,6 +24,8 @@ class SimpleSubArray : public SubArray {
     Command* activate(uint64_t address);
     Command* precharge();
     Command* refresh();
+
+    bool issue(NVM::Command cmd);
 
     void cycle(unsigned int cycles);
 
@@ -42,7 +45,7 @@ class SimpleSubArray : public SubArray {
 
     std::unique_ptr<Command> currentCommand;
 
-    RowController rowControl;
+    SimpleTimer timer;
 };
 
 } // namespace NVM::Memory

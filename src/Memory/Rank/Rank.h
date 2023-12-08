@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Command.h"
 #include "Memory/Bank/Bank.h"
 #include "Simulation/MemorySystem.h"
 
@@ -9,7 +10,9 @@ namespace NVM::Memory {
 
 class Rank {
     public:
-    Command* issue(Instruction& instruction);
+    Command* issueInst(Instruction& instruction);
+
+    bool issue(NVM::Command cmd);
 
     virtual bool isEmpty() const = 0;
 
