@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Memory/Command/TriggeredCommand.h"
-#include "Memory/MemoryController/InstructionTranslator.h"
 #include "Memory/MemoryController/MemoryController.h"
 #include "Modeling/System/SimpleSystem.h"
 #include "Parsing/Parser/SimpleParser.h"
@@ -37,21 +35,10 @@ class SimpleController : public MemoryController {
 
     private:
     unsigned int rowBufferHits;
-    int openRow;
     bool fails;
 
-    InstructionTranslator translator;
-
-    std::unique_ptr<Instruction> receivedInst;
     NVM::Scheduling::Instruction rInst;
     bool received;
-    using InstructionQueue = std::vector<std::unique_ptr<Instruction>>;
-    std::vector<InstructionQueue> highLevelInstructions;
-    std::vector<InstructionQueue> lowLevelInstructions;
-
-    void issueFromQueue();
-    void parseTransaction();
-    std::unique_ptr<Instruction> getNextInstruction();
 
     NVM::Parsing::SimpleParser parser;
     NVM::Scheduling::RBScheduler scheduler;

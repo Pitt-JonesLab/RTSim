@@ -1,19 +1,12 @@
 set(MEMORY_SOURCES
     MemoryFactory.cpp
     StatBlock.cpp
-    Instruction.cpp
-    Command/TimedCommand.cpp
-    Command/WaitingCommand.cpp
-    Command/ChainedCommand.cpp
-    Command/NullCommand.cpp
-    Command/TriggeredCommand.cpp
     Bank/Bank.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
     Interconnect/Interconnect.cpp
     MemoryController/SimpleController.cpp
     MemoryController/MemoryController.cpp
-    MemoryController/InstructionTranslator.cpp
     MemorySystem/SimpleSystem.cpp
     Rank/Rank.cpp
     Rank/SimpleRank.cpp

@@ -2,11 +2,6 @@
 
 using namespace NVM::Memory;
 
-Command* Interconnect::issueInst(Instruction& instruction) {
-    if (ranks.empty()) return nullptr;
-    return ranks[0]->issueInst(instruction);
-}
-
 bool Interconnect::issue(NVM::Command cmd) { return ranks[0]->issue(cmd); }
 
 void Interconnect::addRank(std::unique_ptr<Rank> rank) {

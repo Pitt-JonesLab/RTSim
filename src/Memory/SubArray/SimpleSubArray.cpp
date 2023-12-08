@@ -2,9 +2,6 @@
 
 #include "Command.h"
 #include "Logging/Logging.h"
-#include "Memory/Command/ChainedCommand.h"
-#include "Memory/Command/NullCommand.h"
-#include "Memory/Command/TimedCommand.h"
 
 #include <functional>
 

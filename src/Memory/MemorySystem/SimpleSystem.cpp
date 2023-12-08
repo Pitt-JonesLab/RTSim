@@ -1,7 +1,6 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 
 #include "Logging/Logging.h"
-#include "Memory/Command/WaitingCommand.h"
 #include "Modeling/Decoder.h"
 
 #include <functional>
@@ -11,8 +10,6 @@ using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
 bool SimpleSystem::issue(NVMainRequest* req) { return false; }
-
-using CommandFunc = std::function<Command*()>;
 
 SimpleSystem::SimpleSystem() :
     totalReads(0),

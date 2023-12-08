@@ -1,7 +1,6 @@
 #include "Memory/MemoryController/SimpleController.h"
 
 #include "Logging/Logging.h"
-#include "Memory/Command/WaitingCommand.h"
 #include "Modeling/Bank/SimpleBank.h"
 #include "Modeling/Decoder.h"
 #include "Modeling/Rank/SimpleRank.h"
@@ -17,10 +16,6 @@ using namespace NVM::Logging;
 using namespace NVM::Modeling;
 
 SimpleController::SimpleController() :
-    rowBufferHits(0),
-    highLevelInstructions(1),
-    lowLevelInstructions(1),
-    openRow(-1),
     fails(false),
     received(false),
     rInst(NVM::Scheduling::InstructionType::READ, 0) {
@@ -107,28 +102,6 @@ void SimpleController::cycle(unsigned int cycles) {
             cmdQueue.erase(cmdQueue.begin());
         }
     }
-
-    /*
-    parseTransaction();
-    issueFromQueue();
-    cycles--;
-    if (receivedInst) {
-        highLevelInstructions[0].push_back(std::move(receivedInst));
-        receivedInst.reset();
-    }
-    while (cycles && !highLevelInstructions[0].empty()) {
-        parseTransaction();
-        issueFromQueue();
-        cycles--;
-    }*/
-}
-
-void SimpleController::issueFromQueue() {
-    if (interconnects.empty()) return;
-    if (lowLevelInstructions[0].empty()) return;
-    auto cmd =
-        interconnects[0]->issueInst(*(lowLevelInstructions[0].front().get()));
-    if (cmd) lowLevelInstructions[0].erase(lowLevelInstructions[0].begin());
 }
 
 bool SimpleController::isEmpty() const {
@@ -159,45 +132,4 @@ StatBlock SimpleController::getStats(std::string tag) const {
     }
 
     return stats;
-}
-
-std::unique_ptr<Instruction> SimpleController::getNextInstruction() {
-    if (highLevelInstructions[0].empty()) return nullptr;
-
-    // Try to send row buffer hit
-    auto it = std::find_if(
-        highLevelInstructions[0].begin(), highLevelInstructions[0].end(),
-        [this](const auto& inst) {
-            auto row = decodeSymbol(AddressSymbol::ROW, inst->getAddress());
-            return row == translator.getOpenRow();
-        });
-
-    if (it != highLevelInstructions[0].end()) {
-        log() << LogLevel::EVENT << "Row buffer hit\n";
-        rowBufferHits++;
-        auto nextInst = std::move(*it);
-        highLevelInstructions[0].erase(it);
-        return nextInst;
-    }
-
-    // Send next instruction in queue
-    auto nextInst = std::move(highLevelInstructions[0].front());
-    highLevelInstructions[0].erase(highLevelInstructions[0].begin());
-    return std::move(nextInst);
-}
-
-void SimpleController::parseTransaction() {
-    if (!lowLevelInstructions[0].empty()) return;
-    if (highLevelInstructions[0].empty()) return;
-
-    auto nextInst = getNextInstruction();
-    if (!nextInst) return;
-
-    auto lowLevelInsts = nextInst->translate(translator);
-    lowLevelInstructions[0].reserve(lowLevelInstructions[0].size() +
-                                    lowLevelInsts.size());
-    lowLevelInstructions[0].insert(
-        lowLevelInstructions[0].end(),
-        std::make_move_iterator(lowLevelInsts.begin()),
-        std::make_move_iterator(lowLevelInsts.end()));
 }

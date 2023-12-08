@@ -10,8 +10,6 @@ namespace NVM::Memory {
 
 class Rank {
     public:
-    Command* issueInst(Instruction& instruction);
-
     bool issue(NVM::Command cmd);
 
     virtual bool isEmpty() const = 0;
