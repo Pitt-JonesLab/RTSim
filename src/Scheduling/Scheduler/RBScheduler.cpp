@@ -39,4 +39,6 @@ Instruction RBScheduler::issue(const MemorySystem& system) {
 
 bool RBScheduler::isEmpty() const { return instQueue.empty(); }
 
+bool RBScheduler::isAvailable() const { return instQueue.size() < 20; }
+
 int RBScheduler::getRBHits() const { return rowBufferHits; }

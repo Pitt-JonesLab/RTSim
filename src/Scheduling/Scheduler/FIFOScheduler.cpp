@@ -24,3 +24,5 @@ Instruction FIFOScheduler::issue(const MemorySystem& system) {
 }
 
 bool FIFOScheduler::isEmpty() const { return instQueue.empty(); }
+
+bool FIFOScheduler::isAvailable() const { return instQueue.size() < 20; }

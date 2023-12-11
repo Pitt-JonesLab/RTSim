@@ -30,7 +30,7 @@ SimpleController::SimpleController() :
 void SimpleController::failNext() { fails = true; }
 
 bool SimpleController::read(uint64_t address, DataBlock data) {
-    if (received) return false;
+    if (received || !scheduler.isAvailable()) return false;
 
     received = true;
     rInst = {NVM::Scheduling::InstructionType::READ, address};
@@ -42,7 +42,7 @@ bool SimpleController::read(uint64_t address, DataBlock data) {
 
 bool SimpleController::write(uint64_t address,
                              NVM::Simulation::DataBlock data) {
-    if (received) return false;
+    if (received || !scheduler.isAvailable()) return false;
 
     rInst = {NVM::Scheduling::InstructionType::WRITE, address};
     fails = false;
@@ -54,7 +54,7 @@ bool SimpleController::write(uint64_t address,
 
 bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
                                 NVM::Simulation::DataBlock data) {
-    if (received) return false;
+    if (received || !scheduler.isAvailable()) return false;
 
     rInst = {NVM::Scheduling::InstructionType::ROWCLONE, srcAddress};
     fails = false;
@@ -68,7 +68,7 @@ bool SimpleController::rowClone(uint64_t srcAddress, uint64_t destAddress,
 bool SimpleController::transverseRead(
     uint64_t baseAddress, uint64_t destAddress,
     std::vector<NVM::Simulation::DataBlock> data) {
-    if (received) return false;
+    if (received || !scheduler.isAvailable()) return false;
 
     rInst = {NVM::Scheduling::InstructionType::PIM, baseAddress};
     fails = false;

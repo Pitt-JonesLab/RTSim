@@ -18,6 +18,8 @@ class FIFOScheduler : public Scheduler {
 
     bool isEmpty() const;
 
+    bool isAvailable() const;
+
     private:
     std::vector<Instruction> instQueue;
 };

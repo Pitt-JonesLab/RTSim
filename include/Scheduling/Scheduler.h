@@ -14,6 +14,8 @@ class Scheduler {
     virtual const Instruction& peek(const MemorySystem& system) = 0;
 
     virtual Instruction issue(const MemorySystem& system) = 0;
+
+    virtual bool isAvailable() const = 0;
 };
 
 } // namespace NVM::Scheduling

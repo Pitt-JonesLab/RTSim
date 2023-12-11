@@ -8,7 +8,7 @@
 
 using namespace NVM::Modeling;
 
-std::map<AddressSymbol, std::pair<unsigned int, unsigned int>> symbolPositions;
+std::array<std::pair<unsigned int, unsigned int>, 5> symbolPositions;
 
 AddressSymbol stringToSymbol(std::string token) {
     if (token == "R") return AddressSymbol::ROW;
@@ -57,41 +57,38 @@ void NVM::Modeling::setScheme(std::string order, ComponentCounts counts) {
     for (auto token : splitTokens(order)) {
         auto symbol = stringToSymbol(token);
         auto bitLength = getBitLength(symbol, counts);
-        symbolPositions[symbol] = {lsb + bitLength, lsb};
+        symbolPositions[static_cast<size_t>(symbol)] = {lsb + bitLength, lsb};
         lsb += bitLength + 1;
     }
 }
 
 unsigned int getBitRange(uint64_t val, unsigned int msb, unsigned int lsb) {
-    val >>= lsb;
-    uint64_t mask = 1;
-    for (int i = 0; i < (msb - lsb); i++) {
-        mask <<= 1;
-        mask++;
-    }
-    return val & mask;
+    uint64_t mask = 0xFFFFFFFFFFFFFFFF;
+    mask >>= 64 - (msb - lsb + 1);
+    return (val >> lsb) & mask;
 }
 
 unsigned int NVM::Modeling::decodeSymbol(AddressSymbol symbol,
                                          uint64_t address) {
     // Truncating bus offset and burst length TODO: find these numbers
     address >>= 6;
-    if (!symbolPositions.count(symbol)) return 0;
-    return getBitRange(address, symbolPositions[symbol].first,
-                       symbolPositions[symbol].second);
+    return getBitRange(address,
+                       symbolPositions[static_cast<size_t>(symbol)].first,
+                       symbolPositions[static_cast<size_t>(symbol)].second);
 }
 
 Address NVM::Modeling::replaceSymbol(Address address, AddressSymbol symbol,
                                      unsigned int newVal) {
-    auto symbolLength =
-        symbolPositions[symbol].first - symbolPositions[symbol].second;
+    auto symbolLength = symbolPositions[static_cast<size_t>(symbol)].first -
+                        symbolPositions[static_cast<size_t>(symbol)].second;
     Address mask = 0;
     for (int i = 0; i < symbolLength; i++) {
         mask |= 1;
         mask <<= 1;
     }
-    mask <<= symbolPositions[symbol].second + 6;
+    mask <<= symbolPositions[static_cast<size_t>(symbol)].second + 6;
     address &= ~mask;
-    address |= (newVal << (symbolPositions[symbol].second + 6));
+    address |=
+        (newVal << (symbolPositions[static_cast<size_t>(symbol)].second + 6));
     return address;
 }

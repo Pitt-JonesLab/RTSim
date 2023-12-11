@@ -6,7 +6,7 @@
 
 namespace NVM::Modeling {
 
-enum class AddressSymbol { CHANNEL, RANK, BANK, ROW, COL };
+enum class AddressSymbol { CHANNEL = 0, RANK, BANK, ROW, COL };
 
 struct ComponentCounts {
     unsigned int channels, ranks, banks, rows, cols;

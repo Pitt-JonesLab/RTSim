@@ -18,6 +18,8 @@ class RBScheduler : public Scheduler {
 
     bool isEmpty() const;
 
+    bool isAvailable() const;
+
     int getRBHits() const;
 
     private:

@@ -141,12 +141,26 @@ bool SimpleSystem::write(const Address& address, const RowData& data) {
 
 bool SimpleSystem::rowClone(const Address& srcAddress,
                             const Address& destAddress, const RowData& data) {
-    return false;
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->rowClone(srcAddress.getData(),
+                                            destAddress.getData(), data);
+    if (!channelCmd) return false;
+    totalRowClones++;
+    log() << LogLevel::EVENT << "SimpleSystem received RowClone\n";
+    return true;
 }
 
 bool SimpleSystem::refresh(const Address& bankAddress) { return false; }
 
 bool SimpleSystem::pim(std::vector<Address> operands,
                        const Address& destAddress, std::vector<RowData> data) {
-    return false;
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->transverseRead(
+        operands[0].getData(), destAddress.getData(), {data[0]});
+    if (!channelCmd) return false;
+    totalPIMs++;
+    log() << LogLevel::EVENT << "SimpleSystem received PIM\n";
+    return true;
 }
