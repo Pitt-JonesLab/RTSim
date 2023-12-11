@@ -115,3 +115,38 @@ void SimpleSystem::printStats(std::ostream& statStream) {
 unsigned int SimpleSystem::getCurrentCycle() { return currentCycle; }
 
 void SimpleSystem::failNext() { channels[0]->failNext(); }
+
+bool SimpleSystem::read(const Address& address, const RowData& data) {
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->read(address.getData(), data);
+    if (!channelCmd) return false;
+    totalReads++;
+    log() << LogLevel::EVENT << "SimpleSystem received read at row "
+          << NVM::Modeling::decodeSymbol(NVM::Modeling::AddressSymbol::ROW,
+                                         address.getData())
+          << "\n";
+    return true;
+}
+
+bool SimpleSystem::write(const Address& address, const RowData& data) {
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->write(address.getData(), data);
+    if (!channelCmd) return false;
+    totalWrites++;
+    log() << LogLevel::EVENT << "SimpleSystem received write\n";
+    return true;
+}
+
+bool SimpleSystem::rowClone(const Address& srcAddress,
+                            const Address& destAddress, const RowData& data) {
+    return false;
+}
+
+bool SimpleSystem::refresh(const Address& bankAddress) { return false; }
+
+bool SimpleSystem::pim(std::vector<Address> operands,
+                       const Address& destAddress, std::vector<RowData> data) {
+    return false;
+}

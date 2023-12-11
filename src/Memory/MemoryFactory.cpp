@@ -41,9 +41,9 @@ makeSimpleController(const NVM::Simulation::Config& conf) {
     return std::move(controller);
 }
 
-std::unique_ptr<NVM::Simulation::MemorySystem>
+std::unique_ptr<MemorySystem>
 NVM::Memory::makeSimpleSystem(const NVM::Simulation::Config& conf) {
     SimpleSystem* system = new SimpleSystem();
     system->addController(makeSimpleController(conf));
-    return std::unique_ptr<NVM::Simulation::MemorySystem>(system);
+    return std::unique_ptr<MemorySystem>(system);
 }

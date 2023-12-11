@@ -217,17 +217,20 @@ Command TraceReader::getNextCommand() {
             return [address, data](Commandable& receiver) -> bool {
                 return receiver.read(address, data);
             };
-        // case Opcode1::WRITE:
-        //     return std::unique_ptr<TraceCommand>(
-        //         new WriteCommand(cycle, address, data, threadId));
-        // case Opcode1::PIM: {
-        //     if (op2 == Opcode2::ROWCLONE) {
-        //         return std::unique_ptr<TraceCommand>(
-        //             new RowCloneCommand(address, address2, data));
-        //     }
-        //     return std::unique_ptr<TraceCommand>(
-        //         new TransverseReadCommand(address, address2));
-        // }
+        case Opcode1::WRITE:
+            return [address, data](Commandable& receiver) -> bool {
+                return receiver.write(address, data);
+            };
+        case Opcode1::PIM:
+            if (op2 == Opcode2::ROWCLONE) {
+                return
+                    [address, address2, data](Commandable& receiver) -> bool {
+                        return receiver.rowClone(address, address2, data);
+                    };
+            }
+            return [address, address2, data](Commandable& receiver) -> bool {
+                return receiver.pim({address}, address2, {data});
+            };
         default:
             throw std::runtime_error("Unknown trace operation!");
     }

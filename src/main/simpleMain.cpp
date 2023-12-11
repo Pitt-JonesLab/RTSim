@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl << std::endl;
 
     // Set up log
-    Logging::setLogLevel(LogLevel::DEBUG);
+    Logging::setLogLevel(LogLevel::EVENT);
 
     // Build dependencies
     NVM::Config* config = createConfig(argc, argv);
@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     setAddressScheme(conf);
 
     // Build RTSystem
-    auto memory = makeSimpleSystem(conf);
+    std::unique_ptr<Commandable> memory = makeSimpleSystem(conf);
 
     // Build TraceReader
     auto reader = std::make_unique<FileTraceReader>(argv[2]);

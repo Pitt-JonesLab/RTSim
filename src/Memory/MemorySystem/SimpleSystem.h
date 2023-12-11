@@ -7,6 +7,9 @@
 
 namespace NVM::Memory {
 
+using NVM::Address;
+using NVM::RowData;
+
 class SimpleSystem : public MemorySystem {
     public:
     SimpleSystem();
@@ -45,6 +48,18 @@ class SimpleSystem : public MemorySystem {
     void addController(std::unique_ptr<MemoryController> controller);
 
     void failNext();
+
+    bool read(const Address& address, const RowData& data);
+
+    bool write(const Address& address, const RowData& data);
+
+    bool rowClone(const Address& srcAddress, const Address& destAddress,
+                  const RowData& data);
+
+    bool refresh(const Address& bankAddress);
+
+    bool pim(std::vector<Address> operands, const Address& destAddress,
+             std::vector<RowData> data);
 
     private:
     bool available() const;

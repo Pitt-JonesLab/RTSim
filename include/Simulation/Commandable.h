@@ -4,9 +4,13 @@
 #include "Utils/RowData.h"
 
 #include <functional>
+#include <iostream>
 #include <vector>
 
 namespace NVM::Simulation {
+
+using NVM::Address;
+using NVM::RowData;
 
 class Commandable {
     public:
@@ -22,9 +26,13 @@ class Commandable {
     virtual bool pim(std::vector<Address> operands, const Address& destAddress,
                      std::vector<RowData> data) = 0;
 
-    virtual bool isEmpty() const;
+    virtual bool isEmpty() const = 0;
 
     virtual void cycle(unsigned int cycles = 1) = 0;
+
+    virtual void printStats(std::ostream& statStream) = 0;
+
+    virtual ~Commandable() {}
 };
 
 using Command = std::function<bool(Commandable&)>;

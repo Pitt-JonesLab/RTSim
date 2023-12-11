@@ -2,11 +2,14 @@
 
 #include "Command.h"
 #include "Logging/Logging.h"
+#include "Utils/RowData.h"
 
 #include <functional>
 
 using namespace NVM::Memory;
 using namespace NVM::Logging;
+using NVM::Address;
+using NVM::RowData;
 
 SimpleSubArray::SimpleSubArray(unsigned int rows) :
     totalReads(0),
@@ -48,7 +51,7 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 }
 
 bool SimpleSubArray::issue(NVM::Command cmd) {
-    if (!timer.isAvailable(cmd.getAddress())) return false;
+    if (!timer.isAvailable(cmd.getAddress().getData())) return false;
     timer.issue(cmd);
 
     switch (cmd.getType()) {

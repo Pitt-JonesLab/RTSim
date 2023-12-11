@@ -27,5 +27,6 @@ void TraceSimulator::run() {
 }
 
 void TraceSimulator::printStats(std::ostream& statStream) {
-    memory->printStats(statStream);
+    if (memory) memory->printStats(statStream);
+    if (receiver) receiver->printStats(statStream);
 }

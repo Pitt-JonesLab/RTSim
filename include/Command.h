@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Utils/Address.h"
+
 #include <cstdint>
 
 namespace NVM {
 
-using Address = uint64_t;
+// using Address = uint64_t;
 
 enum class CommandType { READ, WRITE, ROWCLONE, PIM, ACTIVATE, PRECHARGE };
 

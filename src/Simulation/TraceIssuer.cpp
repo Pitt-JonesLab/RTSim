@@ -44,7 +44,7 @@ bool TraceIssuer::drain(MemorySystem* memory) {
 }
 
 bool TraceIssuer::drain(Commandable& receiver) {
-    while (receiver.isEmpty()) {
+    while (!receiver.isEmpty()) {
         if (timer.cycle(1)) receiver.cycle(1);
         else return false;
     }

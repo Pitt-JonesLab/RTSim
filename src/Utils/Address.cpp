@@ -17,3 +17,5 @@ uint64_t Address::getBitRange(unsigned int msb, unsigned int lsb) const {
 
     return range & mask;
 }
+
+uint64_t Address::getData() const { return data; }

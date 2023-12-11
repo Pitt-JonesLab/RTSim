@@ -37,7 +37,7 @@ std::vector<Command> SimpleParser::parseCommands(const Instruction& transaction,
         if (openRow != instRow) {
             commands.emplace_back(CommandType::PRECHARGE,
                                   transaction.getAddress());
-            system.closeRow(address);
+            system.closeRow(address.getData());
         }
     }
 
