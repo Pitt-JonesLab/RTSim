@@ -2,6 +2,8 @@
 
 using namespace NVM;
 
+Address::Address() : data(0) {}
+
 Address::Address(uint64_t data) : data(data) {}
 
 uint64_t Address::getBitRange(unsigned int msb, unsigned int lsb) const {

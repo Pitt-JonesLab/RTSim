@@ -161,3 +161,74 @@ std::unique_ptr<TraceCommand> TraceReader::getNext() {
             throw std::runtime_error("Unknown trace operation!");
     }
 }
+
+Command TraceReader::getNextCommand() {
+    if (!trace.good()) Command();
+    if (trace.eof()) {
+        std::cout << "TraceReader: Reached EOF!" << std::endl;
+        return Command();
+    }
+
+    std::string fullLine;
+    getline(trace, fullLine);
+
+    // if (fullLine == "ECC_FAIL")
+    //     return std::unique_ptr<TraceCommand>(new ECCCommand());
+
+    std::istringstream lineStream(fullLine);
+
+    unsigned int cycle;
+    Opcode1 operation;
+    Opcode2 op2;
+    Address address, address2;
+    NVMDataBlock dataBlock;
+    unsigned int threadId;
+
+    try {
+        cycle = readCycle(lineStream);
+        Logging::log() << Logging::LogLevel::DEBUG << std::dec << "Read cycle "
+                       << cycle << '\n';
+        operation = readOperation(lineStream);
+        Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
+                       << (int) operation << '\n';
+        address = Address(readAddress(lineStream));
+        // Logging::log() << Logging::LogLevel::DEBUG << "Read address "
+        //                << std::hex << address << '\n';
+        if (operation == Opcode1::PIM) {
+            op2 = readOp2(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 "
+                           << (int) op2 << '\n';
+            address2 = Address(readAddress(lineStream));
+            // Logging::log() << Logging::LogLevel::DEBUG << "Read address2 "
+            //                << std::hex << address2 << '\n';
+        }
+        dataBlock = readData(lineStream);
+        threadId = readCycle(lineStream);
+    } catch (...) {
+        std::cout << "Invalid trace format!\n";
+        return nullptr;
+    }
+
+    RowData data;
+    for (int i = 0; i < 64; i++) data.setByte(i, dataBlock.GetByte(i));
+
+    switch (operation) {
+        case Opcode1::READ:
+            return [address, data](Commandable& receiver) -> bool {
+                return receiver.read(address, data);
+            };
+        // case Opcode1::WRITE:
+        //     return std::unique_ptr<TraceCommand>(
+        //         new WriteCommand(cycle, address, data, threadId));
+        // case Opcode1::PIM: {
+        //     if (op2 == Opcode2::ROWCLONE) {
+        //         return std::unique_ptr<TraceCommand>(
+        //             new RowCloneCommand(address, address2, data));
+        //     }
+        //     return std::unique_ptr<TraceCommand>(
+        //         new TransverseReadCommand(address, address2));
+        // }
+        default:
+            throw std::runtime_error("Unknown trace operation!");
+    }
+}

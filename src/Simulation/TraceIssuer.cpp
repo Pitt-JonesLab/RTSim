@@ -22,9 +22,30 @@ bool TraceIssuer::issue(MemorySystem* memory) {
     return true;
 }
 
+bool TraceIssuer::issueCommand(Commandable& receiver) {
+    auto nextCommand = reader->getNextCommand();
+    if (!nextCommand) return false;
+
+    while (!nextCommand(receiver)) {
+        if (timer.cycle(1)) receiver.cycle(1);
+        else return false;
+    }
+    return true;
+}
+
 bool TraceIssuer::drain(MemorySystem* memory) {
     while (!memory->isEmpty()) {
         if (timer.cycle(1)) memory->cycle(1);
+        else return false;
+    }
+    std::cout << "Exiting at cycle " << timer.getCurrentCycle()
+              << " because simCycles " << timer.getMaxCycle() << " reached.\n";
+    return true;
+}
+
+bool TraceIssuer::drain(Commandable& receiver) {
+    while (receiver.isEmpty()) {
+        if (timer.cycle(1)) receiver.cycle(1);
         else return false;
     }
     std::cout << "Exiting at cycle " << timer.getCurrentCycle()

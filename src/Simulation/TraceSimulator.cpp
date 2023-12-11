@@ -8,9 +8,22 @@ TraceSimulator::TraceSimulator(std::unique_ptr<TraceReader> reader,
     issuer(std::move(reader), maxCycles),
     memory(std::move(memory)) {}
 
+TraceSimulator::TraceSimulator(std::unique_ptr<TraceReader> reader,
+                               std::unique_ptr<Commandable> receiver,
+                               unsigned int maxCycles) :
+    issuer(std::move(reader), maxCycles),
+    receiver(std::move(receiver)) {}
+
 void TraceSimulator::run() {
-    while (issuer.issue(memory.get())) continue;
-    issuer.drain(memory.get());
+    if (memory) {
+        while (issuer.issue(memory.get())) continue;
+        issuer.drain(memory.get());
+    }
+
+    if (receiver) {
+        while (issuer.issueCommand(*receiver)) continue;
+        issuer.drain(*receiver);
+    }
 }
 
 void TraceSimulator::printStats(std::ostream& statStream) {

@@ -24,6 +24,17 @@ class TraceSimulator {
                    unsigned int maxCycles = 0);
 
     /**
+     * Creates a TraceSimulator with a given TraceReader and MemorySystem
+     *
+     * @param reader TraceReader for this simulator
+     * @param receiver Commandable to be simulated
+     * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
+     */
+    TraceSimulator(std::unique_ptr<TraceReader> reader,
+                   std::unique_ptr<Commandable> receiver,
+                   unsigned int maxCycles = 0);
+
+    /**
      * Simulates the trace with the MemorySystem. Completes when the maximum
      * cycle has been reached or when all requests have been completed.
      */
@@ -39,6 +50,7 @@ class TraceSimulator {
     private:
     TraceIssuer issuer;
     std::unique_ptr<MemorySystem> memory;
+    std::unique_ptr<Commandable> receiver;
 };
 
 } // namespace NVM::Simulation

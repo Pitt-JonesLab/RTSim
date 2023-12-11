@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Simulation/Command/TraceCommand.h"
+#include "Simulation/Commandable.h"
 #include "Simulation/DataBlock.h"
 
 #include <array>
@@ -27,6 +28,8 @@ class TraceReader {
      * no more commands remaining.
      */
     virtual std::unique_ptr<TraceCommand> getNext();
+
+    Command getNextCommand();
 
     private:
     std::istream& trace;
