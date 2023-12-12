@@ -2,7 +2,6 @@
 
 #include "Command.h"
 #include "Memory/SubArray/SubArray.h"
-#include "Simulation/MemorySystem.h"
 
 #include <memory>
 

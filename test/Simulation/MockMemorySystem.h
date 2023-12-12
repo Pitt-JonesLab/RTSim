@@ -1,69 +1,57 @@
 #pragma once
 
-#include "Simulation/MemorySystem.h"
+#include "Simulation/Commandable.h"
 
 namespace NVM::Simulation {
-class MockMemorySystem : public MemorySystem {
-    public:
-    bool issue(NVMainRequest* req) { return true; }
 
-    bool read(uint64_t address, DataBlock data, unsigned int threadId,
-              unsigned int cycle) {
+using NVM::Address;
+using NVM::RowData;
+
+class MockMemorySystem : public Commandable {
+    public:
+    bool read(const Address& address, const RowData& data) {
         lastAddress = address;
         lastData = data;
-        lastThread = threadId;
-        lastCycle = cycle;
         readFlag = true;
         return available;
     }
 
-    bool write(uint64_t address, DataBlock data, unsigned int threadId,
-               unsigned int cycle) {
+    bool write(const Address& address, const RowData& data) {
         lastAddress = address;
         lastData = data;
-        lastThread = threadId;
-        lastCycle = cycle;
         return available;
     }
 
-    bool rowClone(uint64_t srcAddress, uint64_t destAddress, DataBlock data,
-                  unsigned int threadId, unsigned int cycle) {
-        return true;
+    bool rowClone(const Address& srcAddress, const Address& destAddress,
+                  const RowData& data) {
+        lastAddress = srcAddress;
+        lastData = data;
+        return available;
     }
 
-    bool transverseRead(uint64_t baseAddress, uint64_t destAddress,
-                        std::vector<DataBlock> inputRows, unsigned int threadId,
-                        unsigned int cycle) {
-        return true;
+    bool refresh(const Address& bankAddress) {
+        lastAddress = bankAddress;
+        return available;
     }
 
-    bool transverseWrite(uint64_t baseAddress, std::vector<DataBlock> writeData,
-                         unsigned int threadId, unsigned int cycle) {
+    bool pim(std::vector<Address> operands, const Address& destAddress,
+             std::vector<RowData> data) {
         return true;
-    }
-
-    bool shift(uint64_t address, unsigned int shiftAmount, DataBlock data,
-               unsigned int threadId, unsigned int cycle) {
-        return true;
-    }
-
-    void cycle(unsigned int cycles) {
-        currentCycle += cycles;
-        available = true;
     }
 
     bool isEmpty() const { return currentCycle > lastCycle + 10; }
 
-    void printStats(std::ostream&) {}
+    void cycle(unsigned int cycles = 1) {
+        currentCycle += cycles;
+        if (working) available = true;
+    }
 
-    unsigned int getCurrentCycle() { return currentCycle; }
+    void printStats(std::ostream& statStream) {}
 
-    void failNext() {}
-
-    bool available = true;
+    bool available = true, working = true;
     unsigned int currentCycle = 0;
-    uint64_t lastAddress = 0;
-    DataBlock lastData;
+    Address lastAddress = 0;
+    RowData lastData;
     unsigned int lastThread = 0;
     unsigned int lastCycle = 0;
     bool readFlag = false;

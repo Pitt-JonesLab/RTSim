@@ -22,17 +22,6 @@ class TraceIssuer {
     TraceIssuer(std::unique_ptr<TraceReader> reader, unsigned int cycles);
 
     /**
-     * Attempts to issue the next request to the given MemorySystem. This will
-     * fail if the request maker has run out of requests or the timer has
-     * reached the maximum cycle.
-     *
-     * @param memory MemorySystem to receive the next request
-     *
-     * @return True if successful, false otherwise
-     */
-    bool issue(MemorySystem* memory);
-
-    /**
      * Attempts to issue the next Command to the given receiver. This will
      * return false if the request maker has run out of requests or the timer
      * has reached the maximum cycle.
@@ -42,15 +31,6 @@ class TraceIssuer {
      * @return True if successful, false otherwise
      */
     bool issueCommand(Commandable& receiver);
-
-    /**
-     * Cycles the MemorySystem until all requests have been processed
-     *
-     * @param memory MemorySystem to drain
-     *
-     * @return True if successful, false if timer maxed out
-     */
-    bool drain(MemorySystem* memory);
 
     /**
      * Cycles the Commandable until all requests have been processed

@@ -2,7 +2,6 @@
 
 #include "Command.h"
 #include "Memory/Bank/Bank.h"
-#include "Simulation/MemorySystem.h"
 
 #include <memory>
 

@@ -2,7 +2,6 @@
 
 #include "MockMemorySystem.h"
 #include "MockTraceReader.h"
-#include "Simulation/Command/ReadCommand.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -24,34 +23,37 @@ TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation]") {
     auto reader = std::make_unique<MockTraceReader>();
 
     SECTION("Issues available request") {
-        reader->addCommand(std::unique_ptr<TraceCommand>(
-            new ReadCommand(0, 0, DataBlock(), 0)));
+        reader->addCommand([](Commandable& receiver) {
+            return receiver.read(Address(0), RowData());
+        });
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0);
-        REQUIRE(issuer.issue(&memory));
+        REQUIRE(issuer.issueCommand(memory));
     }
 
     SECTION("Issues several requests - available memory") {
         for (int i = 0; i < 10; i++) {
-            reader->addCommand(std::unique_ptr<TraceCommand>(
-                new ReadCommand(0, 0, DataBlock(), 0)));
+            reader->addCommand([](Commandable& receiver) {
+                return receiver.read(Address(0), RowData());
+            });
         }
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0);
         for (int i = 0; i < 10; i++) {
-            REQUIRE(issuer.issue(&memory));
+            REQUIRE(issuer.issueCommand(memory));
         }
     }
 
     SECTION("Issues several requests - must cycle") {
         for (int i = 0; i < 10; i++) {
-            reader->addCommand(std::unique_ptr<TraceCommand>(
-                new ReadCommand(0, 0, DataBlock(), 0)));
+            reader->addCommand([](Commandable& receiver) {
+                return receiver.read(Address(0), RowData());
+            });
         }
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0);
         for (int i = 0; i < 10; i++) {
-            REQUIRE(issuer.issue(&memory));
+            REQUIRE(issuer.issueCommand(memory));
             memory.available = false;
         }
     }
@@ -59,14 +61,21 @@ TEST_CASE("Issues Correctly", "[TraceIssuer], [Simulation]") {
     SECTION("Fails to issue when no request is available") {
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 0);
-        REQUIRE_FALSE(issuer.issue(&memory));
+        REQUIRE_FALSE(issuer.issueCommand(memory));
     }
 
     SECTION("Fails to issue when timer is maxed out") {
-        reader->addCommand(std::unique_ptr<TraceCommand>(
-            new ReadCommand(10, 0, DataBlock(), 0)));
+        reader->addCommand([](Commandable& receiver) {
+            return receiver.read(Address(0), RowData());
+        });
+        reader->addCommand([](Commandable& receiver) {
+            return receiver.read(Address(0), RowData());
+        });
+        memory.available = false;
         TraceIssuer issuer(
             static_cast<std::unique_ptr<TraceReader>>(std::move(reader)), 1);
-        REQUIRE_FALSE(issuer.issue(&memory));
+        REQUIRE(issuer.issueCommand(memory));
+        memory.available = false;
+        REQUIRE_FALSE(issuer.issueCommand(memory));
     }
 }

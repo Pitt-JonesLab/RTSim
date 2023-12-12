@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Memory/Rank/Rank.h"
-#include "Simulation/MemorySystem.h"
 
 #include <memory>
 

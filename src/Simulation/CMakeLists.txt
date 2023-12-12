@@ -5,7 +5,6 @@ set(SIMULATION_SOURCES
     ${RTSIM_DIR}/src/old/NVMDataBlock.cpp
     Config.cpp)
 
-add_subdirectory(Command)
 add_subdirectory(TraceReader)
 
 add_library(RTSim_Simulation ${SIMULATION_SOURCES})

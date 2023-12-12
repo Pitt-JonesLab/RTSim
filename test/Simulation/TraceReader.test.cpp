@@ -22,14 +22,14 @@ TEST_CASE("Correct Trace Format", "[TraceReader], [Simulation]") {
 
         TraceReader reader(ss);
 
-        auto traceLine = reader.getNext();
+        auto traceLine = reader.getNextCommand();
         REQUIRE(traceLine);
-        traceLine->issue(&memory);
+        traceLine(memory);
         REQUIRE(memory.readFlag);
         REQUIRE(memory.lastCycle == 0);
-        REQUIRE(memory.lastAddress == 0x1000);
+        REQUIRE(memory.lastAddress.getData() == 0x1000);
         REQUIRE(memory.lastThread == 0);
-        REQUIRE_FALSE(reader.getNext());
+        REQUIRE_FALSE(reader.getNextCommand());
     }
 
     SECTION("Reads multiple commands") {
@@ -39,13 +39,13 @@ TEST_CASE("Correct Trace Format", "[TraceReader], [Simulation]") {
         TraceReader reader(ss);
 
         for (int i = 0; i < 20; i++) {
-            auto traceLine = reader.getNext();
+            auto traceLine = reader.getNextCommand();
             REQUIRE(traceLine);
-            traceLine->issue(&memory);
+            traceLine(memory);
             REQUIRE(memory.readFlag);
             memory.readFlag = false;
         }
-        REQUIRE_FALSE(reader.getNext());
+        REQUIRE_FALSE(reader.getNextCommand());
     }
 }
 
@@ -55,6 +55,6 @@ TEST_CASE("Wrong Format", "[TraceReader], [Simulation]") {
     SECTION("Empty line") {
         ss << "\n";
         TraceReader reader(ss);
-        REQUIRE_FALSE(reader.getNext());
+        REQUIRE_FALSE(reader.getNextCommand());
     }
 }

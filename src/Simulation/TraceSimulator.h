@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Simulation/MemorySystem.h"
 #include "Simulation/TraceIssuer.h"
 
 #include <memory>
@@ -12,17 +11,6 @@ namespace NVM::Simulation {
  */
 class TraceSimulator {
     public:
-    /**
-     * Creates a TraceSimulator with a given TraceReader and MemorySystem
-     *
-     * @param reader TraceReader for this simulator
-     * @param memory MemorySystem to be simulated
-     * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
-     */
-    TraceSimulator(std::unique_ptr<TraceReader> reader,
-                   std::unique_ptr<MemorySystem> memory,
-                   unsigned int maxCycles = 0);
-
     /**
      * Creates a TraceSimulator with a given TraceReader and MemorySystem
      *
@@ -49,7 +37,6 @@ class TraceSimulator {
 
     private:
     TraceIssuer issuer;
-    std::unique_ptr<MemorySystem> memory;
     std::unique_ptr<Commandable> receiver;
 };
 

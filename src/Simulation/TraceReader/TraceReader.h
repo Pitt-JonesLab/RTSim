@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Simulation/Command/TraceCommand.h"
 #include "Simulation/Commandable.h"
 #include "Simulation/DataBlock.h"
 
@@ -22,14 +21,12 @@ class TraceReader {
     virtual ~TraceReader() {}
 
     /**
-     * Gets the next TraceCommand
+     * Gets the next Command
      *
-     * @return Next TraceCommand from the source. Returns nullptr if there are
+     * @return Next Command from the source. Returns empty Command if there are
      * no more commands remaining.
      */
-    virtual std::unique_ptr<TraceCommand> getNext();
-
-    Command getNextCommand();
+    virtual Command getNextCommand();
 
     private:
     std::istream& trace;

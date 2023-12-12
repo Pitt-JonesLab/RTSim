@@ -9,77 +9,12 @@ using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
-bool SimpleSystem::issue(NVMainRequest* req) { return false; }
-
 SimpleSystem::SimpleSystem() :
     totalReads(0),
     totalWrites(0),
     totalRowClones(0),
     totalPIMs(0),
     currentCycle(0) {}
-
-bool SimpleSystem::read(uint64_t address, DataBlock data, unsigned int threadId,
-                        unsigned int cycle) {
-    if (!available()) return false;
-
-    auto channelCmd = channels[0]->read(address, data);
-    if (!channelCmd) return false;
-    totalReads++;
-    log() << LogLevel::EVENT << "SimpleSystem received read at row "
-          << NVM::Modeling::decodeSymbol(NVM::Modeling::AddressSymbol::ROW,
-                                         address)
-          << "\n";
-    return true;
-}
-
-bool SimpleSystem::write(uint64_t address, NVM::Simulation::DataBlock data,
-                         unsigned int threadId, unsigned int cycle) {
-    if (!available()) return false;
-
-    auto channelCmd = channels[0]->write(address, data);
-    if (!channelCmd) return false;
-    totalWrites++;
-    log() << LogLevel::EVENT << "SimpleSystem received write\n";
-    return true;
-}
-
-bool SimpleSystem::rowClone(uint64_t srcAddress, uint64_t destAddress,
-                            NVM::Simulation::DataBlock data,
-                            unsigned int threadId, unsigned int cycle) {
-    if (!available()) return false;
-
-    auto channelCmd = channels[0]->rowClone(srcAddress, destAddress, data);
-    if (!channelCmd) return false;
-    totalRowClones++;
-    log() << LogLevel::EVENT << "SimpleSystem received RowClone\n";
-    return true;
-}
-
-bool SimpleSystem::transverseRead(
-    uint64_t baseAddress, uint64_t destAddress,
-    std::vector<NVM::Simulation::DataBlock> inputRows, unsigned int threadId,
-    unsigned int cycle) {
-    if (!available()) return false;
-
-    auto channelCmd =
-        channels[0]->transverseRead(baseAddress, destAddress, inputRows);
-    if (!channelCmd) return false;
-    totalPIMs++;
-    log() << LogLevel::EVENT << "SimpleSystem received RowClone\n";
-    return true;
-}
-
-bool SimpleSystem::transverseWrite(
-    uint64_t baseAddress, std::vector<NVM::Simulation::DataBlock> writeData,
-    unsigned int threadId, unsigned int cycle) {
-    return true;
-}
-
-bool SimpleSystem::shift(uint64_t address, unsigned int shiftAmount,
-                         NVM::Simulation::DataBlock data, unsigned int threadId,
-                         unsigned int cycle) {
-    return true;
-}
 
 bool SimpleSystem::available() const { return !channels.empty(); }
 

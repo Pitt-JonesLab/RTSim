@@ -1,12 +1,6 @@
 #include "Simulation/TraceReader/TraceReader.h"
 
 #include "Logging/Logging.h"
-#include "Simulation/Command/ECCCommand.h"
-#include "Simulation/Command/ReadCommand.h"
-#include "Simulation/Command/RowCloneCommand.h"
-#include "Simulation/Command/TransverseReadCommand.h"
-#include "Simulation/Command/TransverseWriteCommand.h"
-#include "Simulation/Command/WriteCommand.h"
 #include "src/old/NVMDataBlock.h"
 
 #include <arpa/inet.h>
@@ -90,76 +84,6 @@ NVMDataBlock readData(std::istringstream& inStream) {
         rawData[byte] = htonl(rawData[byte]);
     }
     return data;
-}
-
-std::unique_ptr<TraceCommand> TraceReader::getNext() {
-    if (!trace.good()) return nullptr;
-    if (trace.eof()) {
-        std::cout << "TraceReader: Reached EOF!" << std::endl;
-        return nullptr;
-    }
-
-    std::string fullLine;
-    getline(trace, fullLine);
-
-    if (fullLine == "ECC_FAIL")
-        return std::unique_ptr<TraceCommand>(new ECCCommand());
-
-    std::istringstream lineStream(fullLine);
-
-    unsigned int cycle;
-    Opcode1 operation;
-    Opcode2 op2;
-    uint64_t address, address2;
-    NVMDataBlock dataBlock;
-    unsigned int threadId;
-
-    try {
-        cycle = readCycle(lineStream);
-        Logging::log() << Logging::LogLevel::DEBUG << std::dec << "Read cycle "
-                       << cycle << '\n';
-        operation = readOperation(lineStream);
-        Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
-                       << (int) operation << '\n';
-        address = readAddress(lineStream);
-        Logging::log() << Logging::LogLevel::DEBUG << "Read address "
-                       << std::hex << address << '\n';
-        if (operation == Opcode1::PIM) {
-            op2 = readOp2(lineStream);
-            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 "
-                           << (int) op2 << '\n';
-            address2 = readAddress(lineStream);
-            Logging::log() << Logging::LogLevel::DEBUG << "Read address2 "
-                           << std::hex << address2 << '\n';
-        }
-        dataBlock = readData(lineStream);
-        threadId = readCycle(lineStream);
-    } catch (...) {
-        std::cout << "Invalid trace format!\n";
-        return nullptr;
-    }
-
-    DataBlock data;
-    for (int i = 0; i < 64; i++) data.bytes[i] = dataBlock.GetByte(i);
-
-    switch (operation) {
-        case Opcode1::READ:
-            return std::unique_ptr<TraceCommand>(
-                new ReadCommand(cycle, address, data, threadId));
-        case Opcode1::WRITE:
-            return std::unique_ptr<TraceCommand>(
-                new WriteCommand(cycle, address, data, threadId));
-        case Opcode1::PIM: {
-            if (op2 == Opcode2::ROWCLONE) {
-                return std::unique_ptr<TraceCommand>(
-                    new RowCloneCommand(address, address2, data));
-            }
-            return std::unique_ptr<TraceCommand>(
-                new TransverseReadCommand(address, address2));
-        }
-        default:
-            throw std::runtime_error("Unknown trace operation!");
-    }
 }
 
 Command TraceReader::getNextCommand() {
