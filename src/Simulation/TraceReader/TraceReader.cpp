@@ -11,6 +11,9 @@
 using namespace NVM;
 using namespace NVM::Simulation;
 
+using NVM::Memory::Commandable;
+using NVM::Memory::Command;
+
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
 enum class Opcode2 { BITWISE, ROWCLONE, NONE };
@@ -86,7 +89,7 @@ NVMDataBlock readData(std::istringstream& inStream) {
     return data;
 }
 
-Command TraceReader::getNextCommand() {
+NVM::Memory::Command TraceReader::getNextCommand() {
     if (!trace.good()) Command();
     if (trace.eof()) {
         std::cout << "TraceReader: Reached EOF!" << std::endl;

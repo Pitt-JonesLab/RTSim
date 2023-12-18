@@ -11,7 +11,7 @@ class CommandTimer {
     public:
     virtual void cycle() = 0;
     virtual bool busy() const = 0;
-    virtual void issue(Command cmd) = 0;
+    virtual void issue(NVM::Command cmd) = 0;
 };
 
 } // namespace NVM::Memory

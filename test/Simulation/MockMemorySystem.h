@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Simulation/Commandable.h"
+#include "Memory/Commandable.h"
 
 namespace NVM::Simulation {
 
 using NVM::Address;
 using NVM::RowData;
 
-class MockMemorySystem : public Commandable {
+class MockMemorySystem : public NVM::Memory::Commandable {
     public:
     bool read(const Address& address, const RowData& data) {
         lastAddress = address;

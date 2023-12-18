@@ -13,16 +13,16 @@ class MockTraceReader : public TraceReader {
     public:
     MockTraceReader() : TraceReader(std::cin) {}
 
-    Command getNextCommand() {
-        if (commands.empty()) return Command();
+    NVM::Memory::Command getNextCommand() {
+        if (commands.empty()) return NVM::Memory::Command();
         auto command = std::move(commands.front());
         commands.pop();
         return command;
     }
 
-    void addCommand(Command command) { commands.push(command); }
+    void addCommand(NVM::Memory::Command command) { commands.push(command); }
 
-    std::queue<Command> commands;
+    std::queue<NVM::Memory::Command> commands;
 };
 
 } // namespace NVM::Simulation

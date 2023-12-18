@@ -6,6 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 using namespace NVM::Simulation;
+using NVM::Memory::Commandable;
 
 TEST_CASE("Constructs", "[TraceSimulator], [Simulation]") {
     REQUIRE_NOTHROW(

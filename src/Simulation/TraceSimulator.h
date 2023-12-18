@@ -22,7 +22,7 @@ class TraceSimulator {
      * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
      */
     TraceSimulator(std::unique_ptr<TraceReader> reader,
-                   std::unique_ptr<Commandable> receiver,
+                   std::unique_ptr<NVM::Memory::Commandable> receiver,
                    unsigned int maxCycles = 0);
 
     /**
@@ -40,7 +40,7 @@ class TraceSimulator {
 
     private:
     MemoryEventQueue queue;
-    std::unique_ptr<Commandable> receiver;
+    std::unique_ptr<NVM::Memory::Commandable> receiver;
     CycleTimer timer;
 };
 

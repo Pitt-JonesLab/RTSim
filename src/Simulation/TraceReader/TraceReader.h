@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Simulation/Commandable.h"
+#include "Memory/Commandable.h"
 #include "Simulation/DataBlock.h"
 
 #include <array>
@@ -26,7 +26,7 @@ class TraceReader {
      * @return Next Command from the source. Returns empty Command if there are
      * no more commands remaining.
      */
-    virtual Command getNextCommand();
+    virtual NVM::Memory::Command getNextCommand();
 
     private:
     std::istream& trace;

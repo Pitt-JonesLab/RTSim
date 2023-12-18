@@ -10,6 +10,7 @@ using NVM::Simulation::TraceIssuer;
 using NVM::Simulation::TraceReader;
 
 using namespace NVM::Simulation;
+using NVM::Memory::Commandable;
 
 TEST_CASE("Constructs", "[TraceIssuer], [Simulation]") {
     auto reader = std::make_unique<MockTraceReader>();

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 
-namespace NVM::Simulation {
+namespace NVM::Memory {
 
 using NVM::Address;
 using NVM::RowData;

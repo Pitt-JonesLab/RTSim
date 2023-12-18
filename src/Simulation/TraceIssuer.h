@@ -30,7 +30,7 @@ class TraceIssuer {
      *
      * @return True if successful, false otherwise
      */
-    bool issueCommand(Commandable& receiver);
+    bool issueCommand(NVM::Memory::Commandable& receiver);
 
     /**
      * Cycles the Commandable until all requests have been processed
@@ -39,7 +39,7 @@ class TraceIssuer {
      *
      * @return True if successful, false if timer maxed out
      */
-    bool drain(Commandable& receiver);
+    bool drain(NVM::Memory::Commandable& receiver);
 
     private:
     std::unique_ptr<TraceReader> reader;

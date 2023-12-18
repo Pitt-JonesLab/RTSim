@@ -9,7 +9,7 @@ TraceIssuer::TraceIssuer(std::unique_ptr<TraceReader> reader,
     reader(std::move(reader)),
     timer(cycles) {}
 
-bool TraceIssuer::issueCommand(Commandable& receiver) {
+bool TraceIssuer::issueCommand(NVM::Memory::Commandable& receiver) {
     auto nextCommand = reader->getNextCommand();
     if (!nextCommand) return false;
 
@@ -20,7 +20,7 @@ bool TraceIssuer::issueCommand(Commandable& receiver) {
     return true;
 }
 
-bool TraceIssuer::drain(Commandable& receiver) {
+bool TraceIssuer::drain(NVM::Memory::Commandable& receiver) {
     while (!receiver.isEmpty()) {
         if (timer.cycle(1)) receiver.cycle(1);
         else return false;

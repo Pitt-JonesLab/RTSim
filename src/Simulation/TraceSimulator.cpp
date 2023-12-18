@@ -3,7 +3,7 @@
 using namespace NVM::Simulation;
 
 TraceSimulator::TraceSimulator(std::unique_ptr<TraceReader> reader,
-                               std::unique_ptr<Commandable> rcvr,
+                               std::unique_ptr<NVM::Memory::Commandable> rcvr,
                                unsigned int maxCycles) :
     queue(rcvr.get()), receiver(std::move(rcvr)), timer(maxCycles) {
         auto cmd = reader->getNextCommand();
