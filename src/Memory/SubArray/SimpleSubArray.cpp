@@ -28,7 +28,7 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
 
 void SimpleSubArray::cycle(unsigned int cycles) { timer.cycle(); }
 
-bool SimpleSubArray::isEmpty() const { return timer.isAvailable(0); }
+bool SimpleSubArray::isEmpty() const { return !timer.busy(); }
 
 StatBlock SimpleSubArray::getStats(std::string tag) const {
     StatBlock stats(tag);
@@ -51,7 +51,7 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 }
 
 bool SimpleSubArray::issue(NVM::Command cmd) {
-    if (!timer.isAvailable(cmd.getAddress().getData())) return false;
+    if (timer.busy()) return false;
     timer.issue(cmd);
 
     switch (cmd.getType()) {

@@ -1,17 +1,17 @@
 #pragma once
 
-#include "Timing/CommandTimer.h"
+#include "Memory/Timing/CommandTimer.h"
 
 namespace NVM::Timing {
 
 using NVM::Command;
 
-class SimpleTimer : public CommandTimer {
+class SimpleTimer : public NVM::Memory::CommandTimer {
     public:
     SimpleTimer();
 
     void cycle();
-    bool isAvailable(Address address) const;
+    bool busy() const;
     void issue(Command cmd);
 
     private:
