@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Memory/Event/MemoryEventQueue.h"
+#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/Event/CommandEventQueue.h"
 #include "Simulation/TraceReader/TraceReader.h"
 #include "Simulation/CycleTimer.h"
 
@@ -23,7 +25,7 @@ class TraceSimulator {
      * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
      */
     TraceSimulator(std::unique_ptr<TraceReader> reader,
-                   std::unique_ptr<NVM::Memory::Commandable> receiver,
+                   std::unique_ptr<NVM::Memory::MemorySystem> receiver,
                    unsigned int maxCycles = 0);
 
     /**
@@ -40,8 +42,8 @@ class TraceSimulator {
     void printStats(std::ostream& statStream);
 
     private:
-    MemoryEventQueue queue;
-    std::unique_ptr<NVM::Memory::Commandable> receiver;
+    NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem> queue;
+    std::unique_ptr<NVM::Memory::MemorySystem> receiver;
     CycleTimer timer;
 };
 

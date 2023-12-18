@@ -11,8 +11,7 @@
 using namespace NVM;
 using namespace NVM::Simulation;
 
-using NVM::Memory::Commandable;
-using NVM::Memory::Command;
+using NVM::Memory::MemorySystem;
 
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
@@ -89,7 +88,7 @@ NVMDataBlock readData(std::istringstream& inStream) {
     return data;
 }
 
-NVM::Memory::Command TraceReader::getNextCommand() {
+TraceReader::Command TraceReader::getNextCommand() {
     if (!trace.good()) Command();
     if (trace.eof()) {
         std::cout << "TraceReader: Reached EOF!" << std::endl;
@@ -141,21 +140,21 @@ NVM::Memory::Command TraceReader::getNextCommand() {
 
     switch (operation) {
         case Opcode1::READ:
-            return [address, data](Commandable& receiver) -> bool {
+            return [address, data](MemorySystem& receiver) -> bool {
                 return receiver.read(address, data);
             };
         case Opcode1::WRITE:
-            return [address, data](Commandable& receiver) -> bool {
+            return [address, data](MemorySystem& receiver) -> bool {
                 return receiver.write(address, data);
             };
         case Opcode1::PIM:
             if (op2 == Opcode2::ROWCLONE) {
                 return
-                    [address, address2, data](Commandable& receiver) -> bool {
+                    [address, address2, data](MemorySystem& receiver) -> bool {
                         return receiver.rowClone(address, address2, data);
                     };
             }
-            return [address, address2, data](Commandable& receiver) -> bool {
+            return [address, address2, data](MemorySystem& receiver) -> bool {
                 return receiver.pim({address}, address2, {data});
             };
         default:

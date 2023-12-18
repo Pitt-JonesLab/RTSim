@@ -6,18 +6,18 @@
 #include <catch2/catch_test_macros.hpp>
 
 using namespace NVM::Simulation;
-using NVM::Memory::Commandable;
+using NVM::Memory::MemorySystem;
 
 TEST_CASE("Constructs", "[TraceSimulator], [Simulation]") {
     REQUIRE_NOTHROW(
         TraceSimulator(std::unique_ptr<TraceReader>(new MockTraceReader()),
-                       std::unique_ptr<Commandable>(new MockMemorySystem())));
+                       std::unique_ptr<NVM::Memory::MemorySystem>(new MockMemorySystem())));
 }
 
 TEST_CASE("Runs simulation", "[TraceSimulator], [Simulation]") {
     SECTION("Reads whole trace file and drains memory") {
         auto reader = std::make_unique<MockTraceReader>();
-        reader->addCommand([](Commandable& receiver) {
+        reader->addCommand([](MemorySystem& receiver) {
             return receiver.read(Address(), RowData());
         });
         auto readerPtr = reader.get();
@@ -33,7 +33,7 @@ TEST_CASE("Runs simulation", "[TraceSimulator], [Simulation]") {
     SECTION("Ends early if timer ends") {
         auto reader = std::make_unique<MockTraceReader>();
         for (int i = 0; i < 20; i++) {
-            reader->addCommand([](Commandable& receiver) {
+            reader->addCommand([](MemorySystem& receiver) {
                 return receiver.read(Address(5), RowData());
             });
         }

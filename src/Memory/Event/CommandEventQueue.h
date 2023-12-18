@@ -3,6 +3,7 @@
 #include "Event/EventQueue.h"
 
 #include <queue>
+#include <functional>
 
 namespace NVM::Memory {
 

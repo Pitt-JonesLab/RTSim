@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Memory/Commandable.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
 namespace NVM::Simulation {
 
 using NVM::Address;
 using NVM::RowData;
 
-class MockMemorySystem : public NVM::Memory::Commandable {
+class MockMemorySystem : public NVM::Memory::MemorySystem {
     public:
     bool read(const Address& address, const RowData& data) {
         lastAddress = address;
@@ -47,6 +47,10 @@ class MockMemorySystem : public NVM::Memory::Commandable {
     }
 
     void printStats(std::ostream& statStream) {}
+
+    void addController(std::unique_ptr<NVM::Memory::MemoryController> controller) {
+
+    }
 
     bool available = true, working = true;
     unsigned int currentCycle = 0;

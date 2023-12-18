@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Memory/Commandable.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 #include "Memory/Event/CommandEventQueue.h"
 
 namespace NVM::Memory {
 
-using MemoryEventQueue = CommandEventQueue<NVM::Memory::Commandable>;
+using MemoryEventQueue = CommandEventQueue<NVM::Memory::MemorySystem>;
 
 }

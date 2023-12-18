@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
     setAddressScheme(conf);
 
     // Build RTSystem
-    std::unique_ptr<NVM::Memory::Commandable> memory = makeSimpleSystem(conf);
+    auto memory = makeSimpleSystem(conf);
 
     // Build TraceReader
     auto reader = std::make_unique<FileTraceReader>(argv[2]);

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Memory/Commandable.h"
+#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/Event/CommandEventQueue.h"
 #include "Simulation/DataBlock.h"
 
 #include <array>
@@ -16,6 +17,8 @@ namespace NVM::Simulation {
  */
 class TraceReader {
     public:
+    using Command = NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem>::Cmd;
+
     TraceReader(std::istream& trace);
 
     virtual ~TraceReader() {}
@@ -26,7 +29,7 @@ class TraceReader {
      * @return Next Command from the source. Returns empty Command if there are
      * no more commands remaining.
      */
-    virtual NVM::Memory::Command getNextCommand();
+    virtual Command getNextCommand();
 
     private:
     std::istream& trace;
