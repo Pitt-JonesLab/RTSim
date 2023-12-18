@@ -27,8 +27,6 @@ class SimpleController : public MemoryController {
 
     bool isEmpty() const;
 
-    void addInterconnect(std::unique_ptr<Interconnect> interconnect);
-
     void failNext();
 
     StatBlock getStats(std::string tag) const;

@@ -1,10 +1,13 @@
 #pragma once
 
 #include "Simulation/TraceIssuer.h"
+#include "Memory/Event/MemoryEventQueue.h"
 
 #include <memory>
 
 namespace NVM::Simulation {
+
+using NVM::Memory::MemoryEventQueue;
 
 /**
  * Given a TraceIssuer and a MemorySystem, simulates the trace to completion
@@ -36,8 +39,9 @@ class TraceSimulator {
     void printStats(std::ostream& statStream);
 
     private:
-    TraceIssuer issuer;
+    MemoryEventQueue queue;
     std::unique_ptr<Commandable> receiver;
+    CycleTimer timer;
 };
 
 } // namespace NVM::Simulation

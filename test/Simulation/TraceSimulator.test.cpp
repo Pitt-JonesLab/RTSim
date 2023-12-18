@@ -44,6 +44,6 @@ TEST_CASE("Runs simulation", "[TraceSimulator], [Simulation]") {
         memoryPtr->working = false;
         memoryPtr->available = false;
         simulator.run();
-        REQUIRE(!readerPtr->commands.empty());
+        REQUIRE(memoryPtr->currentCycle == 1);
     }
 }
