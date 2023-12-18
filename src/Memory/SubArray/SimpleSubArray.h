@@ -1,17 +1,15 @@
 #pragma once
 
 #include "Memory/SubArray/SubArray.h"
-#include "Timing/Timer/SimpleTimer.h"
+#include "Memory/Timing/CommandTimer.h"
 
 #include <memory>
 
 namespace NVM::Memory {
 
-using NVM::Timing::SimpleTimer;
-
 class SimpleSubArray : public SubArray {
     public:
-    SimpleSubArray(unsigned int rows);
+    SimpleSubArray(unsigned int rows, std::unique_ptr<CommandTimer> timer);
 
     bool issue(NVM::Command cmd);
 
@@ -32,8 +30,7 @@ class SimpleSubArray : public SubArray {
     double actEnergy, readEnergy, writeEnergy, shiftEnergy;
 
     std::unique_ptr<Command> currentCommand;
-
-    SimpleTimer timer;
+    std::unique_ptr<CommandTimer> timer;
 };
 
 } // namespace NVM::Memory

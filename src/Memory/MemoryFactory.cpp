@@ -7,12 +7,14 @@
 #include "Memory/MemorySystem/SimpleSystem.h"
 #include "Memory/Rank/SimpleRank.h"
 #include "Memory/SubArray/SimpleSubArray.h"
+#include "Timing/Timer/SimpleTimer.h"
 
 using namespace NVM::Memory;
 
 std::unique_ptr<SubArray>
 makeSimpleSubArray(const NVM::Simulation::Config& conf) {
-    return std::unique_ptr<SubArray>(new SimpleSubArray(conf.get<int>("DBCS")));
+    auto timer = std::make_unique<NVM::Timing::SimpleTimer>();
+    return std::unique_ptr<SubArray>(new SimpleSubArray(conf.get<int>("DBCS"), std::move(timer)));
 }
 
 std::unique_ptr<Bank> makeSimpleBank(const NVM::Simulation::Config& conf) {

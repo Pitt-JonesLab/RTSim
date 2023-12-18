@@ -11,7 +11,7 @@ using namespace NVM::Logging;
 using NVM::Address;
 using NVM::RowData;
 
-SimpleSubArray::SimpleSubArray(unsigned int rows) :
+SimpleSubArray::SimpleSubArray(unsigned int rows, std::unique_ptr<CommandTimer> timer) :
     totalReads(0),
     totalWrites(0),
     totalActivates(0),
@@ -24,11 +24,12 @@ SimpleSubArray::SimpleSubArray(unsigned int rows) :
     shiftEnergy(0),
     totalRCs(0),
     totalTRs(0),
-    totalTWs(0) {}
+    totalTWs(0),
+    timer(std::move(timer)) {}
 
-void SimpleSubArray::cycle(unsigned int cycles) { timer.cycle(); }
+void SimpleSubArray::cycle(unsigned int cycles) { timer->cycle(); }
 
-bool SimpleSubArray::isEmpty() const { return !timer.busy(); }
+bool SimpleSubArray::isEmpty() const { return !timer->busy(); }
 
 StatBlock SimpleSubArray::getStats(std::string tag) const {
     StatBlock stats(tag);
@@ -51,8 +52,8 @@ StatBlock SimpleSubArray::getStats(std::string tag) const {
 }
 
 bool SimpleSubArray::issue(NVM::Command cmd) {
-    if (timer.busy()) return false;
-    timer.issue(cmd);
+    if (timer->busy()) return false;
+    timer->issue(cmd);
 
     switch (cmd.getType()) {
         case CommandType::READ:
