@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Simulation/TraceIssuer.h"
 #include "Memory/Event/MemoryEventQueue.h"
+#include "Simulation/TraceReader/TraceReader.h"
+#include "Simulation/CycleTimer.h"
 
 #include <memory>
 

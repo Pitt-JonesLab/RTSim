@@ -1,6 +1,5 @@
 set(SIMULATION_SOURCES
     CycleTimer.cpp
-    TraceIssuer.cpp
     TraceSimulator.cpp
     ${RTSIM_DIR}/src/old/NVMDataBlock.cpp
     Config.cpp)
