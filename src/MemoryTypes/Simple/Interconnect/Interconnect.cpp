@@ -1,4 +1,4 @@
-#include "Memory/Interconnect/Interconnect.h"
+#include "MemoryTypes/Simple/Interconnect/Interconnect.h"
 
 using namespace NVM::Memory;
 

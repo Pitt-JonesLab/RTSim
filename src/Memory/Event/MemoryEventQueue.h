@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Memory/MemorySystem/MemorySystem.h"
 #include "Memory/Event/CommandEventQueue.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
 namespace NVM::Memory {
 

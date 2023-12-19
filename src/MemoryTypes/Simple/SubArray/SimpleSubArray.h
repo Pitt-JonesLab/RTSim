@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Memory/SubArray/SubArray.h"
 #include "Memory/Timing/CommandTimer.h"
+#include "MemoryTypes/Simple/SubArray/SubArray.h"
 
 #include <memory>
 

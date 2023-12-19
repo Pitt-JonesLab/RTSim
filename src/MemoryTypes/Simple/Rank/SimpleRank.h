@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Memory/Bank/Bank.h"
+#include "MemoryTypes/Simple/Rank/Rank.h"
 
 namespace NVM::Memory {
 
-class SimpleBank : public Bank {
+class SimpleRank : public Rank {
     public:
-    void cycle(unsigned int cycles);
-
     bool isEmpty() const;
+
+    void cycle(unsigned int cycles);
 
     NVM::Stats::StatBlock getStats(std::string tag) const;
 };

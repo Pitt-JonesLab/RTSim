@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Memory/MemorySystem/MemorySystem.h"
-#include "Timing/Timer/SimpleTimer.h"
+#include "MemoryTypes/Simple/MemoryController/MemoryController.h"
 
+#include <memory>
 #include <vector>
 
 namespace NVM::Memory {

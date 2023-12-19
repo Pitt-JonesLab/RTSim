@@ -1,4 +1,4 @@
-#include "Memory/Bank/Bank.h"
+#include "MemoryTypes/Simple/Bank/Bank.h"
 
 using namespace NVM::Memory;
 

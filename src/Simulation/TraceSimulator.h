@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Memory/Event/CommandEventQueue.h"
 #include "Memory/Event/MemoryEventQueue.h"
 #include "Memory/MemorySystem/MemorySystem.h"
-#include "Memory/Event/CommandEventQueue.h"
-#include "Simulation/TraceReader/TraceReader.h"
 #include "Simulation/CycleTimer.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
 #include <memory>
 

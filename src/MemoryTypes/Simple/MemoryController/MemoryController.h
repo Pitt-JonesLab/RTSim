@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/Interconnect/Interconnect.h"
+#include "MemoryTypes/Simple/Interconnect/Interconnect.h"
 
 #include <memory>
 

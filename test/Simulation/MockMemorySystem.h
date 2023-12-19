@@ -48,10 +48,6 @@ class MockMemorySystem : public NVM::Memory::MemorySystem {
 
     void printStats(std::ostream& statStream) {}
 
-    void addController(std::unique_ptr<NVM::Memory::MemoryController> controller) {
-
-    }
-
     bool available = true, working = true;
     unsigned int currentCycle = 0;
     Address lastAddress = 0;

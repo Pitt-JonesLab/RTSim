@@ -1,4 +1,4 @@
-#include "Memory/SubArray/SimpleSubArray.h"
+#include "MemoryTypes/Simple/SubArray/SimpleSubArray.h"
 
 #include "Command.h"
 

@@ -1,4 +1,4 @@
-#include "Memory/MemoryController/SimpleController.h"
+#include "MemoryTypes/Simple/MemoryController/SimpleController.h"
 
 #include "Logging/Logging.h"
 #include "Modeling/Bank/SimpleBank.h"

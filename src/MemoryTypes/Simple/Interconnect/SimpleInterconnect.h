@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Memory/Interconnect/Interconnect.h"
-
-#include <vector>
+#include "MemoryTypes/Simple/Interconnect/Interconnect.h"
 
 namespace NVM::Memory {
 

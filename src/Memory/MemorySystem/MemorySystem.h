@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Memory/MemoryController/MemoryController.h"
+#include "Utils/Address.h"
+#include "Utils/RowData.h"
 
-#include <memory>
+#include <iostream>
+#include <vector>
 
 namespace NVM::Memory {
 
@@ -25,9 +27,6 @@ class MemorySystem {
     virtual void cycle(unsigned int cycles = 1) = 0;
 
     virtual void printStats(std::ostream& statStream) = 0;
-
-    virtual void
-    addController(std::unique_ptr<MemoryController> controller) = 0;
 
     virtual ~MemorySystem() {}
 };

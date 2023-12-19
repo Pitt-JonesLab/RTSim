@@ -1,14 +1,9 @@
 #pragma once
 
-#include "Memory/MemorySystem/MemorySystem.h"
 #include "Memory/Event/CommandEventQueue.h"
-#include "Simulation/DataBlock.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
-#include <array>
 #include <iostream>
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace NVM::Simulation {
 
@@ -17,7 +12,8 @@ namespace NVM::Simulation {
  */
 class TraceReader {
     public:
-    using Command = NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem>::Cmd;
+    using Command =
+        NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem>::Cmd;
 
     TraceReader(std::istream& trace);
 

@@ -1,10 +1,9 @@
-#include "Memory/MemorySystem/SimpleSystem.h"
+#include "MemoryTypes/Simple/MemorySystem/SimpleSystem.h"
 
 #include "Logging/Logging.h"
 #include "Modeling/Decoder.h"
 
 using namespace NVM::Memory;
-using namespace NVM::Simulation;
 using namespace NVM::Logging;
 
 SimpleSystem::SimpleSystem() :

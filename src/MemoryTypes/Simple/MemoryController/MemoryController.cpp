@@ -1,4 +1,4 @@
-#include "Memory/MemoryController/MemoryController.h"
+#include "MemoryTypes/Simple/MemoryController/MemoryController.h"
 
 using namespace NVM::Memory;
 
