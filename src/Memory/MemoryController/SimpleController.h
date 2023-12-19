@@ -5,7 +5,6 @@
 #include "Parsing/Parser/SimpleParser.h"
 #include "Scheduling/Scheduler/RBScheduler.h"
 
-#include <queue>
 #include <vector>
 
 namespace NVM::Memory {
@@ -29,7 +28,7 @@ class SimpleController : public MemoryController {
 
     void failNext();
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 
     private:
     unsigned int rowBufferHits;

@@ -2,8 +2,6 @@
 
 #include "Memory/Rank/Rank.h"
 
-#include <vector>
-
 namespace NVM::Memory {
 
 class SimpleRank : public Rank {
@@ -12,7 +10,7 @@ class SimpleRank : public Rank {
 
     void cycle(unsigned int cycles);
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 };
 
 } // namespace NVM::Memory

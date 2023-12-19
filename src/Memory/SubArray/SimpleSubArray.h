@@ -17,7 +17,7 @@ class SimpleSubArray : public SubArray {
 
     bool isEmpty() const;
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 
     private:
     unsigned int totalReads, totalRCs, totalTRs, totalTWs;

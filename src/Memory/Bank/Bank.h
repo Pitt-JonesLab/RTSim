@@ -18,7 +18,7 @@ class Bank {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 
     void addSubArray(std::unique_ptr<SubArray> subArray);
 };

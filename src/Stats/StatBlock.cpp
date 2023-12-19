@@ -1,11 +1,13 @@
-#include "Memory/StatBlock.h"
+#include "Stats/StatBlock.h"
+
+#include "Logging/Logging.h"
 
 #include <algorithm>
 
-using namespace NVM::Memory;
+using namespace NVM::Stats;
 
-std::ostream& NVM::Memory::operator<<(std::ostream& out,
-                                      const StatValue& statValue) {
+std::ostream& NVM::Stats::operator<<(std::ostream& out,
+                                     const StatValue& statValue) {
     out << '.' << statValue.name << ' ' << statValue.value->print();
     if (!statValue.unit.empty()) out << ' ' << statValue.unit;
     out << '\n';

@@ -8,8 +8,8 @@ void Interconnect::addRank(std::unique_ptr<Rank> rank) {
     ranks.emplace_back(std::move(rank));
 }
 
-StatBlock Interconnect::getStats(std::string tag) const {
-    StatBlock stats(tag);
+NVM::Stats::StatBlock Interconnect::getStats(std::string tag) const {
+    NVM::Stats::StatBlock stats(tag);
 
     for (int i = 0; i < ranks.size(); i++) {
         auto rankStats = ranks[i]->getStats(tag + ".rank" + std::to_string(i));

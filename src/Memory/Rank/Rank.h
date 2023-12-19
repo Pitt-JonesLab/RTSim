@@ -15,7 +15,7 @@ class Rank {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    virtual StatBlock getStats(std::string tag) const = 0;
+    virtual NVM::Stats::StatBlock getStats(std::string tag) const = 0;
 
     void addBank(std::unique_ptr<Bank> bank);
 

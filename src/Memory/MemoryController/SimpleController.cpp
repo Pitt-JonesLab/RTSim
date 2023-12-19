@@ -2,13 +2,8 @@
 
 #include "Logging/Logging.h"
 #include "Modeling/Bank/SimpleBank.h"
-#include "Modeling/Decoder.h"
 #include "Modeling/Rank/SimpleRank.h"
 #include "Modeling/SubArray/SimpleSubArray.h"
-
-#include <algorithm>
-#include <functional>
-#include <iterator>
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
@@ -110,8 +105,8 @@ bool SimpleController::isEmpty() const {
            interconnects[0]->isEmpty();
 }
 
-StatBlock SimpleController::getStats(std::string tag) const {
-    StatBlock stats(tag);
+NVM::Stats::StatBlock SimpleController::getStats(std::string tag) const {
+    NVM::Stats::StatBlock stats(tag);
 
     stats.addStat(&rowBufferHits, "row_buffer_hits");
 

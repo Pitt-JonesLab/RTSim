@@ -1,4 +1,5 @@
 add_subdirectory(Simulation)
+add_subdirectory(Stats)
 add_subdirectory(Logging)
 add_subdirectory(Memory)
 add_subdirectory(Modeling)

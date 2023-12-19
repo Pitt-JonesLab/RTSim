@@ -2,9 +2,6 @@
 
 #include "Memory/Bank/Bank.h"
 
-#include <functional>
-#include <vector>
-
 namespace NVM::Memory {
 
 class SimpleBank : public Bank {
@@ -13,7 +10,7 @@ class SimpleBank : public Bank {
 
     bool isEmpty() const;
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 };
 
 } // namespace NVM::Memory

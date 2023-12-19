@@ -1,17 +1,11 @@
 #include "Memory/SubArray/SimpleSubArray.h"
 
 #include "Command.h"
-#include "Logging/Logging.h"
-#include "Utils/RowData.h"
-
-#include <functional>
 
 using namespace NVM::Memory;
-using namespace NVM::Logging;
-using NVM::Address;
-using NVM::RowData;
 
-SimpleSubArray::SimpleSubArray(unsigned int rows, std::unique_ptr<CommandTimer> timer) :
+SimpleSubArray::SimpleSubArray(unsigned int rows,
+                               std::unique_ptr<CommandTimer> timer) :
     totalReads(0),
     totalWrites(0),
     totalActivates(0),
@@ -31,8 +25,8 @@ void SimpleSubArray::cycle(unsigned int cycles) { timer->cycle(); }
 
 bool SimpleSubArray::isEmpty() const { return !timer->busy(); }
 
-StatBlock SimpleSubArray::getStats(std::string tag) const {
-    StatBlock stats(tag);
+NVM::Stats::StatBlock SimpleSubArray::getStats(std::string tag) const {
+    NVM::Stats::StatBlock stats(tag);
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");

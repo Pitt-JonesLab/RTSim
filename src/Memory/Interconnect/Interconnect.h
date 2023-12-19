@@ -14,7 +14,7 @@ class Interconnect {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    StatBlock getStats(std::string tag) const;
+    NVM::Stats::StatBlock getStats(std::string tag) const;
 
     void addRank(std::unique_ptr<Rank> rank);
 

@@ -8,8 +8,8 @@ void Bank::addSubArray(std::unique_ptr<SubArray> subArray) {
 
 bool Bank::issue(NVM::Command cmd) { return subArrays[0]->issue(cmd); }
 
-StatBlock Bank::getStats(std::string tag) const {
-    StatBlock stats(tag);
+NVM::Stats::StatBlock Bank::getStats(std::string tag) const {
+    NVM::Stats::StatBlock stats(tag);
 
     for (int i = 0; i < subArrays.size(); i++) {
         auto subArrayStats =

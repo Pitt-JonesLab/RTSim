@@ -1,13 +1,11 @@
 #pragma once
 
-#include "Logging/Logging.h"
-
 #include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
 
-namespace NVM::Memory {
+namespace NVM::Stats {
 
 // TODO: Stats should take by value
 class StatValue {
@@ -87,4 +85,4 @@ class StatBlock {
 
 std::ostream& operator<<(std::ostream&, const StatValue&);
 
-} // namespace NVM::Memory
+} // namespace NVM::Stats

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Command.h"
-#include "Memory/StatBlock.h"
 #include "Simulation/DataBlock.h"
+#include "Stats/StatBlock.h"
 
 #include <vector>
 
@@ -16,7 +16,7 @@ class SubArray {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    virtual StatBlock getStats(std::string tag) const = 0;
+    virtual NVM::Stats::StatBlock getStats(std::string tag) const = 0;
 };
 
 } // namespace NVM::Memory

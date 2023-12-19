@@ -3,8 +3,6 @@
 #include "Logging/Logging.h"
 #include "Modeling/Decoder.h"
 
-#include <functional>
-
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
 using namespace NVM::Logging;
@@ -33,7 +31,7 @@ void SimpleSystem::addController(std::unique_ptr<MemoryController> controller) {
 }
 
 void SimpleSystem::printStats(std::ostream& statStream) {
-    StatBlock stats("system");
+    NVM::Stats::StatBlock stats("system");
 
     stats.addStat(&totalReads, "reads");
     stats.addStat(&totalWrites, "writes");

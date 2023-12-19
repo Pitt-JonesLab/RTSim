@@ -28,7 +28,7 @@ class MemoryController {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    virtual StatBlock getStats(std::string tag) const = 0;
+    virtual NVM::Stats::StatBlock getStats(std::string tag) const = 0;
 
     void addInterconnect(std::unique_ptr<Interconnect> interconnect);
 

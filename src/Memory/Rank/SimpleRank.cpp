@@ -11,8 +11,8 @@ bool SimpleRank::isEmpty() const {
     return banks[0]->isEmpty();
 }
 
-StatBlock SimpleRank::getStats(std::string tag) const {
-    StatBlock stats(tag);
+NVM::Stats::StatBlock SimpleRank::getStats(std::string tag) const {
+    NVM::Stats::StatBlock stats(tag);
 
     for (int i = 0; i < banks.size(); i++) {
         auto bankStats = banks[i]->getStats(tag + ".bank" + std::to_string(i));
