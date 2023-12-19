@@ -8,8 +8,14 @@ void SimpleTimer::cycle() {
     if (remainingCycles) remainingCycles--;
 }
 
-bool SimpleTimer::busy() const {
-    return remainingCycles > 0;
+bool SimpleTimer::busy() const { return remainingCycles > 0; }
+
+void SimpleTimer::issue(Command cmd, unsigned int numTries) {
+    remainingCycles = 5 * numTries;
 }
 
-void SimpleTimer::issue(Command cmd) { remainingCycles = 5; }
+void SimpleTimer::addDelay(unsigned int delayCycles) {
+    remainingCycles += delayCycles;
+}
+
+void SimpleTimer::addFaultDelay(Command cmd) { remainingCycles += 5; }

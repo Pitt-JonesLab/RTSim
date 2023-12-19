@@ -1,24 +1,25 @@
 #include "Config.h"
 
+#include "Logging/Logging.h"
+
 #include <fstream>
-#include <exception>
 #include <iostream>
 
 using namespace NVM::Simulation;
+using namespace NVM::Logging;
 
 Config::Config() {}
 
-template <typename T>
-T Config::get(std::string key) const { 
+template<typename T> T Config::get(std::string key) const {
     return std::any_cast<T>(values.at(key));
 }
 
-template <typename T>
-void Config::set(std::string key, T value) {
+template<typename T> void Config::set(std::string key, T value) {
     values[key] = value;
 }
 
 template int Config::get(std::string key) const;
+template unsigned int Config::get(std::string key) const;
 template bool Config::get(std::string key) const;
 template std::string Config::get(std::string key) const;
 template double Config::get(std::string key) const;
@@ -50,15 +51,15 @@ void setKey(Config& conf, std::string key, std::string val) {
 
     try {
         conf.set(key, std::stoi(val));
-    } catch(...) {}
+    } catch (...) {
+    }
 
     if (val.find(".") != std::string::npos) {
         try {
             conf.set(key, std::stod(val));
-        } catch(...) {}
+        } catch (...) {
+        }
     }
-
-    
 }
 
 Config NVM::Simulation::readConfig(std::istream& input) {
@@ -73,12 +74,12 @@ Config NVM::Simulation::readConfig(std::istream& input) {
         if (line.find_last_not_of(" \t\r\n") == std::string::npos) continue;
 
         std::string key = line.substr(0, line.find(" "));
-        line = line.substr(line.find(" ")+1);
+        line = line.substr(line.find(" ") + 1);
 
-        if (line.find_last_not_of(" \t\r\n") < line.size()-1)
-            line = line.substr(0, line.find_last_not_of(" \t\r\n")+1);
+        if (line.find_last_not_of(" \t\r\n") < line.size() - 1)
+            line = line.substr(0, line.find_last_not_of(" \t\r\n") + 1);
 
-        std::cout << key << " = " << line << '\n';
+        log() << LogLevel::DEBUG << key << " = " << line << '\n';
         setKey(conf, key, line);
     }
 

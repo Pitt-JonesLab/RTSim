@@ -5,25 +5,27 @@ using namespace NVM::Simulation;
 TraceSimulator::TraceSimulator(std::unique_ptr<TraceReader> reader,
                                std::unique_ptr<NVM::Memory::MemorySystem> rcvr,
                                unsigned int maxCycles) :
-    queue(rcvr.get()), receiver(std::move(rcvr)), timer(maxCycles) {
-        auto cmd = reader->getNextCommand();
-        while (cmd) {
-            queue.enqueue(cmd);
-            cmd = reader->getNextCommand();
-        }
+    queue(rcvr.get()),
+    receiver(std::move(rcvr)),
+    timer(maxCycles) {
+    auto cmd = reader->getNextCommand();
+    while (cmd) {
+        queue.enqueue(cmd);
+        cmd = reader->getNextCommand();
     }
+}
 
 void TraceSimulator::run() {
-    while (!queue.isEmpty()) { 
+    while (!queue.isEmpty()) {
         queue.issue();
         if (timer.cycle(1)) receiver->cycle(1);
-        else break; 
+        else break;
     }
     while (!receiver->isEmpty()) {
         if (timer.cycle(1)) receiver->cycle(1);
         else break;
     }
-    std::cout << "Exiting at cycle " << timer.getCurrentCycle()
+    std::cout << std::dec << "Exiting at cycle " << timer.getCurrentCycle()
               << " because simCycles " << timer.getMaxCycle() << " reached.\n";
 }
 

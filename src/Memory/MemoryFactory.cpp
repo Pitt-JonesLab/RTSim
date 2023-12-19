@@ -1,5 +1,6 @@
 #include "Memory/MemoryFactory.h"
 
+#include "Memory/ConfigParser.h"
 #include "MemoryTypes/Simple/Bank/SimpleBank.h"
 #include "MemoryTypes/Simple/Interconnect/SimpleInterconnect.h"
 #include "MemoryTypes/Simple/MemoryController/SimpleController.h"
@@ -10,11 +11,26 @@
 
 using namespace NVM::Memory;
 
+struct SimpleConfigs {
+    double pimFaultRate;
+    int numTries;
+};
+
 std::unique_ptr<SubArray>
 makeSimpleSubArray(const NVM::Simulation::Config& conf) {
+    SimpleConfigs configs;
+
+    ConfigParser parser;
+    parser.registerValue<double>("PIMFaultRate", 0.0, &configs.pimFaultRate);
+    parser.registerValue<int>("NumTries", 1, &configs.numTries);
+
+    parser.parse(conf);
+
+    FaultModel model(configs.pimFaultRate);
+
     auto timer = std::make_unique<NVM::Timing::ConfigurableTimer>(conf);
-    return std::unique_ptr<SubArray>(
-        new SimpleSubArray(conf.get<int>("DBCS"), std::move(timer)));
+    return std::unique_ptr<SubArray>(new SimpleSubArray(
+        conf.get<int>("DBCS"), std::move(timer), model, configs.numTries));
 }
 
 std::unique_ptr<Bank> makeSimpleBank(const NVM::Simulation::Config& conf) {

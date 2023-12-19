@@ -66,7 +66,13 @@ bool SimpleController::transverseRead(
     if (received || !scheduler.isAvailable()) return false;
 
     rInst = {NVM::Scheduling::InstructionType::PIM, baseAddress};
-    fails = false;
+
+    // Do instruction twice on failure
+    if (fails) {
+        scheduler.enqueue(rInst);
+        fails = false;
+    }
+
     received = true;
     log() << LogLevel::EVENT << "SimpleController received PIM\n"
           << "Address: " << baseAddress << "\n";

@@ -1,4 +1,5 @@
 set(MEMORY_SOURCES
+    FaultModel.cpp
     Bank/Bank.cpp
     Bank/SimpleBank.cpp
     Interconnect/SimpleInterconnect.cpp
