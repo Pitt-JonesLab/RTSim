@@ -28,7 +28,7 @@ class ConfigParser {
                       << *destination << '\n';
             } catch (...) {
                 log() << LogLevel::STAT << "Using default config value for "
-                      << key << " (" << *destination << ")\n";
+                      << key << " (" << defaultValue << ")\n";
                 *destination = defaultValue;
             }
         });
