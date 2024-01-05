@@ -61,13 +61,22 @@ void NVM::Modeling::setScheme(std::string order, ComponentCounts counts) {
         lsb += bitLength + 1;
     }
 }
-
+/**
+ * Get a range of bits from a value, starting at the lsb and ending at the msb
+ * @param val the value to get the bits from.
+ * @param msb the most significant bit to get.
+ * @param lsb the least significant bit to get.
+*/
 unsigned int getBitRange(uint64_t val, unsigned int msb, unsigned int lsb) {
     uint64_t mask = 0xFFFFFFFFFFFFFFFF;
     mask >>= 64 - (msb - lsb + 1);
     return (val >> lsb) & mask;
 }
-
+/**
+ * Decode a symbol from an address.
+ * @param symbol the symbol to decode.
+ * @param address the address to decode from.
+*/
 unsigned int NVM::Modeling::decodeSymbol(AddressSymbol symbol,
                                          uint64_t address) {
     // Truncating bus offset and burst length TODO: find these numbers
