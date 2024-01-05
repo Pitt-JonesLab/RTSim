@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Simulation/TraceReader.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
 #include <queue>
 
@@ -11,20 +11,18 @@ namespace NVM::Simulation {
  */
 class MockTraceReader : public TraceReader {
     public:
-    MockTraceReader() {}
+    MockTraceReader() : TraceReader(std::cin) {}
 
-    std::unique_ptr<TraceCommand> getNext() {
-        if (commands.empty()) return nullptr;
+    TraceReader::Command getNextCommand() {
+        if (commands.empty()) return TraceReader::Command();
         auto command = std::move(commands.front());
         commands.pop();
-        return std::move(command);
+        return command;
     }
 
-    void addCommand(std::unique_ptr<TraceCommand> command) {
-        commands.push(std::move(command));
-    }
+    void addCommand(TraceReader::Command command) { commands.push(command); }
 
-    std::queue<std::unique_ptr<TraceCommand>> commands;
+    std::queue<TraceReader::Command> commands;
 };
 
 } // namespace NVM::Simulation

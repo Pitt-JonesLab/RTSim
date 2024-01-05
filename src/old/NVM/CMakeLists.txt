@@ -1,0 +1,4 @@
+set(NVMAIN_SOURCES
+    ${RTSIM_DIR}/src/old/NVM/nvmain.cpp)
+
+set(ALL_SOURCES ${ALL_SOURCES} ${NVMAIN_SOURCES} PARENT_SCOPE)

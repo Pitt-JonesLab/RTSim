@@ -1,11 +1,16 @@
 #pragma once
 
-#include "Simulation/MemorySystem.h"
-#include "Simulation/TraceIssuer.h"
+#include "Memory/Event/CommandEventQueue.h"
+#include "Memory/Event/MemoryEventQueue.h"
+#include "Memory/MemorySystem/MemorySystem.h"
+#include "Simulation/CycleTimer.h"
+#include "Simulation/TraceReader/TraceReader.h"
 
 #include <memory>
 
 namespace NVM::Simulation {
+
+using NVM::Memory::MemoryEventQueue;
 
 /**
  * Given a TraceIssuer and a MemorySystem, simulates the trace to completion
@@ -16,11 +21,11 @@ class TraceSimulator {
      * Creates a TraceSimulator with a given TraceReader and MemorySystem
      *
      * @param reader TraceReader for this simulator
-     * @param memory MemorySystem to be simulated
+     * @param receiver Commandable to be simulated
      * @param maxCycles Maximum number of cycles to simulate. 0 means no max.
      */
     TraceSimulator(std::unique_ptr<TraceReader> reader,
-                   std::unique_ptr<MemorySystem> memory,
+                   std::unique_ptr<NVM::Memory::MemorySystem> receiver,
                    unsigned int maxCycles = 0);
 
     /**
@@ -37,8 +42,9 @@ class TraceSimulator {
     void printStats(std::ostream& statStream);
 
     private:
-    TraceIssuer issuer;
-    std::unique_ptr<MemorySystem> memory;
+    NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem> queue;
+    std::unique_ptr<NVM::Memory::MemorySystem> receiver;
+    CycleTimer timer;
 };
 
 } // namespace NVM::Simulation

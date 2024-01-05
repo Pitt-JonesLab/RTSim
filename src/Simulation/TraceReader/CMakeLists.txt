@@ -1,0 +1,5 @@
+set(TRACEREADER_SOURCES
+    TraceReader/FileTraceReader.cpp
+    TraceReader/TraceReader.cpp)
+
+set(SIMULATION_SOURCES ${SIMULATION_SOURCES} ${TRACEREADER_SOURCES} PARENT_SCOPE)

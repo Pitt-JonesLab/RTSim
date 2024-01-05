@@ -1,43 +1,59 @@
 #pragma once
 
-#include "Simulation/MemorySystem.h"
+#include "Memory/MemorySystem/MemorySystem.h"
 
 namespace NVM::Simulation {
-class MockMemorySystem : public MemorySystem {
+
+using NVM::Address;
+using NVM::RowData;
+
+class MockMemorySystem : public NVM::Memory::MemorySystem {
     public:
-    bool issue(NVMainRequest* req) { return true; }
-
-    bool read(uint64_t address, DataBlock data, unsigned int threadId,
-              unsigned int cycle) {
+    bool read(const Address& address, const RowData& data) {
         lastAddress = address;
         lastData = data;
-        lastThread = threadId;
-        lastCycle = cycle;
+        readFlag = true;
         return available;
     }
 
-    bool write(uint64_t address, DataBlock data, unsigned int threadId,
-               unsigned int cycle) {
+    bool write(const Address& address, const RowData& data) {
         lastAddress = address;
         lastData = data;
-        lastThread = threadId;
-        lastCycle = cycle;
         return available;
     }
 
-    void cycle(unsigned int cycles) { currentCycle += cycles; }
+    bool rowClone(const Address& srcAddress, const Address& destAddress,
+                  const RowData& data) {
+        lastAddress = srcAddress;
+        lastData = data;
+        return available;
+    }
+
+    bool refresh(const Address& bankAddress) {
+        lastAddress = bankAddress;
+        return available;
+    }
+
+    bool pim(std::vector<Address> operands, const Address& destAddress,
+             std::vector<RowData> data) {
+        return true;
+    }
 
     bool isEmpty() const { return currentCycle > lastCycle + 10; }
 
-    void printStats(std::ostream&) {}
+    void cycle(unsigned int cycles = 1) {
+        currentCycle += cycles;
+        if (working) available = true;
+    }
 
-    unsigned int getCurrentCycle() { return currentCycle; }
+    void printStats(std::ostream& statStream) {}
 
-    bool available = true;
+    bool available = true, working = true;
     unsigned int currentCycle = 0;
-    uint64_t lastAddress = 0;
-    DataBlock lastData;
+    Address lastAddress = 0;
+    RowData lastData;
     unsigned int lastThread = 0;
     unsigned int lastCycle = 0;
+    bool readFlag = false;
 };
 } // namespace NVM::Simulation

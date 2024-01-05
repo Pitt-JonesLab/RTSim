@@ -1,0 +1,4 @@
+set(FAULT_SOURCES
+    ${RTSIM_DIR}/src/old/FaultModels/ECP/ECP.cpp)
+
+set(ALL_SOURCES ${ALL_SOURCES} ${FAULT_SOURCES} PARENT_SCOPE)
