@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MemoryTypes/Simple/MemoryController/MemoryController.h"
+#include "MemoryTypes/MemoryController.h"
 #include "Modeling/System/SimpleSystem.h"
 #include "Parsing/Parser/SimpleParser.h"
 #include "Scheduling/Scheduler/RBScheduler.h"
