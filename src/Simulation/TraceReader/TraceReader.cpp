@@ -15,7 +15,46 @@ using NVM::Memory::MemorySystem;
 
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
+std::ostream& operator<<(std::ostream& out, Opcode1 op1) {
+    switch (op1) {
+        case Opcode1::READ:
+            out << "READ";
+            break;
+        case Opcode1::WRITE:
+            out << "WRITE";
+            break;
+        case Opcode1::PIM:
+            out << "PIM";
+            break;
+        case Opcode1::TRANSVERSE_WRITE:
+            out << "TRANS_WRITE";
+            break;
+        case Opcode1::SHIFT:
+            out << "SHIFT";
+            break;
+        case Opcode1::NONE:
+            out << "???";
+            break;
+    }
+    return out;
+}
+
 enum class Opcode2 { BITWISE, ROWCLONE, NONE };
+
+std::ostream& operator<<(std::ostream& out, Opcode2 op2) {
+    switch (op2) {
+        case Opcode2::BITWISE:
+            out << "TRANS_READ";
+            break;
+        case Opcode2::ROWCLONE:
+            out << "ROWCLONE";
+            break;
+        case Opcode2::NONE:
+            out << "???";
+            break;
+    }
+    return out;
+}
 
 TraceReader::TraceReader(std::istream& trace) : trace(trace) {}
 
@@ -116,17 +155,13 @@ TraceReader::Command TraceReader::getNextCommand() {
                        << cycle << '\n';
         operation = readOperation(lineStream);
         Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
-                       << (int) operation << '\n';
+                       << operation << '\n';
         address = Address(readAddress(lineStream));
-        // Logging::log() << Logging::LogLevel::DEBUG << "Read address "
-        //                << std::hex << address << '\n';
         if (operation == Opcode1::PIM) {
             op2 = readOp2(lineStream);
-            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 "
-                           << (int) op2 << '\n';
+            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 " << op2
+                           << '\n';
             address2 = Address(readAddress(lineStream));
-            // Logging::log() << Logging::LogLevel::DEBUG << "Read address2 "
-            //                << std::hex << address2 << '\n';
         }
         dataBlock = readData(lineStream);
         threadId = readCycle(lineStream);
