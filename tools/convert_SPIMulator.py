@@ -45,13 +45,14 @@ def spim_to_rtsim(line):
         rtsim_tokens.append(tokens[2])
     elif rtsim_tokens[1] == 'S':
         rtsim_tokens.append(tokens[2][2:])
+        rtsim_tokens.append('0')
     elif rtsim_tokens[1] == 'T':
         rtsim_tokens.append(tokens[3])
 
-    if rtsim_tokens[1] in {'P', 'S'}:
+    if rtsim_tokens[1] == 'P':
         rtsim_tokens.append(row_number_to_address(int(tokens[1][1:])))
         rtsim_tokens.append('0')
-    else:
+    elif rtsim_tokens[1] == 'W':
         rtsim_tokens.append(tokens[1][2:])
 
     rtsim_tokens.append('0')

@@ -103,8 +103,7 @@ uint64_t readAddress(std::istringstream& inStream) {
 NVMDataBlock readData(std::istringstream& inStream) {
     auto field = getNextToken(inStream);
 
-    if (field.find_first_of("0x") == 0)
-        field = field.substr(2, field.size() - 1);
+    if (field.find("0x") == 0) field = field.substr(2, field.size() - 1);
 
     if (field.size() % 8 != 0) {
         auto padding = 8 - (field.size() % 8);
@@ -153,16 +152,30 @@ TraceReader::Command TraceReader::getNextCommand() {
         cycle = readCycle(lineStream);
         Logging::log() << Logging::LogLevel::DEBUG << std::dec << "Read cycle "
                        << cycle << '\n';
+
         operation = readOperation(lineStream);
         Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
                        << operation << '\n';
+
         address = Address(readAddress(lineStream));
+        Logging::log() << Logging::LogLevel::DEBUG << "Read dest address 0x"
+                       << std::hex << address.getData() << std::dec << '\n';
+
         if (operation == Opcode1::PIM) {
             op2 = readOp2(lineStream);
             Logging::log() << Logging::LogLevel::DEBUG << "Read op2 " << op2
                            << '\n';
+
             address2 = Address(readAddress(lineStream));
+            Logging::log() << Logging::LogLevel::DEBUG << "Read src address 0x"
+                           << std::hex << address2.getData() << std::dec
+                           << '\n';
+        } else if (operation == Opcode1::SHIFT) {
+            auto op2 = getNextToken(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG << "Read shift opcode "
+                           << op2 << '\n';
         }
+
         dataBlock = readData(lineStream);
         threadId = readCycle(lineStream);
     } catch (...) {
@@ -192,6 +205,10 @@ TraceReader::Command TraceReader::getNextCommand() {
             return [address, address2, data](MemorySystem& receiver) -> bool {
                 return receiver.pim({address}, address2, {data});
             };
+        case Opcode1::SHIFT:
+            return [](MemorySystem& receiver) -> bool { return false; };
+        case Opcode1::TRANSVERSE_WRITE:
+            return [](MemorySystem& receiver) -> bool { return false; };
         default:
             throw std::runtime_error("Unknown trace operation!");
     }
