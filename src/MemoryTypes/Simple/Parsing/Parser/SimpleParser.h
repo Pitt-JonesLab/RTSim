@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Parsing/Parser.h"
+#include "MemoryTypes/Simple/Parsing/Parser.h"
 
 namespace NVM::Parsing {
 

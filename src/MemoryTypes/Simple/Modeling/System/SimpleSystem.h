@@ -1,7 +1,7 @@
 #pragma once
 
+#include "MemoryTypes/Simple/Modeling/MemorySystem.h"
 #include "MemoryTypes/Simple/Modeling/Rank.h"
-#include "Modeling/MemorySystem.h"
 
 #include <vector>
 

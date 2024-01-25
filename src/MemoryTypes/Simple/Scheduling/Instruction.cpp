@@ -1,4 +1,4 @@
-#include "Scheduling/Instruction.h"
+#include "MemoryTypes/Simple/Scheduling/Instruction.h"
 
 using namespace NVM::Scheduling;
 using NVM::Modeling::Address;

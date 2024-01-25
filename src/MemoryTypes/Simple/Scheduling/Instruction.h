@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modeling/Types.h"
+#include "MemoryTypes/Simple/Modeling/Types.h"
 
 namespace NVM::Scheduling {
 

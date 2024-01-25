@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Modeling/MemorySystem.h"
-#include "Scheduling/Instruction.h"
+#include "MemoryTypes/Simple/Modeling/MemorySystem.h"
+#include "MemoryTypes/Simple/Scheduling/Instruction.h"
 
 namespace NVM::Scheduling {
 

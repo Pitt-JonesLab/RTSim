@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
-#include "Modeling/MemorySystem.h"
+#include "MemoryTypes/Simple/Modeling/MemorySystem.h"
 
 namespace NVM::Modeling {
 

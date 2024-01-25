@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Scheduling/Scheduler.h"
+#include "MemoryTypes/Simple/Scheduling/Scheduler.h"
 
 #include <vector>
 
