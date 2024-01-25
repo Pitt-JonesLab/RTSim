@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MemoryTypes/Simple/Rank/Rank.h"
+#include "MemoryTypes/Rank.h"
 
 namespace NVM::Memory {
 

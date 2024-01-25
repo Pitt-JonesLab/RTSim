@@ -1,12 +1,13 @@
 #pragma once
 
-#include "MemoryTypes/Simple/Rank/Rank.h"
+#include "Command.h"
+#include "MemoryTypes/Bank.h"
 
 #include <memory>
 
 namespace NVM::Memory {
 
-class Interconnect {
+class Rank {
     public:
     bool issue(NVM::Command cmd);
 
@@ -14,12 +15,12 @@ class Interconnect {
 
     virtual void cycle(unsigned int cycles) = 0;
 
-    NVM::Stats::StatBlock getStats(std::string tag) const;
+    virtual NVM::Stats::StatBlock getStats(std::string tag) const = 0;
 
-    void addRank(std::unique_ptr<Rank> rank);
+    void addBank(std::unique_ptr<Bank> bank);
 
     protected:
-    std::vector<std::unique_ptr<Rank>> ranks;
+    std::vector<std::unique_ptr<Bank>> banks;
 };
 
 } // namespace NVM::Memory

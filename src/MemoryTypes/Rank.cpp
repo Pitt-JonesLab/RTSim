@@ -1,4 +1,4 @@
-#include "MemoryTypes/Simple/Rank/Rank.h"
+#include "MemoryTypes/Rank.h"
 
 using namespace NVM::Memory;
 
