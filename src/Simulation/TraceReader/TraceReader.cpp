@@ -15,7 +15,46 @@ using NVM::Memory::MemorySystem;
 
 enum class Opcode1 { READ, WRITE, PIM, TRANSVERSE_WRITE, SHIFT, NONE };
 
+std::ostream& operator<<(std::ostream& out, Opcode1 op1) {
+    switch (op1) {
+        case Opcode1::READ:
+            out << "READ";
+            break;
+        case Opcode1::WRITE:
+            out << "WRITE";
+            break;
+        case Opcode1::PIM:
+            out << "PIM";
+            break;
+        case Opcode1::TRANSVERSE_WRITE:
+            out << "TRANS_WRITE";
+            break;
+        case Opcode1::SHIFT:
+            out << "SHIFT";
+            break;
+        case Opcode1::NONE:
+            out << "???";
+            break;
+    }
+    return out;
+}
+
 enum class Opcode2 { BITWISE, ROWCLONE, NONE };
+
+std::ostream& operator<<(std::ostream& out, Opcode2 op2) {
+    switch (op2) {
+        case Opcode2::BITWISE:
+            out << "TRANS_READ";
+            break;
+        case Opcode2::ROWCLONE:
+            out << "ROWCLONE";
+            break;
+        case Opcode2::NONE:
+            out << "???";
+            break;
+    }
+    return out;
+}
 
 TraceReader::TraceReader(std::istream& trace) : trace(trace) {}
 
@@ -64,8 +103,7 @@ uint64_t readAddress(std::istringstream& inStream) {
 NVMDataBlock readData(std::istringstream& inStream) {
     auto field = getNextToken(inStream);
 
-    if (field.find_first_of("0x") == 0)
-        field = field.substr(2, field.size() - 1);
+    if (field.find("0x") == 0) field = field.substr(2, field.size() - 1);
 
     if (field.size() % 8 != 0) {
         auto padding = 8 - (field.size() % 8);
@@ -114,20 +152,34 @@ TraceReader::Command TraceReader::getNextCommand() {
         cycle = readCycle(lineStream);
         Logging::log() << Logging::LogLevel::DEBUG << std::dec << "Read cycle "
                        << cycle << '\n';
+
         operation = readOperation(lineStream);
         Logging::log() << Logging::LogLevel::DEBUG << "Read opcode "
-                       << (int) operation << '\n';
+                       << operation << '\n';
+
         address = Address(readAddress(lineStream));
-        // Logging::log() << Logging::LogLevel::DEBUG << "Read address "
-        //                << std::hex << address << '\n';
+        Logging::log() << Logging::LogLevel::DEBUG << "Read dest address 0x"
+                       << std::hex << address.getData() << std::dec << '\n';
+
         if (operation == Opcode1::PIM) {
             op2 = readOp2(lineStream);
-            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 "
-                           << (int) op2 << '\n';
+            Logging::log() << Logging::LogLevel::DEBUG << "Read op2 " << op2
+                           << '\n';
+
             address2 = Address(readAddress(lineStream));
-            // Logging::log() << Logging::LogLevel::DEBUG << "Read address2 "
-            //                << std::hex << address2 << '\n';
+            Logging::log() << Logging::LogLevel::DEBUG << "Read src address 0x"
+                           << std::hex << address2.getData() << std::dec
+                           << '\n';
+        } else if (operation == Opcode1::SHIFT) {
+            auto op2 = getNextToken(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG << "Read shift opcode "
+                           << op2 << '\n';
+        } else if (operation == Opcode1::TRANSVERSE_WRITE) {
+            auto op2 = getNextToken(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG
+                           << "Read transverse write opcode " << op2 << '\n';
         }
+
         dataBlock = readData(lineStream);
         threadId = readCycle(lineStream);
     } catch (...) {
@@ -157,6 +209,10 @@ TraceReader::Command TraceReader::getNextCommand() {
             return [address, address2, data](MemorySystem& receiver) -> bool {
                 return receiver.pim({address}, address2, {data});
             };
+        case Opcode1::SHIFT:
+            return [](MemorySystem& receiver) -> bool { return true; };
+        case Opcode1::TRANSVERSE_WRITE:
+            return [](MemorySystem& receiver) -> bool { return true; };
         default:
             throw std::runtime_error("Unknown trace operation!");
     }

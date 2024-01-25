@@ -1,0 +1,9 @@
+# Store word and rotated word
+CPIM $12 0xA24B791CEF61D7AAB5E389A1D2F67E50 STORE 512 0
+# SubByte on Rotated word
+Subbyte $12 $12 4 0
+
+
+
+
+
