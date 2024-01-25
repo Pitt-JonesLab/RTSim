@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/MemorySystem.h"
 
 namespace NVM::Simulation {
 

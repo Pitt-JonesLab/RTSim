@@ -1,7 +1,7 @@
 #include "MemoryTypes/Simple/MemorySystem/SimpleSystem.h"
 
 #include "Logging/Logging.h"
-#include "Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
 
 using namespace NVM::Memory;
 using namespace NVM::Logging;

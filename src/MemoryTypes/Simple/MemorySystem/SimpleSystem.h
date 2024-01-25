@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/MemorySystem.h"
 #include "MemoryTypes/Simple/MemoryController/MemoryController.h"
 
 #include <memory>

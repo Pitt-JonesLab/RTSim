@@ -7,7 +7,7 @@
 #include "MemoryTypes/Simple/MemorySystem/SimpleSystem.h"
 #include "MemoryTypes/Simple/Rank/SimpleRank.h"
 #include "MemoryTypes/Simple/SubArray/SimpleSubArray.h"
-#include "Timing/Timer/ConfigurableTimer.h"
+#include "MemoryTypes/Simple/Timing/Timer/ConfigurableTimer.h"
 
 using namespace NVM::Memory;
 
