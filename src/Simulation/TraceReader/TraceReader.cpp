@@ -174,6 +174,10 @@ TraceReader::Command TraceReader::getNextCommand() {
             auto op2 = getNextToken(lineStream);
             Logging::log() << Logging::LogLevel::DEBUG << "Read shift opcode "
                            << op2 << '\n';
+        } else if (operation == Opcode1::TRANSVERSE_WRITE) {
+            auto op2 = getNextToken(lineStream);
+            Logging::log() << Logging::LogLevel::DEBUG
+                           << "Read transverse write opcode " << op2 << '\n';
         }
 
         dataBlock = readData(lineStream);
@@ -206,9 +210,9 @@ TraceReader::Command TraceReader::getNextCommand() {
                 return receiver.pim({address}, address2, {data});
             };
         case Opcode1::SHIFT:
-            return [](MemorySystem& receiver) -> bool { return false; };
+            return [](MemorySystem& receiver) -> bool { return true; };
         case Opcode1::TRANSVERSE_WRITE:
-            return [](MemorySystem& receiver) -> bool { return false; };
+            return [](MemorySystem& receiver) -> bool { return true; };
         default:
             throw std::runtime_error("Unknown trace operation!");
     }

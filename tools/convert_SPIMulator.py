@@ -15,6 +15,7 @@ def read_trace_lines(filename):
     
 def tokenize_trace_line(line):
     tokens = line.split(' ')
+    tokens = [t for t in tokens if len(t) > 0]
     # Discard CPIM and block size
     return tokens[1:4] + tokens[5:]
 
@@ -48,6 +49,7 @@ def spim_to_rtsim(line):
         rtsim_tokens.append('0')
     elif rtsim_tokens[1] == 'T':
         rtsim_tokens.append(tokens[3])
+        rtsim_tokens.append(tokens[1])
 
     if rtsim_tokens[1] == 'P':
         rtsim_tokens.append(row_number_to_address(int(tokens[1][1:])))
