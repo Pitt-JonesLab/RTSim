@@ -1,7 +1,7 @@
-#include "Modeling/System/SimpleSystem.h"
+#include "MemoryTypes/Simple/Modeling/System/SimpleSystem.h"
 
-#include "Modeling/Decoder.h"
-#include "Modeling/Rank.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/Rank.h"
 
 using namespace NVM::Modeling;
 

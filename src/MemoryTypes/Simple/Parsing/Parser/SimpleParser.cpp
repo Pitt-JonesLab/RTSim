@@ -1,6 +1,6 @@
-#include "Parsing/Parser/SimpleParser.h"
+#include "MemoryTypes/Simple/Parsing/Parser/SimpleParser.h"
 
-#include "Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
 
 using namespace NVM::Parsing;
 using namespace NVM::Modeling;

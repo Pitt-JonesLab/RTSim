@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modeling/SubArray.h"
+#include "MemoryTypes/Simple/Modeling/SubArray.h"
 
 #include <stdexcept>
 

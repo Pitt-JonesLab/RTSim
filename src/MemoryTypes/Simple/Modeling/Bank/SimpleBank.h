@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modeling/Bank.h"
+#include "MemoryTypes/Simple/Modeling/Bank.h"
 
 #include <vector>
 

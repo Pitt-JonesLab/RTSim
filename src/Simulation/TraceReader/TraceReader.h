@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Memory/Event/CommandEventQueue.h"
-#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/MemorySystem.h"
 
 #include <iostream>
 

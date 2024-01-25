@@ -1,7 +1,7 @@
-#include "Modeling/Bank/SimpleBank.h"
+#include "MemoryTypes/Simple/Modeling/Bank/SimpleBank.h"
 
-#include "Modeling/Decoder.h"
-#include "Modeling/SubArray.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/SubArray.h"
 
 using namespace NVM::Modeling;
 

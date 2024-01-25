@@ -1,6 +1,6 @@
 #include "Memory/MemoryFactory.h"
 
-#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/MemorySystem.h"
 #include "Simulation/Config.h"
 
 #include <catch2/catch_test_macros.hpp>

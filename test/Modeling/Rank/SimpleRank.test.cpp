@@ -1,7 +1,7 @@
-#include "Modeling/Rank/SimpleRank.h"
+#include "MemoryTypes/Simple/Modeling/Rank/SimpleRank.h"
 
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
 #include "Modeling/Bank/MockBank.h"
-#include "Modeling/Decoder.h"
 
 #include <catch2/catch_test_macros.hpp>
 

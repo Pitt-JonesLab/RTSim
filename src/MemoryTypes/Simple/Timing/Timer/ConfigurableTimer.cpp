@@ -1,4 +1,4 @@
-#include "Timing/Timer/ConfigurableTimer.h"
+#include "MemoryTypes/Simple/Timing/Timer/ConfigurableTimer.h"
 
 using namespace NVM::Timing;
 using NVM::Command;

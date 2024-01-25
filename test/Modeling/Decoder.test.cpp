@@ -1,4 +1,4 @@
-#include "Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
 
 #include <catch2/catch_test_macros.hpp>
 

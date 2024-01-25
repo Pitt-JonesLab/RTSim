@@ -1,4 +1,4 @@
-#include "Modeling/SubArray/SimpleSubArray.h"
+#include "MemoryTypes/Simple/Modeling/SubArray/SimpleSubArray.h"
 
 #include <catch2/catch_test_macros.hpp>
 

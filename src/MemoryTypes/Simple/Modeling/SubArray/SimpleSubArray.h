@@ -1,4 +1,4 @@
-#include "Modeling/SubArray.h"
+#include "MemoryTypes/Simple/Modeling/SubArray.h"
 
 namespace NVM::Modeling {
 

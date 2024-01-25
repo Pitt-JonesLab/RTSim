@@ -1,9 +1,9 @@
 #pragma once
 
 #include "MemoryTypes/Simple/MemoryController/MemoryController.h"
-#include "Modeling/System/SimpleSystem.h"
-#include "Parsing/Parser/SimpleParser.h"
-#include "Scheduling/Scheduler/RBScheduler.h"
+#include "MemoryTypes/Simple/Modeling/System/SimpleSystem.h"
+#include "MemoryTypes/Simple/Parsing/Parser/SimpleParser.h"
+#include "MemoryTypes/Simple/Scheduling/Scheduler/RBScheduler.h"
 
 #include <vector>
 

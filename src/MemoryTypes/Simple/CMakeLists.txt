@@ -1,3 +1,8 @@
+add_subdirectory(Modeling)
+add_subdirectory(Parsing)
+add_subdirectory(Scheduling)
+add_subdirectory(Timing)
+
 set(MEMORY_SOURCES
     FaultModel.cpp
     Bank/Bank.cpp

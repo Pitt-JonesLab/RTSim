@@ -1,16 +1,13 @@
 #pragma once
 
 #include "Memory/Event/CommandEventQueue.h"
-#include "Memory/Event/MemoryEventQueue.h"
-#include "Memory/MemorySystem/MemorySystem.h"
+#include "Memory/MemorySystem.h"
 #include "Simulation/CycleTimer.h"
 #include "Simulation/TraceReader/TraceReader.h"
 
 #include <memory>
 
 namespace NVM::Simulation {
-
-using NVM::Memory::MemoryEventQueue;
 
 /**
  * Given a TraceIssuer and a MemorySystem, simulates the trace to completion

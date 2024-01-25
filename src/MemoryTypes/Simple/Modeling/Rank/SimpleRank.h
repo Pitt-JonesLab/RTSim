@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modeling/Rank.h"
+#include "MemoryTypes/Simple/Modeling/Rank.h"
 
 #include <vector>
 

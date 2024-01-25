@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
 #include "Modeling/MemorySystem.h"
 
 namespace NVM::Modeling {

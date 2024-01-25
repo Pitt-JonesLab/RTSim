@@ -1,9 +1,9 @@
 #include "MemoryTypes/Simple/MemoryController/SimpleController.h"
 
 #include "Logging/Logging.h"
-#include "Modeling/Bank/SimpleBank.h"
-#include "Modeling/Rank/SimpleRank.h"
-#include "Modeling/SubArray/SimpleSubArray.h"
+#include "MemoryTypes/Simple/Modeling/Bank/SimpleBank.h"
+#include "MemoryTypes/Simple/Modeling/Rank/SimpleRank.h"
+#include "MemoryTypes/Simple/Modeling/SubArray/SimpleSubArray.h"
 
 using namespace NVM::Memory;
 using namespace NVM::Simulation;
