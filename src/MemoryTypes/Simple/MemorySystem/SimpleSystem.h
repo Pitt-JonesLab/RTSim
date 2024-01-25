@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Memory/MemorySystem.h"
-#include "MemoryTypes/Simple/MemoryController/MemoryController.h"
+#include "MemoryTypes/MemoryController.h"
 
 #include <memory>
 #include <vector>
