@@ -1,6 +1,6 @@
 #include "MemoryTypes/Simple/Scheduling/Scheduler/FIFOScheduler.h"
 
-#include "Modeling/System/MockSystem.h"
+#include "MemoryTypes/Simple/Modeling/System/MockSystem.h"
 
 #include <catch2/catch_test_macros.hpp>
 

@@ -1,7 +1,7 @@
 #include "MemoryTypes/Simple/Modeling/Bank/SimpleBank.h"
 
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
-#include "Modeling/SubArray/MockSubArray.h"
+#include "MemoryTypes/Simple/Modeling/SubArray/MockSubArray.h"
 
 #include <catch2/catch_test_macros.hpp>
 
