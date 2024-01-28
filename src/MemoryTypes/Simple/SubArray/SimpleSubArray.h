@@ -2,7 +2,7 @@
 
 #include "Memory/Timing/CommandTimer.h"
 #include "MemoryTypes/Simple/FaultModel.h"
-#include "MemoryTypes/SubArray.h"
+#include "MemoryTypes/Simple/SubArray.h"
 
 #include <memory>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MemoryTypes/Bank.h"
+#include "MemoryTypes/Simple/Bank.h"
 
 namespace NVM::Memory {
 

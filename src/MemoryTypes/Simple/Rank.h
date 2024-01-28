@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Command.h"
-#include "MemoryTypes/Bank.h"
+#include "MemoryTypes/Simple/Bank.h"
 
 #include <memory>
 

@@ -1,6 +1,5 @@
 #include "Memory/MemoryFactory.h"
 
-#include "Memory/ConfigParser.h"
 #include "MemoryTypes/Simple/Bank/SimpleBank.h"
 #include "MemoryTypes/Simple/Interconnect/SimpleInterconnect.h"
 #include "MemoryTypes/Simple/MemoryController/SimpleController.h"
@@ -8,6 +7,7 @@
 #include "MemoryTypes/Simple/Rank/SimpleRank.h"
 #include "MemoryTypes/Simple/SubArray/SimpleSubArray.h"
 #include "MemoryTypes/Simple/Timing/Timer/ConfigurableTimer.h"
+#include "Utils/ConfigParser.h"
 
 using namespace NVM::Memory;
 

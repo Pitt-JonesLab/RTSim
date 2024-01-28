@@ -1,12 +1,16 @@
 #pragma once
 
-#include "MemoryTypes/Rank.h"
+#include "Command.h"
+#include "MemoryTypes/Simple/SubArray.h"
 
 #include <memory>
 
 namespace NVM::Memory {
 
-class Interconnect {
+class Bank {
+    protected:
+    std::vector<std::unique_ptr<SubArray>> subArrays;
+
     public:
     bool issue(NVM::Command cmd);
 
@@ -16,10 +20,7 @@ class Interconnect {
 
     NVM::Stats::StatBlock getStats(std::string tag) const;
 
-    void addRank(std::unique_ptr<Rank> rank);
-
-    protected:
-    std::vector<std::unique_ptr<Rank>> ranks;
+    void addSubArray(std::unique_ptr<SubArray> subArray);
 };
 
 } // namespace NVM::Memory

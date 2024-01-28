@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Event/EventQueue.h"
-
-#include <queue>
 #include <functional>
+#include <queue>
 
 namespace NVM::Memory {
 
-template <typename Receiver>
-class CommandEventQueue : public NVM::Event::EventQueue {
+template<typename Receiver> class CommandEventQueue {
     public:
     using Cmd = std::function<bool(Receiver&)>;
 
@@ -24,9 +21,7 @@ class CommandEventQueue : public NVM::Event::EventQueue {
         return false;
     }
 
-    void enqueue(Cmd cmd) {
-        commands.push(cmd);
-    }
+    void enqueue(Cmd cmd) { commands.push(cmd); }
 
     bool isEmpty() const { return commands.empty(); }
 
@@ -35,4 +30,4 @@ class CommandEventQueue : public NVM::Event::EventQueue {
     std::queue<Cmd> commands;
 };
 
-}
+} // namespace NVM::Memory
