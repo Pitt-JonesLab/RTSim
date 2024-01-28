@@ -17,8 +17,6 @@ class MemorySystem {
     virtual bool rowClone(const Address& srcAddress, const Address& destAddress,
                           const RowData& data) = 0;
 
-    virtual bool refresh(const Address& bankAddress) = 0;
-
     virtual bool pim(std::vector<Address> operands, const Address& destAddress,
                      std::vector<RowData> data) = 0;
 

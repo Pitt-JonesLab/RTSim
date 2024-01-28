@@ -5,7 +5,6 @@ set(MEMORY_SOURCES
     Bank.cpp )
 
 add_subdirectory(Simple)
-add_subdirectory(DRAM)
 
 add_library(RTSim_MemoryType ${MEMORY_SOURCES})
 target_include_directories(RTSim_MemoryType PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)
