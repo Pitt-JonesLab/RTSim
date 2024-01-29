@@ -48,6 +48,7 @@ NVM::Stats::StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&writeEnergy, "write_energy", "nJ");
     stats.addStat(&shiftEnergy, "shift_energy", "nJ");
     stats.addStat(&numFaults, "pim_faults");
+    stats.addStat(&numUncorrectableFaults, "uncorrectable_faults");
 
     return stats;
 }
@@ -61,6 +62,7 @@ void SimpleSubArray::checkFaults() {
             log() << LogLevel::EVENT << "PIM Fault!\n";
         }
     }
+    numUncorrectableFaults = faultModel.getUncorrectableFaults();
 }
 
 bool SimpleSubArray::issue(NVM::Command cmd) {
