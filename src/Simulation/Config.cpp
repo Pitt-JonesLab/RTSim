@@ -85,3 +85,5 @@ Config NVM::Simulation::readConfig(std::istream& input) {
 
     return conf;
 }
+
+void Config::override(std::string overrideLine) {}

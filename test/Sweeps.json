@@ -1,0 +1,15 @@
+{
+    "tests": [
+        {
+            "name": "Simple R/W",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/hello_world.nvt",
+            "config": "Config/RM.config",
+            "cycles": "0",
+            "overrides": "",
+            "checks": [
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults"
+            ]
+        }
+    ]
+}

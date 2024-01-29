@@ -23,6 +23,7 @@ SimpleSubArray::SimpleSubArray(unsigned int rows,
     totalTRs(0),
     totalTWs(0),
     numFaults(0),
+    numUncorrectableFaults(0),
     faultModel(faultModel),
     numTries(numTries),
     timer(std::move(timer)) {}
