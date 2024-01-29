@@ -19,7 +19,11 @@ template<typename T> void Config::set(std::string key, T value) {
 }
 
 template int Config::get(std::string key) const;
-template unsigned int Config::get(std::string key) const;
+
+template<> unsigned int Config::get(std::string key) const {
+    return get<int>(key);
+}
+
 template bool Config::get(std::string key) const;
 template std::string Config::get(std::string key) const;
 template double Config::get(std::string key) const;

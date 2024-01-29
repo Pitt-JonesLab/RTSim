@@ -9,24 +9,28 @@ StateBank::StateBank() {}
 /*
  *   Performs a READ command.
  */
-bool read(const Address& address, const RowData& data) { return true; }
+bool StateBank::read(const Address& address, const RowData& data) {
+    return true;
+}
 
 /*
  *   Performs a WRITE command.
  */
-bool write(const Address& address, const RowData& data) { return true; }
+bool StateBank::write(const Address& address, const RowData& data) {
+    return true;
+}
 
 /*
  *   Performs an ACTIVATE command.
  */
-bool activate(const Address& address) { return true; }
+bool StateBank::activate(const Address& address) { return true; }
 
 /*
  *   Performs a PRECHARGE command.
  */
-bool precharge(const Address& address) { return true; }
+bool StateBank::precharge(const Address& address) { return true; }
 
 /*
  *   Performs a REFRESH command.
  */
-bool refresh() { return true; }
+bool StateBank::refresh() { return true; }

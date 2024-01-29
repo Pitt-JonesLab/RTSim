@@ -5,11 +5,11 @@ using NVM::Address;
 using NVM::RowData;
 
 bool StateSystem::read(const Address& address, const RowData& data) {
-    return true;
+    return bank.read(address, data);
 }
 
 bool StateSystem::write(const Address& address, const RowData& data) {
-    return true;
+    return bank.write(address, data);
 }
 
 bool StateSystem::rowClone(const Address& srcAddress,

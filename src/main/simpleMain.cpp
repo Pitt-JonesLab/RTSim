@@ -77,8 +77,8 @@ int main(int argc, char* argv[]) {
     ncycle_t simulateCycles = getMaxCycles((argc > 3) ? argv[3] : nullptr);
 
     NVM::Simulation::Config conf = readConfig(argv[1]);
-    setAddressScheme(conf);
     setLogLevel(conf);
+    setAddressScheme(conf);
 
     // Build RTSystem
     std::unique_ptr<MemorySystem> memory;
