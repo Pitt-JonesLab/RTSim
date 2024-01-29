@@ -6,10 +6,16 @@ class FaultModel {
     public:
     FaultModel(double faultRate);
 
-    bool check() const;
+    /*
+     *   Returns true if a correctable fault occurred, false otherwise
+     */
+    bool check();
+
+    int getUncorrectableFaults() const;
 
     private:
     double faultRate;
+    int numCorrectable, wordSize, numUncorrectable;
 };
 
 } // namespace NVM::Memory
