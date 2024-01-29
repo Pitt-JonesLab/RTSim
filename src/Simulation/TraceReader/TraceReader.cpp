@@ -136,8 +136,8 @@ TraceReader::Command TraceReader::getNextCommand() {
     std::string fullLine;
     getline(trace, fullLine);
 
-    // if (fullLine == "ECC_FAIL")
-    //     return std::unique_ptr<TraceCommand>(new ECCCommand());
+    // End on empty line
+    if (fullLine.size() == 0) return nullptr;
 
     std::istringstream lineStream(fullLine);
 
