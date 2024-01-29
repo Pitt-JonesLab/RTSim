@@ -4,8 +4,10 @@ using namespace NVM::State;
 
 NVM::State::WritingState::WritingState() : State() {}
 
-std::unique_ptr<State> NVM::State::WritingState::cycle() {
-    return std::make_unique<WritingState>(*this);
+void NVM::State::WritingState::cycle() {}
+
+std::unique_ptr<State> NVM::State::WritingState::getNext() const {
+    return nullptr;
 }
 
 bool NVM::State::WritingState::read(const Address& address,

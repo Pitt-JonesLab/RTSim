@@ -13,7 +13,9 @@ class ReadingState : public State {
      *
      *   @return Next State
      */
-    std::unique_ptr<State> cycle();
+    void cycle();
+
+    std::unique_ptr<State> getNext() const;
 
     /*
      *   Performs a READ command.

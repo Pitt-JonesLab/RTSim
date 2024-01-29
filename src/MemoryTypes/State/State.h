@@ -13,10 +13,16 @@ class State : public Commandable {
     public:
     /*
      *   Progresses the State forward by 1 cycle.
-     *
-     *   @return Next State
      */
-    virtual std::unique_ptr<State> cycle() = 0;
+    virtual void cycle() = 0;
+
+    /*
+     *   Returns the next State or nullptr if the current State is not
+     * completed.
+     *
+     *  @return Next State or nullptr if the current State is not complete
+     */
+    virtual std::unique_ptr<State> getNext() const = 0;
 };
 
 } // namespace NVM::State
