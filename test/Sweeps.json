@@ -1,14 +1,147 @@
 {
     "tests": [
         {
-            "name": "Simple R/W",
+            "name": "10^-9 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/hello_world.nvt",
-            "config": "Config/RM.config",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
             "cycles": "0",
-            "overrides": "",
+            "overrides": "PIMFaultRate=0.000000001",
             "checks": [
-                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults"
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-8 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.00000001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-7 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.0000001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-6 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.000001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-5 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.00001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-4 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.0001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-3 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.001",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+            ]
+        },
+        {
+            "name": "10^-2 No ECC",
+            "exec": "rtsim.fast",
+            "trace": "test/Traces/SPIMulator/AES.nvt",
+            "config": "Config/Simple.config",
+            "cycles": "0",
+            "overrides": "PIMFaultRate=0.01",
+            "checks": [
+                "Exiting",
+                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.uncorrectable_faults",
+                "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.read_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.write_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
             ]
         }
     ]
