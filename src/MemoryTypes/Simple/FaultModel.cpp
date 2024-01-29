@@ -4,11 +4,11 @@
 
 using namespace NVM::Memory;
 
-FaultModel::FaultModel(double faultRate) :
+FaultModel::FaultModel(double faultRate, int wordSize, int numCorrectable) :
     faultRate(faultRate),
-    numCorrectable(0),
+    numCorrectable(numCorrectable),
     numUncorrectable(0),
-    wordSize(64) {}
+    wordSize(wordSize) {}
 
 bool testFault(double faultRate) {
     double randTest = ((double) rand() / (RAND_MAX));

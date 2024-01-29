@@ -4,7 +4,7 @@ namespace NVM::Memory {
 
 class FaultModel {
     public:
-    FaultModel(double faultRate);
+    FaultModel(double faultRate, int wordSize, int numCorrectable);
 
     /*
      *   Returns true if a correctable fault occurred, false otherwise
