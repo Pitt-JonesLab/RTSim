@@ -5,6 +5,7 @@
 #include "Simulation/TraceReader/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
 #include "src/old/NVMTypes.h"
+#include "Utils/ConfigParser.h"
 
 #include <iostream>
 #include <memory>
@@ -72,7 +73,18 @@ int main(int argc, char* argv[]) {
     setLogLevel(conf);
 
     // Build RTSystem
-    auto memory = makeSimpleSystem(conf);
+    std::unique_ptr<MemorySystem> memory;
+
+    ConfigParser parser;
+    std::string memType;
+    parser.registerValue<std::string>("MemType", "Simple", &memType);
+    parser.parse(conf);
+
+    if (memType == "Simple") {
+        memory = makeSimpleSystem(conf);
+    } else if (memType == "State") {
+        memory = makeStateSystem(conf);
+    }
 
     // Build TraceReader
     auto reader = std::make_unique<FileTraceReader>(argv[2]);

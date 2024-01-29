@@ -7,6 +7,7 @@
 #include "MemoryTypes/Simple/Rank/SimpleRank.h"
 #include "MemoryTypes/Simple/SubArray/SimpleSubArray.h"
 #include "MemoryTypes/Simple/Timing/Timer/ConfigurableTimer.h"
+#include "MemoryTypes/State/StateSystem.h"
 #include "Utils/ConfigParser.h"
 
 using namespace NVM::Memory;
@@ -64,4 +65,11 @@ NVM::Memory::makeSimpleSystem(const NVM::Simulation::Config& conf) {
     SimpleSystem* system = new SimpleSystem();
     system->addController(makeSimpleController(conf));
     return std::unique_ptr<MemorySystem>(system);
+}
+
+using NVM::State::StateSystem;
+
+std::unique_ptr<MemorySystem>
+NVM::Memory::makeStateSystem(const NVM::Simulation::Config& conf) {
+    return std::make_unique<StateSystem>();
 }
