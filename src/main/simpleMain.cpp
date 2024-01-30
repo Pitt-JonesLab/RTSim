@@ -5,6 +5,7 @@
 #include "Simulation/TraceReader/FileTraceReader.h"
 #include "Simulation/TraceSimulator.h"
 #include "src/old/NVMTypes.h"
+#include "Utils/ConfigParser.h"
 
 #include <iostream>
 #include <memory>
@@ -22,31 +23,39 @@ ncycle_t getMaxCycles(char* arg) {
 }
 
 void setAddressScheme(const NVM::Simulation::Config& conf) {
+    ConfigParser parser;
     ComponentCounts counts;
 
-    counts.rows = conf.get<int>("DBCS");
-    counts.cols = conf.get<int>("DOMAINS");
-    counts.ranks = conf.get<int>("RANKS");
-    counts.banks = conf.get<int>("BANKS");
-    counts.channels = conf.get<int>("CHANNELS");
+    parser.registerValue<unsigned int>("DBCS", 64, &counts.rows);
+    parser.registerValue<unsigned int>("DOMAINS", 512, &counts.cols);
+    parser.registerValue<unsigned int>("RANKS", 1, &counts.ranks);
+    parser.registerValue<unsigned int>("BANKS", 1, &counts.banks);
+    parser.registerValue<unsigned int>("CHANNELS", 1, &counts.channels);
 
-    setScheme(conf.get<std::string>("AddressMappingScheme"), counts);
+    std::string addressScheme;
+    parser.registerValue<std::string>("AddressMappingScheme", "RK:BK:CH:R:C",
+                                      &addressScheme);
+
+    parser.parse(conf);
+
+    setScheme(addressScheme, counts);
 }
 
 void setLogLevel(const NVM::Simulation::Config& conf) {
-    try {
-        auto logLevel = conf.get<std::string>("LogLevel");
+    ConfigParser parser;
+    std::string logLevel;
+    parser.registerValue<std::string>("LogLevel", "STAT", &logLevel);
+    parser.parse(conf);
 
-        if (logLevel == "DEBUG") {
-            log().setGlobalLevel(LogLevel::DEBUG);
-        } else if (logLevel == "EVENT") {
-            log().setGlobalLevel(LogLevel::EVENT);
-        } else if (logLevel == "STAT") {
-            log().setGlobalLevel(LogLevel::STAT);
-        } else if (logLevel == "ERROR") {
-            log().setGlobalLevel(LogLevel::ERROR);
-        }
-    } catch (...) {
+    if (logLevel == "DEBUG") {
+        log().setGlobalLevel(LogLevel::DEBUG);
+    } else if (logLevel == "EVENT") {
+        log().setGlobalLevel(LogLevel::EVENT);
+    } else if (logLevel == "STAT") {
+        log().setGlobalLevel(LogLevel::STAT);
+    } else if (logLevel == "ERROR") {
+        log().setGlobalLevel(LogLevel::ERROR);
+    } else {
         log().setGlobalLevel(LogLevel::STAT);
     }
 }
@@ -74,10 +83,23 @@ int main(int argc, char* argv[]) {
     }
 
     setAddressScheme(conf);
+
     setLogLevel(conf);
+    setAddressScheme(conf);
 
     // Build RTSystem
-    auto memory = makeSimpleSystem(conf);
+    std::unique_ptr<MemorySystem> memory;
+
+    ConfigParser parser;
+    std::string memType;
+    parser.registerValue<std::string>("MemType", "Simple", &memType);
+    parser.parse(conf);
+
+    if (memType == "Simple") {
+        memory = makeSimpleSystem(conf);
+    } else if (memType == "State") {
+        memory = makeStateSystem(conf);
+    }
 
     // Build TraceReader
     auto reader = std::make_unique<FileTraceReader>(argv[2]);
