@@ -32,9 +32,14 @@ def get_opcode(tokens):
             return 'W'
     elif 'SH' in tokens[2]:
         return 'S'
-    elif tokens[2] in {'AND', 'OR', 'XOR', 'COPY'}:
+    elif tokens[2] in {'AND', 'OR', 'XOR', 'COPY', 'PC', 'NOR', 'MULT', 'ADD'}:
         return 'P'
     return '?'
+
+def get_op2(token):
+    if token in {'AND', 'OR', 'XOR'}:
+        return token
+    return 'AND'
 
 def spim_to_rtsim(line):
     tokens = tokenize_trace_line(line)
@@ -43,7 +48,7 @@ def spim_to_rtsim(line):
     if tokens[2] == 'COPY':
         rtsim_tokens.append('RC')
     elif rtsim_tokens[1] == 'P':
-        rtsim_tokens.append(tokens[2])
+        rtsim_tokens.append(get_op2(tokens[2]))
     elif rtsim_tokens[1] == 'S':
         rtsim_tokens.append(tokens[2][2:])
         rtsim_tokens.append('0')
