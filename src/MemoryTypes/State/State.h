@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/State/Commandable.h"
+#include "Stats/StatBlock.h"
 
 #include <memory>
 
@@ -29,6 +30,8 @@ class State : public Commandable {
      *  False otherwise.
      */
     virtual bool finished() const = 0;
+
+    virtual Stats::ValueStatBlock getStats() const = 0;
 };
 
 } // namespace NVM::State

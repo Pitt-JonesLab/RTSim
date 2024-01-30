@@ -2,8 +2,10 @@
 
 #include "MemoryTypes/State/ReadingState.h"
 #include "MemoryTypes/State/WritingState.h"
+#include "Stats/StatBlock.h"
 
 using namespace NVM::State;
+using namespace NVM::Stats;
 
 NVM::State::ClosedState::ClosedState() : State() {}
 
@@ -40,4 +42,8 @@ bool NVM::State::ClosedState::refresh() { return true; }
 
 bool NVM::State::ClosedState::finished() const {
     return nextState != NextState::NONE;
+}
+
+ValueStatBlock NVM::State::ClosedState::getStats() const {
+    return ValueStatBlock();
 }

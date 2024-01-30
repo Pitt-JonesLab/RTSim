@@ -1,8 +1,10 @@
 #include "MemoryTypes/State/ReadingState.h"
 
 #include "MemoryTypes/State/ClosedState.h"
+#include "Stats/StatBlock.h"
 
 using namespace NVM::State;
+using namespace NVM::Stats;
 
 NVM::State::ReadingState::ReadingState() : State(), remainingCycles(5) {}
 
@@ -36,3 +38,10 @@ bool NVM::State::ReadingState::precharge(const Address& address) {
 bool NVM::State::ReadingState::refresh() { return except(); }
 
 bool NVM::State::ReadingState::finished() const { return !remainingCycles; }
+
+ValueStatBlock NVM::State::ReadingState::getStats() const {
+    ValueStatBlock stats;
+    stats.addStat(1, "reads");
+
+    return stats;
+}

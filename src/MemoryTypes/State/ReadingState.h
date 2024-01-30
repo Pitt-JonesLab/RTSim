@@ -44,6 +44,8 @@ class ReadingState : public State {
 
     bool finished() const;
 
+    Stats::ValueStatBlock getStats() const;
+
     private:
     int remainingCycles;
 };

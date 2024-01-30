@@ -2,6 +2,7 @@
 
 #include "MemoryTypes/State/Commandable.h"
 #include "MemoryTypes/State/State.h"
+#include "Stats/StatBlock.h"
 
 namespace NVM::State {
 
@@ -39,8 +40,11 @@ class StateBank : public Commandable {
 
     void cycle();
 
+    NVM::Stats::ValueStatBlock getStats() const;
+
     private:
     std::unique_ptr<State> currentState;
+    NVM::Stats::ValueStatBlock stats;
 };
 
 } // namespace NVM::State

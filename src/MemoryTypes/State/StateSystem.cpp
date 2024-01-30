@@ -28,4 +28,7 @@ void StateSystem::cycle(unsigned int cycles) {
     for (int i = 0; i < cycles; i++) bank.cycle();
 }
 
-void StateSystem::printStats(std::ostream& statStream) {}
+void StateSystem::printStats(std::ostream& statStream) {
+    auto stats = bank.getStats();
+    stats.log(statStream);
+}

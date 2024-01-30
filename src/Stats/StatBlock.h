@@ -86,7 +86,7 @@ class ValueStatValue {
         }
 
         Stat& operator+(Stat& rhs) {
-            value += dynamic_cast<PrintableWrapper<T>>(rhs).value;
+            value += dynamic_cast<PrintableWrapper<T>&>(rhs).value;
             return *this;
         }
 

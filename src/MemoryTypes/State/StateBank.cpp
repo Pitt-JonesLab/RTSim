@@ -41,5 +41,13 @@ bool StateBank::refresh() { return currentState->refresh(); }
 
 void NVM::State::StateBank::cycle() {
     currentState->cycle();
-    if (currentState->finished()) currentState = currentState->getNext();
+    if (currentState->finished()) {
+        auto s = currentState->getStats();
+        stats += s;
+        currentState = currentState->getNext();
+    }
+}
+
+NVM::Stats::ValueStatBlock NVM::State::StateBank::getStats() const {
+    return stats;
 }
