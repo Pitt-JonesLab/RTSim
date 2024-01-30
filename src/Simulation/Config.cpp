@@ -89,3 +89,14 @@ Config NVM::Simulation::readConfig(std::istream& input) {
 
     return conf;
 }
+
+void Config::override(std::string overrideLine) {
+    std::cout << "Got override " << overrideLine << '\n';
+
+    std::string key, value;
+    key = overrideLine.substr(0, overrideLine.find("="));
+    value = overrideLine.substr(overrideLine.find("=") + 1,
+                                overrideLine.size() - overrideLine.find("="));
+
+    setKey(*this, key, value);
+}

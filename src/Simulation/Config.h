@@ -16,6 +16,8 @@ class Config {
 
     template<typename T> void set(std::string key, T value);
 
+    void override(std::string overrideLine);
+
     private:
     std::map<std::string, std::any> values;
 };
