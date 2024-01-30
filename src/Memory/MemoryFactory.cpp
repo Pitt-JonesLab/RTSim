@@ -15,6 +15,8 @@ using namespace NVM::Memory;
 struct SimpleConfigs {
     double pimFaultRate;
     int numTries;
+    int numCorrectableFaults;
+    int wordSize;
 };
 
 std::unique_ptr<SubArray>
@@ -24,10 +26,14 @@ makeSimpleSubArray(const NVM::Simulation::Config& conf) {
     ConfigParser parser;
     parser.registerValue<double>("PIMFaultRate", 0.0, &configs.pimFaultRate);
     parser.registerValue<int>("NumTries", 1, &configs.numTries);
+    parser.registerValue<int>("NumCorrectableFaults", 0,
+                              &configs.numCorrectableFaults);
+    parser.registerValue<int>("WordSize", 64, &configs.wordSize);
 
     parser.parse(conf);
 
-    FaultModel model(configs.pimFaultRate);
+    FaultModel model(configs.pimFaultRate, configs.wordSize,
+                     configs.numCorrectableFaults);
 
     auto timer = std::make_unique<NVM::Timing::ConfigurableTimer>(conf);
     return std::unique_ptr<SubArray>(new SimpleSubArray(

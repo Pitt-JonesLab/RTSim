@@ -4,12 +4,18 @@ namespace NVM::Memory {
 
 class FaultModel {
     public:
-    FaultModel(double faultRate);
+    FaultModel(double faultRate, int wordSize, int numCorrectable);
 
-    bool check() const;
+    /*
+     *   Returns true if a correctable fault occurred, false otherwise
+     */
+    bool check();
+
+    int getUncorrectableFaults() const;
 
     private:
     double faultRate;
+    int numCorrectable, wordSize, numUncorrectable;
 };
 
 } // namespace NVM::Memory
