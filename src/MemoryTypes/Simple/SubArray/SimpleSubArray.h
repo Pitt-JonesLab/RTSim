@@ -31,7 +31,7 @@ class SimpleSubArray : public SubArray {
     unsigned int totalShifts;
     unsigned int rowBufferHits;
     unsigned int numTries;
-    unsigned int numFaults;
+    unsigned int numFaults, numUncorrectableFaults;
 
     double actEnergy, readEnergy, writeEnergy, shiftEnergy;
 

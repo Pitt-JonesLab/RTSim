@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from optparse import OptionParser
+from stat_parse import *
 import subprocess
 import json
 import sys
@@ -12,14 +13,6 @@ parser = OptionParser()
 parser.add_option("-b", "--build", type="string", help="RTSim build to test (e.g., *.fast, *.prof, *.debug)", default="fast")
 
 (options, args) = parser.parse_args()
-
-def find_executable(exec_name):
-    exe_file = "bin" + os.sep + exec_name
-    if not os.path.isfile(exe_file) or not os.access(exe_file, os.X_OK):
-        print("Could not find executable: {}".format(exe_file))
-        print("Exiting...")
-        sys.exit(1)
-    return exe_file
 
 def get_tests():
     json_data = open('test/Tests.json')
