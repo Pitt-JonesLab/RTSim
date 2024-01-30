@@ -37,6 +37,8 @@ class StateBank : public Commandable {
      */
     bool refresh();
 
+    void cycle();
+
     private:
     std::unique_ptr<State> currentState;
 };

@@ -42,7 +42,10 @@ class ReadingState : public State {
      */
     bool refresh();
 
+    bool finished() const;
+
     private:
+    int remainingCycles;
 };
 
 } // namespace NVM::State

@@ -23,6 +23,12 @@ class State : public Commandable {
      *  @return Next State or nullptr if the current State is not complete
      */
     virtual std::unique_ptr<State> getNext() const = 0;
+
+    /*
+     *  Returns true if this State is complete and has a valid next State.
+     *  False otherwise.
+     */
+    virtual bool finished() const = 0;
 };
 
 } // namespace NVM::State

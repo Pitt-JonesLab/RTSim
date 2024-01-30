@@ -24,6 +24,8 @@ bool StateSystem::pim(std::vector<Address> operands, const Address& destAddress,
 
 bool StateSystem::isEmpty() const { return true; }
 
-void StateSystem::cycle(unsigned int cycles) {}
+void StateSystem::cycle(unsigned int cycles) {
+    for (int i = 0; i < cycles; i++) bank.cycle();
+}
 
 void StateSystem::printStats(std::ostream& statStream) {}
