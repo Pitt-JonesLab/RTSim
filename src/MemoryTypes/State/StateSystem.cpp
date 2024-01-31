@@ -4,12 +4,14 @@ using namespace NVM::State;
 using NVM::Address;
 using NVM::RowData;
 
+NVM::State::StateSystem::StateSystem() { bus.setBank(&bank); }
+
 bool StateSystem::read(const Address& address, const RowData& data) {
-    return bank.read(address, data);
+    return bus.read(address, data);
 }
 
 bool StateSystem::write(const Address& address, const RowData& data) {
-    return bank.write(address, data);
+    return bus.write(address, data);
 }
 
 bool StateSystem::rowClone(const Address& srcAddress,
@@ -25,10 +27,11 @@ bool StateSystem::pim(std::vector<Address> operands, const Address& destAddress,
 bool StateSystem::isEmpty() const { return true; }
 
 void StateSystem::cycle(unsigned int cycles) {
-    for (int i = 0; i < cycles; i++) bank.cycle();
+    for (int i = 0; i < cycles; i++) bus.cycle();
 }
 
 void StateSystem::printStats(std::ostream& statStream) {
     auto stats = bank.getStats();
     stats.log(statStream);
+    bus.printCycles();
 }
