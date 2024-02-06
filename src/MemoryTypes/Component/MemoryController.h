@@ -3,6 +3,7 @@
 #include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
+#include "MemoryTypes/Component/MemoryCommand.h"
 
 namespace NVM::ComponentType {
 
@@ -24,6 +25,8 @@ class MemoryController : public Component {
      *  Returns all stat values associated with this Component
      */
     Stats::StatBlock getStats();
+
+    void issue(MemoryCommand command);
 
     void setCommandConnection(Connection<BankCommand>* connection);
 
