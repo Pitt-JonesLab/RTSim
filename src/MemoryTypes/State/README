@@ -1,3 +1,15 @@
 This memory type is for testing out a state machine based simulation.
 
 It is based on DRAM.
+
+1_30_2024
+
+- How should stats be handled?
+
+For now, each state will keep track of its own stats, and the result will be added to the device when switching states. For example, the Reading state adds 1 read to the stats, so it returns a StatBlock containing 1 'read'.
+
+1_31_2024
+
+- How should the bus be handled?
+
+The bus (or buses in general) require 2-way communication. Commands go in, responses come out. The state of the bus at each cycle is crucial to verification. What design pattern allows for 2-way communication across a medium? Mediator. Any device using a bus can simply keep a reference to the bus. If 2 devices try to drive the bus in the same cycle, we can throw an exception.

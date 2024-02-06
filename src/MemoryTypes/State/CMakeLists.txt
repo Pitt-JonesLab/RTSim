@@ -4,7 +4,7 @@ set(STATE_SOURCES
     ReadingState.cpp
     WritingState.cpp
     ClosedState.cpp
-    OpenState.cpp)
+    Bus.cpp)
 
 add_library(RTSim_MemoryType_State ${STATE_SOURCES})
 target_include_directories(RTSim_MemoryType_State PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)

@@ -1,12 +1,15 @@
 #pragma once
 
 #include "Memory/MemorySystem.h"
+#include "MemoryTypes/State/Bus.h"
 #include "MemoryTypes/State/StateBank.h"
 
 namespace NVM::State {
 
 class StateSystem : public Memory::MemorySystem {
     public:
+    StateSystem();
+
     bool read(const Address& address, const RowData& data);
 
     bool write(const Address& address, const RowData& data);
@@ -25,6 +28,7 @@ class StateSystem : public Memory::MemorySystem {
 
     private:
     StateBank bank;
+    Bus bus;
 };
 
 } // namespace NVM::State

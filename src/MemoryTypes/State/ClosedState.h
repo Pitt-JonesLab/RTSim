@@ -41,6 +41,13 @@ class ClosedState : public State {
      */
     bool refresh();
 
+    bool finished() const;
+
+    Stats::ValueStatBlock getStats() const;
+
     private:
+    enum class NextState { NONE, READ, WRITE };
+
+    NextState nextState;
 };
 } // namespace NVM::State
