@@ -15,7 +15,7 @@ namespace NVM::ComponentType {
  */
 template<typename CommandType> class Connection {
     public:
-    Connection() : valid(false){};
+    Connection() : valid(false), currentCommand(CommandType::Opcode::NO_OP){};
 
     /*
      *   Puts a command on the Connection.
