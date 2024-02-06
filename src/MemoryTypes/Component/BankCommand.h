@@ -2,11 +2,11 @@
 
 namespace NVM::ComponentType {
 
-class MemoryCommand {
+class BankCommand {
     public:
     enum class Opcode { NO_OP };
 
-    MemoryCommand(Opcode);
+    BankCommand(Opcode);
 };
 
 } // namespace NVM::ComponentType

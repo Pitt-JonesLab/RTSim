@@ -20,7 +20,7 @@ void NVM::ComponentType::Bank::setResponseConnection(
 }
 
 void NVM::ComponentType::Bank::setCommandConnection(
-    Connection<MemoryCommand>* connection) {
+    Connection<BankCommand>* connection) {
     commandConnection = connection;
 }
 

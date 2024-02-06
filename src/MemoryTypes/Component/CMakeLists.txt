@@ -3,7 +3,7 @@ set(COMPONENT_SOURCES
     Bank.cpp
     Bus.cpp
     MemoryController.cpp
-    MemoryCommand.cpp
+    BankCommand.cpp
     BankResponse.cpp)
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})

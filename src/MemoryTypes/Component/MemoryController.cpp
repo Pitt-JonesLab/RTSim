@@ -14,7 +14,7 @@ NVM::Stats::StatBlock NVM::ComponentType::MemoryController::getStats() {
 }
 
 void NVM::ComponentType::MemoryController::setCommandConnection(
-    Connection<MemoryCommand>* connection) {
+    Connection<BankCommand>* connection) {
     commandConnection = connection;
 }
 

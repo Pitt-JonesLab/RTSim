@@ -1,9 +1,9 @@
 #pragma once
 
+#include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/BankResponse.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
-#include "MemoryTypes/Component/MemoryCommand.h"
 
 namespace NVM::ComponentType {
 
@@ -29,11 +29,11 @@ class Bus : public Component {
     bool busy() const;
 
     Connection<BankResponse>* getResponseConnection();
-    Connection<MemoryCommand>* getCommandConnection();
+    Connection<BankCommand>* getCommandConnection();
 
     private:
     Connection<BankResponse> bankConnection;
-    Connection<MemoryCommand> commandConnection;
+    Connection<BankCommand> commandConnection;
 };
 
 } // namespace NVM::ComponentType

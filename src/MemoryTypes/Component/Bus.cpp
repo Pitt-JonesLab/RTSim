@@ -20,6 +20,6 @@ Connection<BankResponse>* NVM::ComponentType::Bus::getResponseConnection() {
     return &bankConnection;
 }
 
-Connection<MemoryCommand>* NVM::ComponentType::Bus::getCommandConnection() {
+Connection<BankCommand>* NVM::ComponentType::Bus::getCommandConnection() {
     return &commandConnection;
 }
