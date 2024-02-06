@@ -25,6 +25,10 @@ class MemoryController : public Component {
      */
     Stats::StatBlock getStats();
 
+    void setCommandConnection(Connection<MemoryCommand>* connection);
+
+    bool busy() const;
+
     private:
     Connection<MemoryCommand>* commandConnection;
 };

@@ -1,12 +1,17 @@
 #pragma once
 
 #include "Memory/MemorySystem.h"
+#include "MemoryTypes/Component/Bank.h"
+#include "MemoryTypes/Component/Bus.h"
 #include "MemoryTypes/Component/Component.h"
+#include "MemoryTypes/Component/MemoryController.h"
 
 namespace NVM::ComponentType {
 
 class ComponentSystem : public NVM::Memory::MemorySystem, Component {
     public:
+    ComponentSystem();
+
     /*
      *  Processes incoming commands from upstream Components
      */
@@ -34,9 +39,14 @@ class ComponentSystem : public NVM::Memory::MemorySystem, Component {
 
     bool isEmpty() const;
 
-    void cycle(unsigned int cycles = 1);
+    void cycle(unsigned int cycles);
 
     void printStats(std::ostream& statStream);
+
+    private:
+    Bank bank;
+    MemoryController controller;
+    Bus bus;
 };
 
 } // namespace NVM::ComponentType

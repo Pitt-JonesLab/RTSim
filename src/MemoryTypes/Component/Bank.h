@@ -26,6 +26,12 @@ class Bank : public Component {
      */
     Stats::StatBlock getStats();
 
+    void setResponseConnection(Connection<BankResponse>* connection);
+
+    void setCommandConnection(Connection<MemoryCommand>* connection);
+
+    bool busy() const;
+
     private:
     Connection<BankResponse>* responseConnection;
     Connection<MemoryCommand>* commandConnection;

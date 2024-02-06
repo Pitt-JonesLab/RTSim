@@ -26,6 +26,11 @@ class Bus : public Component {
      */
     Stats::StatBlock getStats();
 
+    bool busy() const;
+
+    Connection<BankResponse>* getResponseConnection();
+    Connection<MemoryCommand>* getCommandConnection();
+
     private:
     Connection<BankResponse> bankConnection;
     Connection<MemoryCommand> commandConnection;

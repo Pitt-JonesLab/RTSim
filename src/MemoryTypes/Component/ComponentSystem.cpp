@@ -2,9 +2,23 @@
 
 #include "Stats/StatBlock.h"
 
-void NVM::ComponentType::ComponentSystem::process() {}
+NVM::ComponentType::ComponentSystem::ComponentSystem() {
+    bank.setCommandConnection(bus.getCommandConnection());
+    bank.setResponseConnection(bus.getResponseConnection());
+    controller.setCommandConnection(bus.getCommandConnection());
+}
 
-void NVM::ComponentType::ComponentSystem::cycle() {}
+void NVM::ComponentType::ComponentSystem::process() {
+    bank.process();
+    bus.process();
+    controller.process();
+}
+
+void NVM::ComponentType::ComponentSystem::cycle() {
+    bank.cycle();
+    bus.cycle();
+    controller.cycle();
+}
 
 NVM::Stats::StatBlock NVM::ComponentType::ComponentSystem::getStats() {
     return Stats::StatBlock();
@@ -32,9 +46,13 @@ bool NVM::ComponentType::ComponentSystem::pim(std::vector<Address> operands,
     return true;
 }
 
-bool NVM::ComponentType::ComponentSystem::isEmpty() const { return true; }
+bool NVM::ComponentType::ComponentSystem::isEmpty() const {
+    return !(bank.busy() || bus.busy() || controller.busy());
+}
 
-void NVM::ComponentType::ComponentSystem::cycle(unsigned int cycles) {}
+void NVM::ComponentType::ComponentSystem::cycle(unsigned int cycles) {
+    for (int i = 0; i < cycles; i++) cycle();
+}
 
 void NVM::ComponentType::ComponentSystem::printStats(std::ostream& statStream) {
 

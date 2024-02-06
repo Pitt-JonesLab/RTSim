@@ -13,3 +13,15 @@ void NVM::ComponentType::Bank::cycle() {}
 NVM::Stats::StatBlock NVM::ComponentType::Bank::getStats() {
     return Stats::StatBlock();
 }
+
+void NVM::ComponentType::Bank::setResponseConnection(
+    Connection<BankResponse>* connection) {
+    responseConnection = connection;
+}
+
+void NVM::ComponentType::Bank::setCommandConnection(
+    Connection<MemoryCommand>* connection) {
+    commandConnection = connection;
+}
+
+bool NVM::ComponentType::Bank::busy() const { return false; }

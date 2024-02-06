@@ -12,3 +12,10 @@ void NVM::ComponentType::MemoryController::cycle() {}
 NVM::Stats::StatBlock NVM::ComponentType::MemoryController::getStats() {
     return Stats::StatBlock();
 }
+
+void NVM::ComponentType::MemoryController::setCommandConnection(
+    Connection<MemoryCommand>* connection) {
+    commandConnection = connection;
+}
+
+bool NVM::ComponentType::MemoryController::busy() const { return false; }
