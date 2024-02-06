@@ -99,6 +99,8 @@ int main(int argc, char* argv[]) {
         memory = makeSimpleSystem(conf);
     } else if (memType == "State") {
         memory = makeStateSystem(conf);
+    } else if (memType == "Component") {
+        memory = makeComponentSystem(conf);
     }
 
     // Build TraceReader

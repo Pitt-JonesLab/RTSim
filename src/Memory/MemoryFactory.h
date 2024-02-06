@@ -19,4 +19,7 @@ makeSimpleSystem(const NVM::Simulation::Config& conf);
 std::unique_ptr<MemorySystem>
 makeStateSystem(const NVM::Simulation::Config& conf);
 
+std::unique_ptr<MemorySystem>
+makeComponentSystem(const NVM::Simulation::Config& conf);
+
 } // namespace NVM::Memory

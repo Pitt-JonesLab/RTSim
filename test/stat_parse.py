@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 import subprocess
-import json
 import sys
 import os
+import time
 
 def find_executable(exec_name):
     exe_file = "bin" + os.sep + exec_name
@@ -46,9 +46,12 @@ def start_exec(run_data):
     return subprocess.Popen(command, stdout=subprocess.PIPE)
 
 def run_parallel(runs):
+    print("Running " + str(len(runs)) + " simulations...")
     runs_processes = [start_exec(run) for run in runs]
 
     while any([p.poll() is None for p in runs_processes]):
-        pass
+        sys.stdout.write("\r[{}/{}] simulations complete...".format(sum([p.poll() is not None for p in runs_processes]), len(runs_processes)))
+        time.sleep(1)
+    print()
 
     return [p.communicate()[0].decode() for p in runs_processes]

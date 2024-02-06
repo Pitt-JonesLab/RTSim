@@ -1,5 +1,6 @@
 #include "Memory/MemoryFactory.h"
 
+#include "MemoryTypes/Component/ComponentSystem.h"
 #include "MemoryTypes/Simple/Bank/SimpleBank.h"
 #include "MemoryTypes/Simple/Interconnect/SimpleInterconnect.h"
 #include "MemoryTypes/Simple/MemoryController/SimpleController.h"
@@ -78,4 +79,11 @@ using NVM::State::StateSystem;
 std::unique_ptr<MemorySystem>
 NVM::Memory::makeStateSystem(const NVM::Simulation::Config& conf) {
     return std::make_unique<StateSystem>();
+}
+
+using NVM::ComponentType::ComponentSystem;
+
+std::unique_ptr<MemorySystem>
+NVM::Memory::makeComponentSystem(const NVM::Simulation::Config& conf) {
+    return std::make_unique<ComponentSystem>();
 }
