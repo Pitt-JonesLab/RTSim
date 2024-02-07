@@ -1,5 +1,8 @@
 #pragma once
 
+#include "MemoryTypes/Component/TimingRules.h"
+
+#include <memory>
 #include <stdexcept>
 
 namespace NVM::ComponentType {
@@ -15,17 +18,22 @@ namespace NVM::ComponentType {
  */
 template<typename CommandType> class Connection {
     public:
-    Connection() : valid(false), currentCommand(CommandType::Opcode::NO_OP){};
+    Connection() :
+        valid(false),
+        nextValid(false),
+        currentCommand(CommandType::Opcode::NO_OP),
+        nextCommand(CommandType::Opcode::NO_OP),
+        timingRules(nullptr){};
 
     /*
      *   Puts a command on the Connection.
      *   If there is already a command present, throws an exception.
      */
     void issue(CommandType cmd) {
-        if (valid) throw std::runtime_error("Connection contention!");
-
-        currentCommand = cmd;
-        valid = true;
+        if (nextValid) throw std::runtime_error("Connection contention!");
+        if (timingRules) timingRules->issue(cmd);
+        nextCommand = cmd;
+        nextValid = true;
     }
 
     /*
@@ -40,11 +48,24 @@ template<typename CommandType> class Connection {
     /*
      *   Resets the Connection command.
      */
-    void cycle() { valid = false; }
+    void cycle() {
+        valid = nextValid;
+        currentCommand = nextCommand;
+        nextValid = false;
+        if (timingRules) timingRules->cycle();
+    }
+
+    /*
+     *   Sets the TimingRules object for this Connection.
+     */
+    void setTimingRules(std::unique_ptr<TimingRules<CommandType>>&& rules) {
+        timingRules = rules;
+    }
 
     private:
-    CommandType currentCommand;
-    bool valid;
+    CommandType currentCommand, nextCommand;
+    bool valid, nextValid;
+    std::unique_ptr<TimingRules<CommandType>> timingRules;
 };
 
 } // namespace NVM::ComponentType

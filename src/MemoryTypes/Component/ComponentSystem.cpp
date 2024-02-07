@@ -1,5 +1,6 @@
 #include "MemoryTypes/Component/ComponentSystem.h"
 
+#include "MemoryTypes/Component/MemoryCommand.h"
 #include "Stats/StatBlock.h"
 
 NVM::ComponentType::ComponentSystem::ComponentSystem() {
@@ -15,6 +16,8 @@ void NVM::ComponentType::ComponentSystem::process() {
 }
 
 void NVM::ComponentType::ComponentSystem::cycle() {
+    process();
+
     bank.cycle();
     bus.cycle();
     controller.cycle();
@@ -26,12 +29,12 @@ NVM::Stats::StatBlock NVM::ComponentType::ComponentSystem::getStats() {
 
 bool NVM::ComponentType::ComponentSystem::read(const Address& address,
                                                const RowData& data) {
-    return true;
+    return controller.issue({MemoryCommand::Opcode::READ, address, data});
 }
 
 bool NVM::ComponentType::ComponentSystem::write(const Address& address,
                                                 const RowData& data) {
-    return true;
+    return controller.issue({MemoryCommand::Opcode::WRITE, address, data});
 }
 
 bool NVM::ComponentType::ComponentSystem::rowClone(const Address& srcAddress,

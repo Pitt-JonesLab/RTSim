@@ -26,7 +26,7 @@ class MemoryController : public Component {
      */
     Stats::StatBlock getStats();
 
-    void issue(MemoryCommand command);
+    bool issue(MemoryCommand command);
 
     void setCommandConnection(Connection<BankCommand>* connection);
 
@@ -34,6 +34,10 @@ class MemoryController : public Component {
 
     private:
     Connection<BankCommand>* commandConnection;
+
+    bool working;
+
+    MemoryCommand currentCommand;
 };
 
 } // namespace NVM::ComponentType

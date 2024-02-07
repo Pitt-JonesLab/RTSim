@@ -35,6 +35,8 @@ class Bank : public Component {
     private:
     Connection<BankResponse>* responseConnection;
     Connection<BankCommand>* commandConnection;
+
+    BankCommand currentCommand;
 };
 
 } // namespace NVM::ComponentType

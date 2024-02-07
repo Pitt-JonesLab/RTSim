@@ -8,7 +8,10 @@ NVM::ComponentType::Bus::Bus() {}
 
 void NVM::ComponentType::Bus::process() {}
 
-void NVM::ComponentType::Bus::cycle() {}
+void NVM::ComponentType::Bus::cycle() {
+    bankConnection.cycle();
+    commandConnection.cycle();
+}
 
 NVM::Stats::StatBlock NVM::ComponentType::Bus::getStats() {
     return Stats::StatBlock();
