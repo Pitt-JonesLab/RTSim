@@ -25,7 +25,7 @@ class ComponentSystem : public NVM::Memory::MemorySystem, Component {
     /*
      *  Returns all stat values associated with this Component
      */
-    Stats::StatBlock getStats();
+    Stats::ValueStatBlock getStats(std::string tag);
 
     bool read(const Address& address, const RowData& data);
 

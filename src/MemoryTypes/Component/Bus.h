@@ -24,7 +24,7 @@ class Bus : public Component {
     /*
      *  Returns all stat values associated with this Component
      */
-    Stats::StatBlock getStats();
+    Stats::ValueStatBlock getStats(std::string tag);
 
     bool busy() const;
 

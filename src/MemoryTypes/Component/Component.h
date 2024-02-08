@@ -19,7 +19,7 @@ class Component {
     /*
      *  Returns all stat values associated with this Component
      */
-    virtual Stats::StatBlock getStats() = 0;
+    virtual Stats::ValueStatBlock getStats(std::string tag) = 0;
 };
 
 } // namespace NVM::ComponentType

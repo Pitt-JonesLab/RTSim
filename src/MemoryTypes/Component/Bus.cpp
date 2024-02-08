@@ -17,8 +17,8 @@ void NVM::ComponentType::Bus::cycle() {
     commandConnection.cycle();
 }
 
-NVM::Stats::StatBlock NVM::ComponentType::Bus::getStats() {
-    return Stats::StatBlock();
+NVM::Stats::ValueStatBlock NVM::ComponentType::Bus::getStats(std::string tag) {
+    return Stats::ValueStatBlock();
 }
 
 bool NVM::ComponentType::Bus::busy() const { return false; }

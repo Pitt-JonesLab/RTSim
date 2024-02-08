@@ -82,8 +82,6 @@ int main(int argc, char* argv[]) {
         conf.override(argv[i]);
     }
 
-    setAddressScheme(conf);
-
     setLogLevel(conf);
     setAddressScheme(conf);
 

@@ -2,25 +2,45 @@
 
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/ClosedState.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
+
+#include <stdexcept>
 
 using namespace NVM::ComponentType;
+using namespace NVM::Modeling;
 
 OpenState::OpenState(Connection<BankCommand>* cmd,
-                     Connection<BankResponse>* response) :
-    BankState(cmd, response) {}
+                     Connection<BankResponse>* response, unsigned int r) :
+    BankState(cmd, response),
+    row(r) {}
 
 void OpenState::process() {
     auto busCommand = commandConnection->receive();
 
     switch (busCommand.getOpcode()) {
-        case BankCommand::Opcode::READ:
+        case BankCommand::Opcode::READ: {
+            auto cmdRow = decodeSymbol(AddressSymbol::ROW,
+                                       busCommand.getAddress().getData());
+            if (row != cmdRow)
+                throw std::runtime_error(
+                    "READ command is for a different row!\n");
             Logging::log() << Logging::LogLevel::EVENT
-                           << "Bank received READ command\n";
+                           << "Bank received READ command for row " << row
+                           << " address " << busCommand.getAddress().getData()
+                           << "\n";
             break;
-        case BankCommand::Opcode::WRITE:
+        }
+        case BankCommand::Opcode::WRITE: {
+            auto cmdRow = decodeSymbol(AddressSymbol::ROW,
+                                       busCommand.getAddress().getData());
+            if (row != cmdRow)
+                throw std::runtime_error(
+                    "WRITE command is for a different row!\n");
             Logging::log() << Logging::LogLevel::EVENT
-                           << "Bank received WRITE command\n";
+                           << "Bank received WRITE command for row " << row
+                           << "\n";
             break;
+        }
         case BankCommand::Opcode::ACTIVATE:
             throw std::runtime_error("Cannot activate open bank!\n");
             break;

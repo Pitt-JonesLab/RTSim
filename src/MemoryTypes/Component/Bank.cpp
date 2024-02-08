@@ -21,8 +21,8 @@ void NVM::ComponentType::Bank::cycle() {
     if (nextState) state = std::move(nextState);
 }
 
-NVM::Stats::StatBlock NVM::ComponentType::Bank::getStats() {
-    return Stats::StatBlock();
+NVM::Stats::ValueStatBlock NVM::ComponentType::Bank::getStats(std::string tag) {
+    return Stats::ValueStatBlock();
 }
 
 void NVM::ComponentType::Bank::setResponseConnection(

@@ -4,18 +4,15 @@
 
 namespace NVM::ComponentType {
 
-class OpenState : public BankState {
+class WritingState : public BankState {
     public:
-    OpenState(Connection<BankCommand>* cmd, Connection<BankResponse>* response,
-              unsigned int row);
+    WritingState(Connection<BankCommand>* cmd,
+                 Connection<BankResponse>* response);
 
     void process();
     void cycle();
 
     std::unique_ptr<BankState> nextState();
-
-    private:
-    unsigned int row;
 };
 
 } // namespace NVM::ComponentType

@@ -23,8 +23,14 @@ void NVM::ComponentType::ComponentSystem::cycle() {
     controller.cycle();
 }
 
-NVM::Stats::StatBlock NVM::ComponentType::ComponentSystem::getStats() {
-    return Stats::StatBlock();
+NVM::Stats::ValueStatBlock
+NVM::ComponentType::ComponentSystem::getStats(std::string tag) {
+    Stats::ValueStatBlock systemStats(tag);
+
+    auto controllerStats = controller.getStats(tag + ".channel0");
+
+    systemStats.addChild(controllerStats);
+    return systemStats;
 }
 
 bool NVM::ComponentType::ComponentSystem::read(const Address& address,
@@ -58,5 +64,6 @@ void NVM::ComponentType::ComponentSystem::cycle(unsigned int cycles) {
 }
 
 void NVM::ComponentType::ComponentSystem::printStats(std::ostream& statStream) {
-
+    auto stats = getStats("system");
+    stats.log();
 }

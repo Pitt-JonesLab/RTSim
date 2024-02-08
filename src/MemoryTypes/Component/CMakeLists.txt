@@ -9,7 +9,11 @@ set(COMPONENT_SOURCES
     SimpleBankTimingRules.cpp
     BankState.cpp
     ClosedState.cpp
-    OpenState.cpp)
+    OpenState.cpp
+    ReadingState.cpp
+    WritingState.cpp
+    BankModel.cpp
+    Parser.cpp)
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})
 target_include_directories(RTSim_MemoryType_Component PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)

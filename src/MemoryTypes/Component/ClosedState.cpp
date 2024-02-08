@@ -3,6 +3,9 @@
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/OpenState.h"
+#include "MemoryTypes/Simple/Modeling/Decoder.h"
+
+using namespace NVM::Modeling;
 
 NVM::ComponentType::ClosedState::ClosedState(
     Connection<BankCommand>* cmd, Connection<BankResponse>* response) :
@@ -22,12 +25,16 @@ void NVM::ComponentType::ClosedState::process() {
         case BankCommand::Opcode::PRECHARGE:
             throw std::runtime_error("Cannot precharge closed bank!\n");
             break;
-        case BankCommand::Opcode::ACTIVATE:
+        case BankCommand::Opcode::ACTIVATE: {
+            auto row = decodeSymbol(AddressSymbol::ROW,
+                                    busCommand.getAddress().getData());
             Logging::log() << Logging::LogLevel::EVENT
-                           << "Bank received ACTIVATE command\n";
+                           << "Bank received ACTIVATE command for row " << row
+                           << "\n";
             next = std::make_unique<OpenState>(commandConnection,
-                                               responseConnection);
+                                               responseConnection, row);
             break;
+        }
         default:
             break;
     }

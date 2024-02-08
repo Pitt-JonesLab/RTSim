@@ -86,11 +86,17 @@ void NVM::Stats::ValueStatBlock::log() const {
     for (const auto& val : values) {
         NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
+    for (const auto& child : children) {
+        child.log();
+    }
 }
 
 void NVM::Stats::ValueStatBlock::log(std::ostream& out) const {
     for (const auto& val : values) {
         out << tag << val;
+    }
+    for (const auto& child : children) {
+        child.log(out);
     }
 }
 
@@ -98,4 +104,8 @@ ValueStatBlock& NVM::Stats::ValueStatBlock::operator+=(ValueStatBlock& rhs) {
     for (const auto& val : rhs.values)
         addChildStat(rhs, val.getName(), val.getUnit());
     return *this;
+}
+
+void NVM::Stats::ValueStatBlock::addChild(ValueStatBlock childBlock) {
+    children.push_back(childBlock);
 }

@@ -153,6 +153,7 @@ class ValueStatBlock {
     private:
     std::string tag;
     std::vector<ValueStatValue> values;
+    std::vector<ValueStatBlock> children;
 
     public:
     ValueStatBlock(std::string t = "");
@@ -164,6 +165,7 @@ class ValueStatBlock {
         values.emplace_back(stat, name, unit);
     }
 
+    void addChild(ValueStatBlock childBlock);
     void addChildStat(ValueStatBlock childBlock, std::string name,
                       std::string unit = "");
     void log() const;

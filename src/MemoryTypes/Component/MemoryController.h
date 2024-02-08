@@ -1,9 +1,11 @@
 #pragma once
 
 #include "MemoryTypes/Component/BankCommand.h"
+#include "MemoryTypes/Component/BankModel.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
+#include "MemoryTypes/Component/Parser.h"
 
 #include <queue>
 
@@ -26,7 +28,7 @@ class MemoryController : public Component {
     /*
      *  Returns all stat values associated with this Component
      */
-    Stats::StatBlock getStats();
+    Stats::ValueStatBlock getStats(std::string tag);
 
     bool issue(MemoryCommand command);
 
@@ -38,10 +40,13 @@ class MemoryController : public Component {
     Connection<BankCommand>* commandConnection;
 
     bool issued;
-
-    BankCommand nextCommand;
-
     std::queue<BankCommand> bankQueue;
+
+    Parser parser;
+    BankModel bankModel;
+    MemoryCommand nextCommand;
+
+    unsigned int reads, writes, activates, precharges;
 };
 
 } // namespace NVM::ComponentType
