@@ -1,38 +1,35 @@
 #include "MemoryTypes/Component/MemoryController.h"
 
 #include "Logging/Logging.h"
+#include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
 #include "Stats/StatBlock.h"
 
 NVM::ComponentType::MemoryController::MemoryController() :
     commandConnection(nullptr),
     working(false),
-    currentCommand(MemoryCommand::Opcode::NO_OP) {}
+    currentCommand(MemoryCommand::Opcode::NO_OP),
+    nextCommand(BankCommand::Opcode::NO_OP) {}
 
 void NVM::ComponentType::MemoryController::process() {}
 
 void NVM::ComponentType::MemoryController::cycle() {
-    if (working) {
-        switch (currentCommand.getOpcode()) {
-            case MemoryCommand::Opcode::READ:
+    if (working && commandConnection->validateTiming(nextCommand)) {
+        switch (nextCommand.getOpcode()) {
+            case BankCommand::Opcode::READ:
                 Logging::log() << Logging::LogLevel::EVENT
                                << "MemoryController issuing READ command\n";
-                commandConnection->issue({BankCommand::Opcode::READ,
-                                          currentCommand.getAddress(),
-                                          currentCommand.getData()});
                 break;
-            case MemoryCommand::Opcode::WRITE:
+            case BankCommand::Opcode::WRITE:
                 Logging::log() << Logging::LogLevel::EVENT
                                << "MemoryController issuing WRITE command\n";
-                commandConnection->issue({BankCommand::Opcode::WRITE,
-                                          currentCommand.getAddress(),
-                                          currentCommand.getData()});
                 break;
-            case MemoryCommand::Opcode::NO_OP:
+            default:
                 break;
         }
+        commandConnection->issue(nextCommand);
+        working = false;
     }
-    working = false;
 }
 
 NVM::Stats::StatBlock NVM::ComponentType::MemoryController::getStats() {
@@ -43,6 +40,23 @@ bool NVM::ComponentType::MemoryController::issue(MemoryCommand command) {
     if (working) return false;
     working = true;
     currentCommand = command;
+    switch (currentCommand.getOpcode()) {
+        case MemoryCommand::Opcode::NO_OP:
+            nextCommand = {BankCommand::Opcode::NO_OP,
+                           currentCommand.getAddress(),
+                           currentCommand.getData()};
+            break;
+        case MemoryCommand::Opcode::READ:
+            nextCommand = {BankCommand::Opcode::READ,
+                           currentCommand.getAddress(),
+                           currentCommand.getData()};
+            break;
+        case MemoryCommand::Opcode::WRITE:
+            nextCommand = {BankCommand::Opcode::READ,
+                           currentCommand.getAddress(),
+                           currentCommand.getData()};
+            break;
+    }
     return true;
 }
 

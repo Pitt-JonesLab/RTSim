@@ -1,10 +1,14 @@
 #include "MemoryTypes/Component/Bus.h"
 
+#include "MemoryTypes/Component/SimpleBankTimingRules.h"
 #include "Stats/StatBlock.h"
 
 using namespace NVM::ComponentType;
 
-NVM::ComponentType::Bus::Bus() {}
+NVM::ComponentType::Bus::Bus() {
+    auto rules = std::make_unique<SimpleBankTimingRules>();
+    commandConnection.setTimingRules(std::move(rules));
+}
 
 void NVM::ComponentType::Bus::process() {}
 

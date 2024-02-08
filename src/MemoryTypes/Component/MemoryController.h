@@ -38,6 +38,7 @@ class MemoryController : public Component {
     bool working;
 
     MemoryCommand currentCommand;
+    BankCommand nextCommand;
 };
 
 } // namespace NVM::ComponentType

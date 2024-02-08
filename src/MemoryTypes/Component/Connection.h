@@ -59,7 +59,12 @@ template<typename CommandType> class Connection {
      *   Sets the TimingRules object for this Connection.
      */
     void setTimingRules(std::unique_ptr<TimingRules<CommandType>>&& rules) {
-        timingRules = rules;
+        timingRules = std::move(rules);
+    }
+
+    bool validateTiming(CommandType cmd) {
+        if (!timingRules) return true;
+        return timingRules->validate(cmd);
     }
 
     private:
