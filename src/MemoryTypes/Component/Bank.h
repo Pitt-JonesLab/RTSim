@@ -2,6 +2,7 @@
 
 #include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/BankResponse.h"
+#include "MemoryTypes/Component/BankState.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
 
@@ -37,6 +38,7 @@ class Bank : public Component {
     Connection<BankCommand>* commandConnection;
 
     BankCommand currentCommand;
+    std::unique_ptr<BankState> state;
 };
 
 } // namespace NVM::ComponentType
