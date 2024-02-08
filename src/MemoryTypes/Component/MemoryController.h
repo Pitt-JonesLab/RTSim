@@ -5,6 +5,8 @@
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
 
+#include <queue>
+
 namespace NVM::ComponentType {
 
 class MemoryController : public Component {
@@ -35,10 +37,11 @@ class MemoryController : public Component {
     private:
     Connection<BankCommand>* commandConnection;
 
-    bool working;
+    bool issued;
 
-    MemoryCommand currentCommand;
     BankCommand nextCommand;
+
+    std::queue<BankCommand> bankQueue;
 };
 
 } // namespace NVM::ComponentType

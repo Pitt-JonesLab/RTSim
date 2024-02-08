@@ -7,15 +7,17 @@
 
 NVM::ComponentType::MemoryController::MemoryController() :
     commandConnection(nullptr),
-    working(false),
-    currentCommand(MemoryCommand::Opcode::NO_OP),
-    nextCommand(BankCommand::Opcode::NO_OP) {}
+    issued(false),
+    nextCommand(BankCommand::Opcode::NO_OP) {
+    bankQueue.push({BankCommand::Opcode::ACTIVATE});
+}
 
 void NVM::ComponentType::MemoryController::process() {}
 
 void NVM::ComponentType::MemoryController::cycle() {
-    if (working && commandConnection->validateTiming(nextCommand)) {
-        switch (nextCommand.getOpcode()) {
+    if (bankQueue.size() &&
+        commandConnection->validateTiming(bankQueue.front())) {
+        switch (bankQueue.front().getOpcode()) {
             case BankCommand::Opcode::READ:
                 Logging::log() << Logging::LogLevel::EVENT
                                << "MemoryController issuing READ command\n";
@@ -27,9 +29,11 @@ void NVM::ComponentType::MemoryController::cycle() {
             default:
                 break;
         }
-        commandConnection->issue(nextCommand);
-        working = false;
+        commandConnection->issue(bankQueue.front());
+        bankQueue.pop();
     }
+    if (issued) bankQueue.push(nextCommand);
+    issued = false;
 }
 
 NVM::Stats::StatBlock NVM::ComponentType::MemoryController::getStats() {
@@ -37,26 +41,23 @@ NVM::Stats::StatBlock NVM::ComponentType::MemoryController::getStats() {
 }
 
 bool NVM::ComponentType::MemoryController::issue(MemoryCommand command) {
-    if (working) return false;
-    working = true;
-    currentCommand = command;
-    switch (currentCommand.getOpcode()) {
+    if (bankQueue.size() == 10) return false;
+    switch (command.getOpcode()) {
         case MemoryCommand::Opcode::NO_OP:
-            nextCommand = {BankCommand::Opcode::NO_OP,
-                           currentCommand.getAddress(),
-                           currentCommand.getData()};
+            nextCommand = {BankCommand::Opcode::NO_OP, command.getAddress(),
+                           command.getData()};
             break;
         case MemoryCommand::Opcode::READ:
-            nextCommand = {BankCommand::Opcode::READ,
-                           currentCommand.getAddress(),
-                           currentCommand.getData()};
+            nextCommand = {BankCommand::Opcode::READ, command.getAddress(),
+                           command.getData()};
             break;
         case MemoryCommand::Opcode::WRITE:
-            nextCommand = {BankCommand::Opcode::READ,
-                           currentCommand.getAddress(),
-                           currentCommand.getData()};
+            nextCommand = {BankCommand::Opcode::READ, command.getAddress(),
+                           command.getData()};
             break;
     }
+    issued = true;
+
     return true;
 }
 
@@ -65,4 +66,6 @@ void NVM::ComponentType::MemoryController::setCommandConnection(
     commandConnection = connection;
 }
 
-bool NVM::ComponentType::MemoryController::busy() const { return working; }
+bool NVM::ComponentType::MemoryController::busy() const {
+    return bankQueue.size() || issued;
+}

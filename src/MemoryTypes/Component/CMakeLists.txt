@@ -8,7 +8,8 @@ set(COMPONENT_SOURCES
     MemoryCommand.cpp
     SimpleBankTimingRules.cpp
     BankState.cpp
-    ClosedState.cpp)
+    ClosedState.cpp
+    OpenState.cpp)
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})
 target_include_directories(RTSim_MemoryType_Component PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)

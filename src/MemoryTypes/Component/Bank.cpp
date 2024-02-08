@@ -15,7 +15,11 @@ NVM::ComponentType::Bank::Bank() :
 
 void NVM::ComponentType::Bank::process() { state->process(); }
 
-void NVM::ComponentType::Bank::cycle() { state->cycle(); }
+void NVM::ComponentType::Bank::cycle() {
+    state->cycle();
+    auto nextState = state->nextState();
+    if (nextState) state = std::move(nextState);
+}
 
 NVM::Stats::StatBlock NVM::ComponentType::Bank::getStats() {
     return Stats::StatBlock();

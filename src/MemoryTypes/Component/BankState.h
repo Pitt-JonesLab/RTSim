@@ -18,6 +18,7 @@ class BankState {
     protected:
     Connection<BankCommand>* commandConnection;
     Connection<BankResponse>* responseConnection;
+    std::unique_ptr<BankState> next;
 };
 
 } // namespace NVM::ComponentType
