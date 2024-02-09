@@ -6,6 +6,7 @@
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
 #include "MemoryTypes/Component/Parser.h"
+#include "MemoryTypes/Component/Scheduler.h"
 
 #include <queue>
 
@@ -43,10 +44,9 @@ class MemoryController : public Component {
     std::queue<BankCommand> bankQueue;
 
     Parser parser;
+    Scheduler scheduler;
     BankModel bankModel;
     MemoryCommand nextCommand;
-
-    unsigned int reads, writes, activates, precharges;
 };
 
 } // namespace NVM::ComponentType

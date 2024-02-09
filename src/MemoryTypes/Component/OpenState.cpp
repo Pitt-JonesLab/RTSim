@@ -2,7 +2,10 @@
 
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/ClosedState.h"
+#include "MemoryTypes/Component/ReadingState.h"
+#include "MemoryTypes/Component/WritingState.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
+#include "Stats/StatBlock.h"
 
 #include <stdexcept>
 
@@ -28,6 +31,8 @@ void OpenState::process() {
                            << "Bank received READ command for row " << row
                            << " address " << busCommand.getAddress().getData()
                            << "\n";
+            next = std::make_unique<ReadingState>(commandConnection,
+                                                  responseConnection, row);
             break;
         }
         case BankCommand::Opcode::WRITE: {
@@ -39,6 +44,8 @@ void OpenState::process() {
             Logging::log() << Logging::LogLevel::EVENT
                            << "Bank received WRITE command for row " << row
                            << "\n";
+            next = std::make_unique<WritingState>(commandConnection,
+                                                  responseConnection, row);
             break;
         }
         case BankCommand::Opcode::ACTIVATE:
@@ -49,6 +56,7 @@ void OpenState::process() {
                            << "Bank received PRECHARGE command\n";
             next = std::make_unique<ClosedState>(commandConnection,
                                                  responseConnection);
+            stats.addStat(1, "precharges");
             break;
         default:
             break;
@@ -58,3 +66,9 @@ void OpenState::process() {
 void OpenState::cycle() {}
 
 std::unique_ptr<BankState> OpenState::nextState() { return std::move(next); }
+
+NVM::Stats::ValueStatBlock NVM::ComponentType::OpenState::getStats() {
+    return stats;
+}
+
+bool NVM::ComponentType::OpenState::busy() const { return false; }

@@ -160,6 +160,8 @@ class ValueStatBlock {
 
     ValueStatBlock& operator+=(ValueStatBlock& rhs);
 
+    void setTag(std::string t);
+
     template<typename T>
     void addStat(T stat, std::string name, std::string unit = "") {
         values.emplace_back(stat, name, unit);

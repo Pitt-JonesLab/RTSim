@@ -5,6 +5,7 @@
 #include "MemoryTypes/Component/BankState.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
+#include "Stats/StatBlock.h"
 
 namespace NVM::ComponentType {
 
@@ -39,6 +40,7 @@ class Bank : public Component {
 
     BankCommand currentCommand;
     std::unique_ptr<BankState> state;
+    Stats::ValueStatBlock stats;
 };
 
 } // namespace NVM::ComponentType

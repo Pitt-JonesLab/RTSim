@@ -51,7 +51,6 @@ void StatBlock::log() const {
         NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
     for (const auto& child : children) {
-        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag;
         child.log();
     }
 }
@@ -61,7 +60,6 @@ void StatBlock::log(std::ostream& out) const {
         out << tag << val;
     }
     for (const auto& child : children) {
-        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << '.';
         child.log();
     }
 }
@@ -106,7 +104,7 @@ void NVM::Stats::ValueStatBlock::log(std::string parentTag) const {
         NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
     for (const auto& child : children) {
-        child.log(parentTag);
+        child.log(parentTag + '.' + tag);
     }
 }
 
@@ -115,6 +113,8 @@ ValueStatBlock& NVM::Stats::ValueStatBlock::operator+=(ValueStatBlock& rhs) {
         addChildStat(rhs, val.getName(), val.getUnit());
     return *this;
 }
+
+void NVM::Stats::ValueStatBlock::setTag(std::string t) { tag = t; }
 
 void NVM::Stats::ValueStatBlock::addChild(ValueStatBlock childBlock) {
     children.push_back(childBlock);

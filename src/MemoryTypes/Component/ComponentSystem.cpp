@@ -28,8 +28,27 @@ NVM::ComponentType::ComponentSystem::getStats(std::string tag) {
     Stats::ValueStatBlock systemStats(tag);
 
     auto controllerStats = controller.getStats("channel0");
+    auto busStats = bus.getStats("i0");
+    auto bankStats = bank.getStats("rank0.bank0");
+
+    busStats.addChild(bankStats);
+    busStats.addChildStat(bankStats, "reads");
+    busStats.addChildStat(bankStats, "writes");
+    busStats.addChildStat(bankStats, "precharges");
+    busStats.addChildStat(bankStats, "activates");
+
+    controllerStats.addChild(busStats);
+    controllerStats.addChildStat(busStats, "reads");
+    controllerStats.addChildStat(busStats, "writes");
+    controllerStats.addChildStat(busStats, "precharges");
+    controllerStats.addChildStat(busStats, "activates");
 
     systemStats.addChild(controllerStats);
+    systemStats.addChildStat(controllerStats, "reads");
+    systemStats.addChildStat(controllerStats, "writes");
+    systemStats.addChildStat(controllerStats, "activates");
+    systemStats.addChildStat(controllerStats, "precharges");
+
     return systemStats;
 }
 

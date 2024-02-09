@@ -7,6 +7,8 @@ class BankResponse {
     enum class Opcode { NO_OP };
 
     BankResponse(Opcode);
+
+    Opcode getOpcode() const;
 };
 
 } // namespace NVM::ComponentType

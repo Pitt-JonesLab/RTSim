@@ -67,6 +67,13 @@ template<typename CommandType> class Connection {
         return timingRules->validate(cmd);
     }
 
+    bool busy() const {
+        return (currentCommand.getOpcode() != CommandType::Opcode::NO_OP &&
+                valid) ||
+               (nextCommand.getOpcode() != CommandType::Opcode::NO_OP &&
+                nextValid);
+    }
+
     private:
     CommandType currentCommand, nextCommand;
     bool valid, nextValid;

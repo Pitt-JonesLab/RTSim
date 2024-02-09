@@ -4,12 +4,17 @@
 #include "MemoryTypes/Component/BankCommand.h"
 #include "MemoryTypes/Component/OpenState.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
+#include "Stats/StatBlock.h"
 
 using namespace NVM::Modeling;
 
 NVM::ComponentType::ClosedState::ClosedState(
     Connection<BankCommand>* cmd, Connection<BankResponse>* response) :
     BankState(cmd, response) {}
+
+NVM::Stats::ValueStatBlock NVM::ComponentType::ClosedState::getStats() {
+    return stats;
+}
 
 void NVM::ComponentType::ClosedState::process() {
     auto busCommand = commandConnection->receive();
@@ -33,6 +38,7 @@ void NVM::ComponentType::ClosedState::process() {
                            << "\n";
             next = std::make_unique<OpenState>(commandConnection,
                                                responseConnection, row);
+            stats.addStat(1, "activates");
             break;
         }
         default:
@@ -46,3 +52,5 @@ std::unique_ptr<NVM::ComponentType::BankState>
 NVM::ComponentType::ClosedState::nextState() {
     return std::move(next);
 }
+
+bool NVM::ComponentType::ClosedState::busy() const { return false; }

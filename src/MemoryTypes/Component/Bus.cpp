@@ -18,10 +18,12 @@ void NVM::ComponentType::Bus::cycle() {
 }
 
 NVM::Stats::ValueStatBlock NVM::ComponentType::Bus::getStats(std::string tag) {
-    return Stats::ValueStatBlock();
+    return Stats::ValueStatBlock(tag);
 }
 
-bool NVM::ComponentType::Bus::busy() const { return false; }
+bool NVM::ComponentType::Bus::busy() const {
+    return commandConnection.busy() || bankConnection.busy();
+}
 
 Connection<BankResponse>* NVM::ComponentType::Bus::getResponseConnection() {
     return &bankConnection;

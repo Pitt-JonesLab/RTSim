@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/Component/BankState.h"
+#include "Stats/StatBlock.h"
 
 namespace NVM::ComponentType {
 
@@ -9,10 +10,17 @@ class ClosedState : public BankState {
     ClosedState(Connection<BankCommand>* cmd,
                 Connection<BankResponse>* response);
 
+    NVM::Stats::ValueStatBlock getStats();
+
     void process();
     void cycle();
 
     std::unique_ptr<BankState> nextState();
+
+    bool busy() const;
+
+    private:
+    Stats::ValueStatBlock stats;
 };
 
 } // namespace NVM::ComponentType
