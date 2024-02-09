@@ -169,7 +169,7 @@ class ValueStatBlock {
     void addChildStat(ValueStatBlock childBlock, std::string name,
                       std::string unit = "");
     void log() const;
-    void log(std::ostream& out) const;
+    void log(std::string parentTag) const;
 };
 
 std::ostream& operator<<(std::ostream&, const StatValue&);

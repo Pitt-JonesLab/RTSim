@@ -32,6 +32,6 @@ void StateSystem::cycle(unsigned int cycles) {
 
 void StateSystem::printStats(std::ostream& statStream) {
     auto stats = bank.getStats();
-    stats.log(statStream);
+    stats.log();
     bus.printCycles();
 }

@@ -27,7 +27,7 @@ NVM::Stats::ValueStatBlock
 NVM::ComponentType::ComponentSystem::getStats(std::string tag) {
     Stats::ValueStatBlock systemStats(tag);
 
-    auto controllerStats = controller.getStats(tag + ".channel0");
+    auto controllerStats = controller.getStats("channel0");
 
     systemStats.addChild(controllerStats);
     return systemStats;

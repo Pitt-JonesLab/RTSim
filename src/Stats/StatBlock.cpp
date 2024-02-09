@@ -50,14 +50,20 @@ void StatBlock::log() const {
     for (const auto& val : values) {
         NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
-    for (const auto& child : children) child.log();
+    for (const auto& child : children) {
+        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag;
+        child.log();
+    }
 }
 
 void StatBlock::log(std::ostream& out) const {
     for (const auto& val : values) {
         out << tag << val;
     }
-    for (const auto& child : children) child.log();
+    for (const auto& child : children) {
+        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << '.';
+        child.log();
+    }
 }
 
 NVM::Stats::ValueStatBlock::ValueStatBlock(std::string t) : tag(t) {}
@@ -87,16 +93,20 @@ void NVM::Stats::ValueStatBlock::log() const {
         NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
     for (const auto& child : children) {
-        child.log();
+        child.log(tag);
     }
 }
 
-void NVM::Stats::ValueStatBlock::log(std::ostream& out) const {
+void NVM::Stats::ValueStatBlock::log(std::string parentTag) const {
     for (const auto& val : values) {
-        out << tag << val;
+        if (parentTag.size()) {
+            NVM::Logging::log()
+                << NVM::Logging::LogLevel::STAT << parentTag << '.';
+        }
+        NVM::Logging::log() << NVM::Logging::LogLevel::STAT << tag << val;
     }
     for (const auto& child : children) {
-        child.log(out);
+        child.log(parentTag);
     }
 }
 
