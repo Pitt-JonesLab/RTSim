@@ -1,6 +1,6 @@
-#include "MemoryTypes/Component/Bus.h"
+#include "MemoryTypes/Component/Bus/Bus.h"
 
-#include "MemoryTypes/Component/SimpleBankTimingRules.h"
+#include "MemoryTypes/Component/Bus/SimpleBankTimingRules.h"
 #include "Stats/StatBlock.h"
 
 using namespace NVM::ComponentType;

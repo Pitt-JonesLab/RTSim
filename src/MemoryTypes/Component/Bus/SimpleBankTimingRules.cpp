@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/SimpleBankTimingRules.h"
+#include "MemoryTypes/Component/Bus/SimpleBankTimingRules.h"
 
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/Bank/BankCommand.h"

@@ -2,7 +2,7 @@
 
 #include "Memory/MemorySystem.h"
 #include "MemoryTypes/Component/Bank/Bank.h"
-#include "MemoryTypes/Component/Bus.h"
+#include "MemoryTypes/Component/Bus/Bus.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Controller/MemoryController.h"
 
