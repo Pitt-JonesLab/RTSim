@@ -14,19 +14,11 @@ class BankState : public State<std::monostate> {
     public:
     BankState(Connection<BankCommand>* cmd, Connection<BankResponse>* response);
 
-    virtual void process() = 0;
-    virtual void cycle() = 0;
-
-    virtual std::unique_ptr<BankState> nextState() = 0;
-
-    virtual NVM::Stats::ValueStatBlock getStats() = 0;
-
     virtual bool busy() const = 0;
 
     protected:
     Connection<BankCommand>* commandConnection;
     Connection<BankResponse>* responseConnection;
-    std::unique_ptr<BankState> next;
 };
 
 } // namespace NVM::ComponentType

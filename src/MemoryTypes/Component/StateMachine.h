@@ -1,12 +1,14 @@
 #pragma once
 
+#include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/State.h"
+#include "Stats/StatBlock.h"
 
 #include <memory>
 
 namespace NVM::ComponentType {
 
-class StateMachine {
+class StateMachine : public Component {
     public:
     StateMachine(std::unique_ptr<StateWrapper> firstState) :
         state(std::move(firstState)) {}
@@ -16,11 +18,23 @@ class StateMachine {
     void cycle() {
         state->cycle();
         auto nextState = state->getNext();
-        if (nextState) state = std::move(nextState);
+        if (nextState) {
+            auto s = state->getStats();
+            stats += s;
+            state = std::move(nextState);
+        }
     }
 
-    private:
+    Stats::ValueStatBlock getStats(std::string tag) {
+        auto s = state->getStats();
+        stats += s;
+        stats.setTag(tag);
+        return stats;
+    }
+
+    protected:
     std::unique_ptr<StateWrapper> state;
+    Stats::ValueStatBlock stats;
 };
 
 } // namespace NVM::ComponentType

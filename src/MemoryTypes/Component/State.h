@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Stats/StatBlock.h"
+
 #include <memory>
 
 namespace NVM::ComponentType {
@@ -9,6 +11,10 @@ class StateWrapper {
     virtual void process() = 0;
     virtual void cycle() = 0;
     virtual std::unique_ptr<StateWrapper> getNext() = 0;
+
+    virtual NVM::Stats::ValueStatBlock getStats() = 0;
+
+    virtual bool busy() const = 0;
 };
 
 template<typename StateInfo> class State : public StateWrapper {

@@ -16,8 +16,6 @@ class ReadingState : public BankState {
 
     NVM::Stats::ValueStatBlock getStats();
 
-    std::unique_ptr<BankState> nextState();
-
     private:
     int delay;
     unsigned int row;

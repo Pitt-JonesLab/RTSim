@@ -13,8 +13,6 @@ class OpenState : public BankState {
     void process();
     void cycle();
 
-    std::unique_ptr<BankState> nextState();
-
     NVM::Stats::ValueStatBlock getStats();
 
     bool busy() const;

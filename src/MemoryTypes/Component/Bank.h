@@ -10,24 +10,9 @@
 
 namespace NVM::ComponentType {
 
-class Bank : public Component, StateMachine {
+class Bank : public StateMachine {
     public:
     Bank();
-
-    /*
-     *  Processes incoming commands from upstream Components
-     */
-    void process();
-
-    /*
-     *  Sends outgoing commands to downstream Components
-     */
-    void cycle();
-
-    /*
-     *  Returns all stat values associated with this Component
-     */
-    Stats::ValueStatBlock getStats(std::string tag);
 
     void setResponseConnection(Connection<BankResponse>* connection);
 
@@ -38,10 +23,6 @@ class Bank : public Component, StateMachine {
     private:
     Connection<BankResponse>* responseConnection;
     Connection<BankCommand>* commandConnection;
-
-    BankCommand currentCommand;
-    std::unique_ptr<BankState> state;
-    Stats::ValueStatBlock stats;
 };
 
 } // namespace NVM::ComponentType

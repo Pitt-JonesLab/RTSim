@@ -14,8 +14,6 @@ class WritingState : public BankState {
 
     bool busy() const;
 
-    std::unique_ptr<BankState> nextState();
-
     NVM::Stats::ValueStatBlock getStats();
 
     private:

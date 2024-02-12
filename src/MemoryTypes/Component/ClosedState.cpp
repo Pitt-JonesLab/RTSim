@@ -36,8 +36,8 @@ void NVM::ComponentType::ClosedState::process() {
             Logging::log() << Logging::LogLevel::EVENT
                            << "Bank received ACTIVATE command for row " << row
                            << "\n";
-            next = std::make_unique<OpenState>(commandConnection,
-                                               responseConnection, row);
+            nextState = std::make_unique<OpenState>(commandConnection,
+                                                    responseConnection, row);
             stats.addStat(1, "activates");
             break;
         }
@@ -47,10 +47,5 @@ void NVM::ComponentType::ClosedState::process() {
 }
 
 void NVM::ComponentType::ClosedState::cycle() {}
-
-std::unique_ptr<NVM::ComponentType::BankState>
-NVM::ComponentType::ClosedState::nextState() {
-    return std::move(next);
-}
 
 bool NVM::ComponentType::ClosedState::busy() const { return false; }

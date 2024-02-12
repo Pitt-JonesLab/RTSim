@@ -14,17 +14,13 @@ NVM::ComponentType::WritingState::WritingState(
 
 void NVM::ComponentType::WritingState::process() {
     if (!delay)
-        next = std::make_unique<OpenState>(commandConnection,
-                                           responseConnection, row);
+        nextState = std::make_unique<OpenState>(commandConnection,
+                                                responseConnection, row);
 }
 
 void NVM::ComponentType::WritingState::cycle() { delay--; }
 
 bool NVM::ComponentType::WritingState::busy() const { return true; }
-
-std::unique_ptr<BankState> NVM::ComponentType::WritingState::nextState() {
-    return std::move(next);
-}
 
 NVM::Stats::ValueStatBlock NVM::ComponentType::WritingState::getStats() {
     Stats::ValueStatBlock stats;

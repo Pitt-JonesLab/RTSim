@@ -14,8 +14,8 @@ NVM::ComponentType::ReadingState::ReadingState(
 
 void NVM::ComponentType::ReadingState::process() {
     if (!delay)
-        next = std::make_unique<OpenState>(commandConnection,
-                                           responseConnection, row);
+        nextState = std::make_unique<OpenState>(commandConnection,
+                                                responseConnection, row);
 }
 
 void NVM::ComponentType::ReadingState::cycle() { delay--; }
@@ -26,8 +26,4 @@ NVM::Stats::ValueStatBlock NVM::ComponentType::ReadingState::getStats() {
     Stats::ValueStatBlock stats;
     stats.addStat(1, "reads");
     return stats;
-}
-
-std::unique_ptr<BankState> NVM::ComponentType::ReadingState::nextState() {
-    return std::move(next);
 }

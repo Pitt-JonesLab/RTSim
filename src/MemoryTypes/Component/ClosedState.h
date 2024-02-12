@@ -15,8 +15,6 @@ class ClosedState : public BankState {
     void process();
     void cycle();
 
-    std::unique_ptr<BankState> nextState();
-
     bool busy() const;
 
     private:
