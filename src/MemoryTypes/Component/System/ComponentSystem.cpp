@@ -1,6 +1,6 @@
-#include "MemoryTypes/Component/ComponentSystem.h"
+#include "MemoryTypes/Component/System/ComponentSystem.h"
 
-#include "MemoryTypes/Component/MemoryCommand.h"
+#include "MemoryTypes/Component/System/MemoryCommand.h"
 #include "Stats/StatBlock.h"
 
 NVM::ComponentType::ComponentSystem::ComponentSystem() {

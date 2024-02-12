@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/MemoryCommand.h"
+#include "MemoryTypes/Component/System/MemoryCommand.h"
 
 using namespace NVM::ComponentType;
 using NVM::Address;

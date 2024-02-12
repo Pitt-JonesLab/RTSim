@@ -13,8 +13,8 @@ set(COMPONENT_SOURCES
     Controller/Parser.cpp
     Controller/Scheduler.cpp
     Controller/MemoryController.cpp
-    ComponentSystem.cpp
-    MemoryCommand.cpp
+    System/ComponentSystem.cpp
+    System/MemoryCommand.cpp
     )
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})

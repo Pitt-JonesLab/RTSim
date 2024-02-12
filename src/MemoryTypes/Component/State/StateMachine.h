@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/Component/Component.h"
-#include "MemoryTypes/Component/State.h"
+#include "MemoryTypes/Component/State/State.h"
 #include "Stats/StatBlock.h"
 
 #include <memory>

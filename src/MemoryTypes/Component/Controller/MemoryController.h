@@ -6,7 +6,7 @@
 #include "MemoryTypes/Component/Controller/BankModel.h"
 #include "MemoryTypes/Component/Controller/Parser.h"
 #include "MemoryTypes/Component/Controller/Scheduler.h"
-#include "MemoryTypes/Component/MemoryCommand.h"
+#include "MemoryTypes/Component/System/MemoryCommand.h"
 
 #include <queue>
 

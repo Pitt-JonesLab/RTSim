@@ -1,6 +1,6 @@
 #include "Memory/MemoryFactory.h"
 
-#include "MemoryTypes/Component/ComponentSystem.h"
+#include "MemoryTypes/Component/System/ComponentSystem.h"
 #include "MemoryTypes/Simple/Bank/SimpleBank.h"
 #include "MemoryTypes/Simple/Interconnect/SimpleInterconnect.h"
 #include "MemoryTypes/Simple/MemoryController/SimpleController.h"

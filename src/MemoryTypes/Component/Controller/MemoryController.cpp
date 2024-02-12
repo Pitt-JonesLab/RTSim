@@ -3,7 +3,7 @@
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/Controller/Scheduler.h"
-#include "MemoryTypes/Component/MemoryCommand.h"
+#include "MemoryTypes/Component/System/MemoryCommand.h"
 #include "Stats/StatBlock.h"
 
 NVM::ComponentType::MemoryController::MemoryController() :
