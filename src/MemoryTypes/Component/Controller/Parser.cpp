@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/Parser.h"
+#include "MemoryTypes/Component/Controller/Parser.h"
 
 #include "MemoryTypes/Component/MemoryCommand.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"

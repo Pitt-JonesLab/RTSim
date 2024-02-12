@@ -1,12 +1,12 @@
 #pragma once
 
 #include "MemoryTypes/Component/Bank/BankCommand.h"
-#include "MemoryTypes/Component/BankModel.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
+#include "MemoryTypes/Component/Controller/BankModel.h"
+#include "MemoryTypes/Component/Controller/Parser.h"
+#include "MemoryTypes/Component/Controller/Scheduler.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
-#include "MemoryTypes/Component/Parser.h"
-#include "MemoryTypes/Component/Scheduler.h"
 
 #include <queue>
 

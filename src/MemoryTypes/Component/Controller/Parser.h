@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/Component/Bank/BankCommand.h"
-#include "MemoryTypes/Component/BankModel.h"
+#include "MemoryTypes/Component/Controller/BankModel.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
 
 #include <vector>

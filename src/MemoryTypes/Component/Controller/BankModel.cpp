@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/BankModel.h"
+#include "MemoryTypes/Component/Controller/BankModel.h"
 
 NVM::ComponentType::BankModel::BankModel() : openRow(-1) {}
 

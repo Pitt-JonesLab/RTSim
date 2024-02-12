@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/Scheduler.h"
+#include "MemoryTypes/Component/Controller/Scheduler.h"
 
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
 

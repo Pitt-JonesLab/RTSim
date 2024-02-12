@@ -7,14 +7,14 @@ set(COMPONENT_SOURCES
     Bank/OpenState.cpp
     Bank/ReadingState.cpp
     Bank/WritingState.cpp
+    Controller/BankModel.cpp
+    Controller/Parser.cpp
+    Controller/Scheduler.cpp
+    Controller/MemoryController.cpp
     ComponentSystem.cpp
     Bus.cpp
-    MemoryController.cpp
     MemoryCommand.cpp
-    SimpleBankTimingRules.cpp
-    BankModel.cpp
-    Parser.cpp
-    Scheduler.cpp)
+    SimpleBankTimingRules.cpp)
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})
 target_include_directories(RTSim_MemoryType_Component PUBLIC ${RTSIM_DIR}/include PRIVATE ${RTSIM_DIR}/src)

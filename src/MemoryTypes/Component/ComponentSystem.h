@@ -4,7 +4,7 @@
 #include "MemoryTypes/Component/Bank/Bank.h"
 #include "MemoryTypes/Component/Bus.h"
 #include "MemoryTypes/Component/Component.h"
-#include "MemoryTypes/Component/MemoryController.h"
+#include "MemoryTypes/Component/Controller/MemoryController.h"
 
 namespace NVM::ComponentType {
 
