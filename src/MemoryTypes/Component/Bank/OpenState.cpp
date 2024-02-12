@@ -1,9 +1,9 @@
-#include "OpenState.h"
+#include "MemoryTypes/Component/Bank/OpenState.h"
 
 #include "Logging/Logging.h"
-#include "MemoryTypes/Component/ClosedState.h"
-#include "MemoryTypes/Component/ReadingState.h"
-#include "MemoryTypes/Component/WritingState.h"
+#include "MemoryTypes/Component/Bank/ClosedState.h"
+#include "MemoryTypes/Component/Bank/ReadingState.h"
+#include "MemoryTypes/Component/Bank/WritingState.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
 #include "Stats/StatBlock.h"
 

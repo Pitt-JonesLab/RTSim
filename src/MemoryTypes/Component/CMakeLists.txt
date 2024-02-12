@@ -1,17 +1,17 @@
 set(COMPONENT_SOURCES
+    Bank/Bank.cpp
+    Bank/BankCommand.cpp
+    Bank/BankResponse.cpp
+    Bank/BankState.cpp
+    Bank/ClosedState.cpp
+    Bank/OpenState.cpp
+    Bank/ReadingState.cpp
+    Bank/WritingState.cpp
     ComponentSystem.cpp
-    Bank.cpp
     Bus.cpp
     MemoryController.cpp
-    BankCommand.cpp
-    BankResponse.cpp
     MemoryCommand.cpp
     SimpleBankTimingRules.cpp
-    BankState.cpp
-    ClosedState.cpp
-    OpenState.cpp
-    ReadingState.cpp
-    WritingState.cpp
     BankModel.cpp
     Parser.cpp
     Scheduler.cpp)

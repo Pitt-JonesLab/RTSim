@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
 
 using NVM::Address;
 using NVM::RowData;

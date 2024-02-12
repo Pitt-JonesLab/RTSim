@@ -1,7 +1,7 @@
 #include "MemoryTypes/Component/SimpleBankTimingRules.h"
 
 #include "Logging/Logging.h"
-#include "MemoryTypes/Component/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
 
 using namespace NVM::Logging;
 

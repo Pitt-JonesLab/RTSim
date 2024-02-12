@@ -1,6 +1,6 @@
-#include "MemoryTypes/Component/ReadingState.h"
+#include "MemoryTypes/Component/Bank/ReadingState.h"
 
-#include "MemoryTypes/Component/OpenState.h"
+#include "MemoryTypes/Component/Bank/OpenState.h"
 #include "Stats/StatBlock.h"
 
 using namespace NVM::ComponentType;

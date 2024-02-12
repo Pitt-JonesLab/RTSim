@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MemoryTypes/Component/BankCommand.h"
-#include "MemoryTypes/Component/BankResponse.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankResponse.h"
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/State.h"
 #include "Stats/StatBlock.h"

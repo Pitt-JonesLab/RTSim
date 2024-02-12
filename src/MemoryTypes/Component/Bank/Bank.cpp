@@ -1,8 +1,8 @@
-#include "MemoryTypes/Component/Bank.h"
+#include "MemoryTypes/Component/Bank/Bank.h"
 
 #include "Logging/Logging.h"
-#include "MemoryTypes/Component/BankCommand.h"
-#include "MemoryTypes/Component/ClosedState.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
+#include "MemoryTypes/Component/Bank/ClosedState.h"
 #include "Stats/StatBlock.h"
 
 using namespace NVM::ComponentType;

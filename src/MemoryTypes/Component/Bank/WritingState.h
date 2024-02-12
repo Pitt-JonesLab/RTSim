@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MemoryTypes/Component/BankState.h"
+#include "MemoryTypes/Component/Bank/BankState.h"
 
 namespace NVM::ComponentType {
 

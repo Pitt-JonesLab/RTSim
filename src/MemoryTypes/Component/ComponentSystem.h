@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Memory/MemorySystem.h"
-#include "MemoryTypes/Component/Bank.h"
+#include "MemoryTypes/Component/Bank/Bank.h"
 #include "MemoryTypes/Component/Bus.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/MemoryController.h"

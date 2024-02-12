@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MemoryTypes/Component/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/TimingRules.h"
 
 #include <map>

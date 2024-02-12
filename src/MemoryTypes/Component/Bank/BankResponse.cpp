@@ -1,4 +1,4 @@
-#include "MemoryTypes/Component/BankResponse.h"
+#include "MemoryTypes/Component/Bank/BankResponse.h"
 
 NVM::ComponentType::BankResponse::BankResponse(Opcode) {}
 

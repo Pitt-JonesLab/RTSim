@@ -1,7 +1,7 @@
 #include "MemoryTypes/Component/MemoryController.h"
 
 #include "Logging/Logging.h"
-#include "MemoryTypes/Component/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/MemoryCommand.h"
 #include "MemoryTypes/Component/Scheduler.h"
 #include "Stats/StatBlock.h"
