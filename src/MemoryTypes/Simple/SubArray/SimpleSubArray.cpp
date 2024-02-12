@@ -24,6 +24,7 @@ SimpleSubArray::SimpleSubArray(unsigned int rows,
     totalTWs(0),
     numFaults(0),
     numUncorrectableFaults(0),
+    pimEnergy(0),
     faultModel(faultModel),
     numTries(numTries),
     timer(std::move(timer)) {}
@@ -48,6 +49,8 @@ NVM::Stats::StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&readEnergy, "read_energy", "nJ");
     stats.addStat(&writeEnergy, "write_energy", "nJ");
     stats.addStat(&shiftEnergy, "shift_energy", "nJ");
+    stats.addStat(&pimEnergy, "pim_energy", "nJ");
+    stats.addStat(&totalEnergy, "total_energy", "nJ");
     stats.addStat(&numFaults, "pim_faults");
     stats.addStat(&numUncorrectableFaults, "uncorrectable_faults");
 
@@ -60,6 +63,7 @@ void SimpleSubArray::checkFaults() {
             timer->addFaultDelay({CommandType::PIM, 0});
             totalTRs++;
             numFaults++;
+            pimEnergy += 0.256;
             log() << LogLevel::EVENT << "PIM Fault!\n";
         }
     }
@@ -89,7 +93,7 @@ bool SimpleSubArray::issue(NVM::Command cmd) {
             break;
         case CommandType::PIM:
             totalTRs += numTries;
-            actEnergy += 0.080096;
+            pimEnergy += 0.256 * numTries;
             checkFaults();
             break;
         case CommandType::ACTIVATE:
@@ -99,6 +103,8 @@ bool SimpleSubArray::issue(NVM::Command cmd) {
             totalPrecharges++;
             break;
     }
+    totalEnergy =
+        readEnergy + writeEnergy + actEnergy + shiftEnergy + pimEnergy;
 
     return true;
 }

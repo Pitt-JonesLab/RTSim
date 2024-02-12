@@ -11,7 +11,8 @@ NVM::ComponentType::Bank::Bank() :
     responseConnection(nullptr),
     commandConnection(nullptr),
     currentCommand(BankCommand::Opcode::NO_OP),
-    state(nullptr) {
+    state(nullptr),
+    StateMachine(nullptr) {
     stats.addStat(0, "reads");
     stats.addStat(0, "writes");
     stats.addStat(0, "precharges");

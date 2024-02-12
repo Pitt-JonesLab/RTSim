@@ -4,4 +4,5 @@ NVM::ComponentType::BankState::BankState(Connection<BankCommand>* cmd,
                                          Connection<BankResponse>* response) :
     commandConnection(cmd),
     responseConnection(response),
-    next(nullptr) {}
+    next(nullptr),
+    State({}) {}

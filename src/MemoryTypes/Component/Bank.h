@@ -5,11 +5,12 @@
 #include "MemoryTypes/Component/BankState.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
+#include "MemoryTypes/Component/StateMachine.h"
 #include "Stats/StatBlock.h"
 
 namespace NVM::ComponentType {
 
-class Bank : public Component {
+class Bank : public Component, StateMachine {
     public:
     Bank();
 

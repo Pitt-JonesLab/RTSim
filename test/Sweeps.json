@@ -3,7 +3,7 @@
         {
             "name": "10^-9 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000000001 NumCorrectableFaults=0",
@@ -15,13 +15,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-8 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00000001 NumCorrectableFaults=0",
@@ -33,13 +35,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-7 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0000001 NumCorrectableFaults=0",
@@ -51,13 +55,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-6 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000001 NumCorrectableFaults=0",
@@ -69,13 +75,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-5 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00001 NumCorrectableFaults=0",
@@ -87,13 +95,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-4 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0001 NumCorrectableFaults=0",
@@ -105,13 +115,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-3 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.001 NumCorrectableFaults=0",
@@ -123,13 +135,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-2 No ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.01 NumCorrectableFaults=0",
@@ -141,13 +155,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-9 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000000001 NumCorrectableFaults=1",
@@ -159,13 +175,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-8 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00000001 NumCorrectableFaults=1",
@@ -177,13 +195,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-7 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0000001 NumCorrectableFaults=1",
@@ -195,13 +215,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-6 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000001 NumCorrectableFaults=1",
@@ -213,13 +235,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-5 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00001 NumCorrectableFaults=1",
@@ -231,13 +255,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-4 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0001 NumCorrectableFaults=1",
@@ -249,13 +275,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-3 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.001 NumCorrectableFaults=1",
@@ -267,13 +295,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-2 1-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.01 NumCorrectableFaults=1",
@@ -285,13 +315,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-9 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000000001 NumCorrectableFaults=2",
@@ -303,13 +335,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-8 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00000001 NumCorrectableFaults=2",
@@ -321,13 +355,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-7 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0000001 NumCorrectableFaults=2",
@@ -339,13 +375,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-6 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000001 NumCorrectableFaults=2",
@@ -357,13 +395,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-5 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00001 NumCorrectableFaults=2",
@@ -375,13 +415,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-4 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0001 NumCorrectableFaults=2",
@@ -393,13 +435,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-3 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.001 NumCorrectableFaults=2",
@@ -411,13 +455,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-2 2-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.01 NumCorrectableFaults=2",
@@ -429,13 +475,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-9 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000000001 NumCorrectableFaults=3",
@@ -447,13 +495,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-8 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00000001 NumCorrectableFaults=3",
@@ -465,13 +515,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-7 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0000001 NumCorrectableFaults=3",
@@ -483,13 +535,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-6 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.000001 NumCorrectableFaults=3",
@@ -501,13 +555,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-5 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.00001 NumCorrectableFaults=3",
@@ -519,13 +575,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-4 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.0001 NumCorrectableFaults=3",
@@ -537,13 +595,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-3 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.001 NumCorrectableFaults=3",
@@ -555,13 +615,15 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         },
         {
             "name": "10^-2 3-ECC",
             "exec": "rtsim.fast",
-            "trace": "test/Traces/SPIMulator/MatrixMult.nvt",
+            "trace": "test/Traces/counters/increment_non_predicate.nvt",
             "config": "Config/Simple.config",
             "cycles": "0",
             "overrides": "PIMFaultRate=0.01 NumCorrectableFaults=3",
@@ -573,7 +635,9 @@
                 "system.channel0.i0.rank0.bank0.subArray0.activate_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.read_energy",
                 "system.channel0.i0.rank0.bank0.subArray0.write_energy",
-                "system.channel0.i0.rank0.bank0.subArray0.shift_energy"
+                "system.channel0.i0.rank0.bank0.subArray0.shift_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.pim_energy",
+                "system.channel0.i0.rank0.bank0.subArray0.total_energy"
             ]
         }
     ]
