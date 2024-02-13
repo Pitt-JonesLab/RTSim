@@ -22,7 +22,7 @@ ncycle_t getMaxCycles(char* arg) {
     return 0;
 }
 
-void setAddressScheme(const NVM::Simulation::Config& conf) {
+void setAddressScheme() {
     ComponentCounts counts;
 
     ConfigParser::registerValue<unsigned int>("DBCS", 64, &counts.rows);
@@ -38,7 +38,7 @@ void setAddressScheme(const NVM::Simulation::Config& conf) {
     setScheme(addressScheme, counts);
 }
 
-void setLogLevel(const NVM::Simulation::Config& conf) {
+void setLogLevel() {
     std::string logLevel;
     ConfigParser::registerValue<std::string>("LogLevel", "STAT", &logLevel);
 
@@ -78,8 +78,8 @@ int main(int argc, char* argv[]) {
         conf.override(argv[i]);
     }
 
-    setLogLevel(conf);
-    setAddressScheme(conf);
+    setLogLevel();
+    setAddressScheme();
 
     // Build RTSystem
     std::unique_ptr<MemorySystem> memory;
@@ -88,11 +88,11 @@ int main(int argc, char* argv[]) {
     ConfigParser::registerValue<std::string>("MemType", "Simple", &memType);
 
     if (memType == "Simple") {
-        memory = makeSimpleSystem(conf);
+        memory = makeSimpleSystem();
     } else if (memType == "State") {
-        memory = makeStateSystem(conf);
+        memory = makeStateSystem();
     } else if (memType == "Component") {
-        memory = makeComponentSystem(conf);
+        memory = makeComponentSystem();
     }
 
     // Build TraceReader

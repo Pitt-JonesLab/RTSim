@@ -2,6 +2,7 @@
 
 #include "Memory/MemorySystem.h"
 #include "Simulation/Config.h"
+#include "Utils/ConfigParser.h"
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -12,6 +13,7 @@ TEST_CASE("Makes valid simple system", "[MemoryFactory], [Memory]") {
     conf.set("DBCS", 1);
     conf.set("tACT", 1);
     conf.set("tRP", 1);
-    auto system = makeSimpleSystem(conf);
+    ConfigParser::setConfig(conf);
+    auto system = makeSimpleSystem();
     REQUIRE(system);
 }
