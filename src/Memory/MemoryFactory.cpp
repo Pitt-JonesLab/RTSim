@@ -24,14 +24,12 @@ std::unique_ptr<SubArray>
 makeSimpleSubArray(const NVM::Simulation::Config& conf) {
     SimpleConfigs configs;
 
-    ConfigParser parser;
-    parser.registerValue<double>("PIMFaultRate", 0.0, &configs.pimFaultRate);
-    parser.registerValue<int>("NumTries", 1, &configs.numTries);
-    parser.registerValue<int>("NumCorrectableFaults", 0,
-                              &configs.numCorrectableFaults);
-    parser.registerValue<int>("WordSize", 64, &configs.wordSize);
-
-    parser.parse(conf);
+    ConfigParser::registerValue<double>("PIMFaultRate", 0.0,
+                                        &configs.pimFaultRate);
+    ConfigParser::registerValue<int>("NumTries", 1, &configs.numTries);
+    ConfigParser::registerValue<int>("NumCorrectableFaults", 0,
+                                     &configs.numCorrectableFaults);
+    ConfigParser::registerValue<int>("WordSize", 64, &configs.wordSize);
 
     FaultModel model(configs.pimFaultRate, configs.wordSize,
                      configs.numCorrectableFaults);

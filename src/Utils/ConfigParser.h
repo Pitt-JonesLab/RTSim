@@ -14,14 +14,14 @@ class ConfigParser {
     ConfigParser() {}
 
     template<typename T>
-    void registerValue(std::string key, T defaultValue, T* destination) {
+    static void registerValue(std::string key, T defaultValue, T* destination) {
         using namespace NVM::Logging;
 
         log() << LogLevel::DEBUG << "Registering config value " << key
               << ", default is " << defaultValue << '\n';
 
-        parsers.push_back([key, defaultValue,
-                           destination](const NVM::Simulation::Config& conf) {
+        auto parseFunc = [key, defaultValue,
+                          destination](const NVM::Simulation::Config& conf) {
             try {
                 *destination = conf.get<T>(key);
                 log() << LogLevel::STAT << "Read config value " << key << " as "
@@ -31,15 +31,27 @@ class ConfigParser {
                       << key << " (" << defaultValue << ")\n";
                 *destination = defaultValue;
             }
-        });
+        };
+
+        if (hasConfig) {
+            parseFunc(config);
+        } else {
+            parsers.push_back(parseFunc);
+        }
     }
 
-    void parse(const NVM::Simulation::Config& conf) {
+    static void setConfig(const NVM::Simulation::Config& conf) {
+        config = conf;
         for (auto p : parsers) p(conf);
+        hasConfig = true;
     }
 
     private:
-    std::vector<std::function<void(const NVM::Simulation::Config&)>> parsers;
+    static std::vector<std::function<void(const NVM::Simulation::Config&)>>
+        parsers;
+
+    static NVM::Simulation::Config config;
+    static bool hasConfig;
 };
 
 } // namespace NVM::Memory

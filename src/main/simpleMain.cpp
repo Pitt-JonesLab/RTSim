@@ -23,29 +23,24 @@ ncycle_t getMaxCycles(char* arg) {
 }
 
 void setAddressScheme(const NVM::Simulation::Config& conf) {
-    ConfigParser parser;
     ComponentCounts counts;
 
-    parser.registerValue<unsigned int>("DBCS", 64, &counts.rows);
-    parser.registerValue<unsigned int>("DOMAINS", 512, &counts.cols);
-    parser.registerValue<unsigned int>("RANKS", 1, &counts.ranks);
-    parser.registerValue<unsigned int>("BANKS", 1, &counts.banks);
-    parser.registerValue<unsigned int>("CHANNELS", 1, &counts.channels);
+    ConfigParser::registerValue<unsigned int>("DBCS", 64, &counts.rows);
+    ConfigParser::registerValue<unsigned int>("DOMAINS", 512, &counts.cols);
+    ConfigParser::registerValue<unsigned int>("RANKS", 1, &counts.ranks);
+    ConfigParser::registerValue<unsigned int>("BANKS", 1, &counts.banks);
+    ConfigParser::registerValue<unsigned int>("CHANNELS", 1, &counts.channels);
 
     std::string addressScheme;
-    parser.registerValue<std::string>("AddressMappingScheme", "RK:BK:CH:R:C",
-                                      &addressScheme);
-
-    parser.parse(conf);
+    ConfigParser::registerValue<std::string>("AddressMappingScheme",
+                                             "RK:BK:CH:R:C", &addressScheme);
 
     setScheme(addressScheme, counts);
 }
 
 void setLogLevel(const NVM::Simulation::Config& conf) {
-    ConfigParser parser;
     std::string logLevel;
-    parser.registerValue<std::string>("LogLevel", "STAT", &logLevel);
-    parser.parse(conf);
+    ConfigParser::registerValue<std::string>("LogLevel", "STAT", &logLevel);
 
     if (logLevel == "DEBUG") {
         log().setGlobalLevel(LogLevel::DEBUG);
@@ -77,6 +72,7 @@ int main(int argc, char* argv[]) {
     ncycle_t simulateCycles = getMaxCycles((argc > 3) ? argv[3] : nullptr);
 
     NVM::Simulation::Config conf = readConfig(argv[1]);
+    ConfigParser::setConfig(conf);
 
     for (int i = 4; i < argc; i++) {
         conf.override(argv[i]);
@@ -88,10 +84,8 @@ int main(int argc, char* argv[]) {
     // Build RTSystem
     std::unique_ptr<MemorySystem> memory;
 
-    ConfigParser parser;
     std::string memType;
-    parser.registerValue<std::string>("MemType", "Simple", &memType);
-    parser.parse(conf);
+    ConfigParser::registerValue<std::string>("MemType", "Simple", &memType);
 
     if (memType == "Simple") {
         memory = makeSimpleSystem(conf);
