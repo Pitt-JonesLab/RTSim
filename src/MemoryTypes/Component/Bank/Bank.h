@@ -2,6 +2,7 @@
 
 #include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/Bank/BankResponse.h"
+#include "MemoryTypes/Component/Bank/FaultModel.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/State/StateMachine.h"
@@ -18,6 +19,7 @@ struct BankInfo {
     Connection<BankResponse>* responseConnection;
     Connection<BankCommand>* commandConnection;
     EnergyCosts energyCosts;
+    FaultModel faultModel;
 };
 
 class Bank : public StateMachine<BankInfo> {

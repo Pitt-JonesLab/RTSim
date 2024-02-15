@@ -73,6 +73,7 @@ class ValueStatValue {
         virtual Stat& operator+(Stat& rhs) = 0;
 
         virtual Stat& operator+(std::variant<int, double> number) = 0;
+        virtual Stat& operator=(std::variant<int, double> number) = 0;
     };
 
     template<typename T> class PrintableWrapper : public Stat {
@@ -96,6 +97,11 @@ class ValueStatValue {
 
         Stat& operator+(std::variant<int, double> number) {
             value += std::get<T>(number);
+            return *this;
+        }
+
+        Stat& operator=(std::variant<int, double> number) {
+            value = std::get<T>(number);
             return *this;
         }
 
@@ -136,6 +142,11 @@ class ValueStatValue {
 
     template<typename T> ValueStatValue& operator+=(T rhs) {
         *value = (*value) + rhs;
+        return *this;
+    }
+
+    template<typename T> ValueStatValue& operator=(T rhs) {
+        *value = rhs;
         return *this;
     }
 
@@ -184,6 +195,19 @@ class ValueStatBlock {
 
         if (same_name != values.end()) {
             (*same_name) += stat;
+        } else {
+            values.emplace_back(stat, name, unit);
+        }
+    }
+
+    template<typename T>
+    void setStat(T stat, std::string name, std::string unit = "") {
+        auto same_name = std::find_if(
+            values.begin(), values.end(),
+            [&name](ValueStatValue& value) { return value.getName() == name; });
+
+        if (same_name != values.end()) {
+            (*same_name) = stat;
         } else {
             values.emplace_back(stat, name, unit);
         }

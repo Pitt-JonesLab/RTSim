@@ -14,6 +14,7 @@ set(COMPONENT_SOURCES
     Controller/MemoryController.cpp
     System/ComponentSystem.cpp
     System/MemoryCommand.cpp
+    Bank/FaultModel.cpp
     )
 
 add_library(RTSim_MemoryType_Component ${COMPONENT_SOURCES})

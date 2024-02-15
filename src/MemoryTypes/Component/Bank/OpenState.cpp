@@ -1,6 +1,7 @@
 #include "MemoryTypes/Component/Bank/OpenState.h"
 
 #include "Logging/Logging.h"
+#include "Logging/LogStream.h"
 #include "MemoryTypes/Component/Bank/ClosedState.h"
 #include "MemoryTypes/Component/Bank/ReadingState.h"
 #include "MemoryTypes/Component/Bank/WritingState.h"
@@ -68,6 +69,15 @@ void OpenState::process() {
             stats.addStat(1, "transverse_reads");
             stats.addStat(info.energyCosts.transverseReadEnergy,
                           "transverse_read_energy");
+
+            if (info.faultModel.check()) {
+                stats.addStat(1, "pim_faults");
+
+                // TODO: Reissue TR command
+            }
+            stats.addStat(info.faultModel.getUncorrectableFaults(),
+                          "uncorrectable_pim_faults");
+            info.faultModel.resetUncorrectables();
             break;
         default:
             break;
