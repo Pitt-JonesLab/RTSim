@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -125,6 +126,11 @@ class ValueStatValue {
         return *this;
     }
 
+    template<typename T> ValueStatValue& operator+(T rhs) {
+        *value += rhs;
+        return *this;
+    }
+
     friend std::ostream& operator<<(std::ostream&, const ValueStatValue&);
 };
 
@@ -164,7 +170,15 @@ class ValueStatBlock {
 
     template<typename T>
     void addStat(T stat, std::string name, std::string unit = "") {
-        values.emplace_back(stat, name, unit);
+        auto same_name = std::find_if(
+            values.begin(), values.end(),
+            [&name](ValueStatValue& value) { return value.getName() == name; });
+
+        if (same_name != values.end()) {
+            (*same_name) += stat;
+        } else {
+            values.emplace_back(stat, name, unit);
+        }
     }
 
     void addChild(ValueStatBlock childBlock);
