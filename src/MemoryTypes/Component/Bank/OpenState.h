@@ -20,6 +20,7 @@ class OpenState : public State<BankInfo> {
     unsigned int row;
 
     Stats::ValueStatBlock stats;
+    BankResponse responseCmd;
 };
 
 } // namespace NVM::ComponentType

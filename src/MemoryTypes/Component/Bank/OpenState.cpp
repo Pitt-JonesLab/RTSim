@@ -2,6 +2,8 @@
 
 #include "Logging/Logging.h"
 #include "Logging/LogStream.h"
+#include "MemoryTypes/Component/Bank/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankResponse.h"
 #include "MemoryTypes/Component/Bank/ClosedState.h"
 #include "MemoryTypes/Component/Bank/ReadingState.h"
 #include "MemoryTypes/Component/Bank/WritingState.h"
@@ -15,7 +17,8 @@ using namespace NVM::Modeling;
 
 OpenState::OpenState(BankInfo& i, unsigned int r) :
     State<BankInfo>(i),
-    row(r) {}
+    row(r),
+    responseCmd(BankResponse::Opcode::NO_OP) {}
 
 void OpenState::process() {
     auto busCommand = info.commandConnection->receive();
@@ -71,9 +74,12 @@ void OpenState::process() {
                           "transverse_read_energy");
 
             if (info.faultModel.check()) {
+                Logging::log() << Logging::LogLevel::EVENT
+                               << "TR fault! Bank sending a reiusse response\n";
                 stats.addStat(1, "pim_faults");
-
-                // TODO: Reissue TR command
+                responseCmd =
+                    BankResponse(BankResponse::Opcode::TR_FAILURE,
+                                 busCommand.getAddress(), busCommand.getData());
             }
             stats.addStat(info.faultModel.getUncorrectableFaults(),
                           "uncorrectable_pim_faults");
@@ -84,7 +90,10 @@ void OpenState::process() {
     }
 }
 
-void OpenState::cycle() {}
+void OpenState::cycle() {
+    info.responseConnection->issue(responseCmd);
+    responseCmd = BankResponse(BankResponse::Opcode::NO_OP);
+}
 
 NVM::Stats::ValueStatBlock NVM::ComponentType::OpenState::getStats() {
     return stats;

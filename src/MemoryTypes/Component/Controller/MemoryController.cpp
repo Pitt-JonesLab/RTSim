@@ -2,12 +2,14 @@
 
 #include "Logging/Logging.h"
 #include "MemoryTypes/Component/Bank/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankResponse.h"
 #include "MemoryTypes/Component/Controller/Scheduler.h"
 #include "MemoryTypes/Component/System/MemoryCommand.h"
 #include "Stats/StatBlock.h"
 
 NVM::ComponentType::MemoryController::MemoryController() :
     commandConnection(nullptr),
+    responseConnection(nullptr),
     issued(false),
     nextCommand(MemoryCommand::Opcode::NO_OP),
     bankModel() {}
@@ -19,10 +21,20 @@ void NVM::ComponentType::MemoryController::process() {
         for (auto& cmd : bankCommands) bankQueue.push(cmd);
     }
 
-    if (issued) {
-        scheduler.issue(nextCommand);
+    // Check for TR reissue
+    auto bankResponse = responseConnection->receive();
+    if (bankResponse.getOpcode() == BankResponse::Opcode::TR_FAILURE) {
+        Logging::log() << Logging::LogLevel::EVENT
+                       << "MemoryController received TR_FAILURE response\n";
+        scheduler.issue({MemoryCommand::Opcode::TRANSVERSE_READ,
+                         bankResponse.getAddress(), bankResponse.getData()});
+    } else {
+        // Check for system issue
+        if (issued) {
+            scheduler.issue(nextCommand);
+        }
+        issued = false;
     }
-    issued = false;
 }
 
 void NVM::ComponentType::MemoryController::cycle() {
@@ -72,6 +84,11 @@ bool NVM::ComponentType::MemoryController::issue(MemoryCommand command) {
 void NVM::ComponentType::MemoryController::setCommandConnection(
     Connection<BankCommand>* connection) {
     commandConnection = connection;
+}
+
+void NVM::ComponentType::MemoryController::setResponseConnection(
+    Connection<BankResponse>* connection) {
+    responseConnection = connection;
 }
 
 bool NVM::ComponentType::MemoryController::busy() const {

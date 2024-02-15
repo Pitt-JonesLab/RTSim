@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MemoryTypes/Component/Bank/BankCommand.h"
+#include "MemoryTypes/Component/Bank/BankResponse.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/Controller/BankModel.h"
@@ -34,11 +35,13 @@ class MemoryController : public Component {
     bool issue(MemoryCommand command);
 
     void setCommandConnection(Connection<BankCommand>* connection);
+    void setResponseConnection(Connection<BankResponse>* connection);
 
     bool busy() const;
 
     private:
     Connection<BankCommand>* commandConnection;
+    Connection<BankResponse>* responseConnection;
 
     bool issued;
     std::queue<BankCommand> bankQueue;

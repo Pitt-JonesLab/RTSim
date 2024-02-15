@@ -7,6 +7,7 @@ NVM::ComponentType::ComponentSystem::ComponentSystem() {
     bank.setCommandConnection(bus.getCommandConnection());
     bank.setResponseConnection(bus.getResponseConnection());
     controller.setCommandConnection(bus.getCommandConnection());
+    controller.setResponseConnection(bus.getResponseConnection());
 }
 
 void NVM::ComponentType::ComponentSystem::process() {

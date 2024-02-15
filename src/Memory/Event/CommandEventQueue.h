@@ -13,7 +13,7 @@ template<typename Receiver> class CommandEventQueue {
     using Cmd = std::function<bool(Receiver&)>;
 
     CommandEventQueue(Receiver* receiver) : receiver(receiver) {
-        ConfigParser::registerValue("numTries", 1, &numTries);
+        ConfigParser::registerValue("NumTries", 1, &numTries);
 
         nextCmd = commands.begin();
     }
