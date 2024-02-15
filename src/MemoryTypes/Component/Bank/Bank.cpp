@@ -25,16 +25,16 @@ NVM::ComponentType::Bank::Bank() {
                                 &info.energyCosts.transverseReadEnergy);
 
     stats.addStat(0, "reads");
-    stats.addStat<double>(0.0, "read_energy");
+    stats.addStat<double>(0.0, "read_energy", "nJ");
     stats.addStat(0, "writes");
-    stats.addStat<double>(0.0, "write_energy");
+    stats.addStat<double>(0.0, "write_energy", "nJ");
     stats.addStat(0, "precharges");
     stats.addStat(0, "activates");
-    stats.addStat<double>(0.0, "activate_energy");
+    stats.addStat<double>(0.0, "activate_energy", "nJ");
     stats.addStat(0, "row_clones");
-    stats.addStat<double>(0.0, "copy_energy");
+    stats.addStat<double>(0.0, "copy_energy", "nJ");
     stats.addStat(0, "transverse_reads");
-    stats.addStat<double>(0.0, "transverse_read_energy");
+    stats.addStat<double>(0.0, "transverse_read_energy", "nJ");
 
     initialize(std::make_unique<ClosedState>(info));
 }

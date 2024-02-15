@@ -21,5 +21,6 @@ bool NVM::ComponentType::ReadingState::busy() const { return true; }
 NVM::Stats::ValueStatBlock NVM::ComponentType::ReadingState::getStats() {
     Stats::ValueStatBlock stats;
     stats.addStat(1, "reads");
+    stats.addStat(info.energyCosts.readEnergy, "read_energy");
     return stats;
 }

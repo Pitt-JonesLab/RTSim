@@ -59,6 +59,7 @@ void OpenState::process() {
                            << "Bank received COPY command\n";
             // TODO: make CopyingState
             stats.addStat(1, "row_clones");
+            stats.addStat(info.energyCosts.copyEnergy, "copy_energy");
             break;
         case BankCommand::Opcode::TRANSVERSE_READ:
             Logging::log() << Logging::LogLevel::EVENT

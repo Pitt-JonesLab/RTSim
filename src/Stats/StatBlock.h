@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace NVM::Stats {
@@ -70,6 +71,8 @@ class ValueStatValue {
         virtual std::string print() const = 0;
         virtual std::unique_ptr<Stat> clone() const = 0;
         virtual Stat& operator+(Stat& rhs) = 0;
+
+        virtual Stat& operator+(std::variant<int, double> number) = 0;
     };
 
     template<typename T> class PrintableWrapper : public Stat {
@@ -88,6 +91,11 @@ class ValueStatValue {
 
         Stat& operator+(Stat& rhs) {
             value += dynamic_cast<PrintableWrapper<T>&>(rhs).value;
+            return *this;
+        }
+
+        Stat& operator+(std::variant<int, double> number) {
+            value += std::get<T>(number);
             return *this;
         }
 
@@ -126,8 +134,8 @@ class ValueStatValue {
         return *this;
     }
 
-    template<typename T> ValueStatValue& operator+(T rhs) {
-        *value += rhs;
+    template<typename T> ValueStatValue& operator+=(T rhs) {
+        *value = (*value) + rhs;
         return *this;
     }
 
