@@ -58,6 +58,18 @@ void OpenState::process() {
                                                       responseConnection);
             stats.addStat(1, "precharges");
             break;
+        case BankCommand::Opcode::COPY:
+            Logging::log() << Logging::LogLevel::EVENT
+                           << "Bank received COPY command\n";
+            // TODO: make CopyingState
+            stats.addStat(1, "row_clones");
+            break;
+        case BankCommand::Opcode::TRANSVERSE_READ:
+            Logging::log() << Logging::LogLevel::EVENT
+                           << "Bank received TRANSVERSE_READ command\n";
+            // TODO: make TransverseReadingState
+            stats.addStat(1, "transverse_reads");
+            break;
         default:
             break;
     }

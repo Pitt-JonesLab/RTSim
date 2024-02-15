@@ -16,6 +16,8 @@ NVM::ComponentType::Bank::Bank() :
     stats.addStat(0, "writes");
     stats.addStat(0, "precharges");
     stats.addStat(0, "activates");
+    stats.addStat(0, "row_clones");
+    stats.addStat(0, "transverse_reads");
 }
 
 void NVM::ComponentType::Bank::setResponseConnection(

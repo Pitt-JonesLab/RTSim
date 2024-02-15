@@ -36,18 +36,24 @@ NVM::ComponentType::ComponentSystem::getStats(std::string tag) {
     busStats.addChildStat(bankStats, "writes");
     busStats.addChildStat(bankStats, "precharges");
     busStats.addChildStat(bankStats, "activates");
+    busStats.addChildStat(bankStats, "row_clones");
+    busStats.addChildStat(bankStats, "transverse_reads");
 
     controllerStats.addChild(busStats);
     controllerStats.addChildStat(busStats, "reads");
     controllerStats.addChildStat(busStats, "writes");
     controllerStats.addChildStat(busStats, "precharges");
     controllerStats.addChildStat(busStats, "activates");
+    controllerStats.addChildStat(busStats, "row_clones");
+    controllerStats.addChildStat(busStats, "transverse_reads");
 
     systemStats.addChild(controllerStats);
     systemStats.addChildStat(controllerStats, "reads");
     systemStats.addChildStat(controllerStats, "writes");
     systemStats.addChildStat(controllerStats, "activates");
     systemStats.addChildStat(controllerStats, "precharges");
+    systemStats.addChildStat(controllerStats, "row_clones");
+    systemStats.addChildStat(controllerStats, "transverse_reads");
 
     return systemStats;
 }

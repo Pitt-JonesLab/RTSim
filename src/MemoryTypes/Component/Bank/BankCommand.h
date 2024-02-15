@@ -7,7 +7,15 @@ namespace NVM::ComponentType {
 
 class BankCommand {
     public:
-    enum class Opcode { NO_OP, ACTIVATE, PRECHARGE, READ, WRITE };
+    enum class Opcode {
+        NO_OP,
+        ACTIVATE,
+        PRECHARGE,
+        READ,
+        WRITE,
+        COPY,
+        TRANSVERSE_READ
+    };
 
     BankCommand(Opcode);
     BankCommand(Opcode, Address, RowData);

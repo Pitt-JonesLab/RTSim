@@ -64,15 +64,6 @@ NVM::ComponentType::MemoryController::getStats(std::string tag) {
 }
 
 bool NVM::ComponentType::MemoryController::issue(MemoryCommand command) {
-    // Skip RowClone and TR commands for now
-    switch (command.getOpcode()) {
-        case MemoryCommand::Opcode::ROWCLONE:
-        case MemoryCommand::Opcode::TRANSVERSE_READ:
-            return true;
-        default:
-            break;
-    }
-
     if (scheduler.getSize() >= 20) return false;
     nextCommand = command;
     return issued = true;

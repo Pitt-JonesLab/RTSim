@@ -1,5 +1,6 @@
 #include "MemoryTypes/Component/Controller/Parser.h"
 
+#include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/System/MemoryCommand.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
 
@@ -30,6 +31,14 @@ std::vector<BankCommand> NVM::ComponentType::Parser::parse(MemoryCommand cmd,
         case MemoryCommand::Opcode::WRITE:
             bankCommands.push_back(
                 {BankCommand::Opcode::WRITE, cmd.getAddress(), cmd.getData()});
+            break;
+        case MemoryCommand::Opcode::ROWCLONE:
+            bankCommands.push_back(
+                {BankCommand::Opcode::COPY, cmd.getAddress2(), cmd.getData()});
+            break;
+        case MemoryCommand::Opcode::TRANSVERSE_READ:
+            bankCommands.push_back({BankCommand::Opcode::TRANSVERSE_READ,
+                                    cmd.getAddress(), cmd.getData()});
             break;
         default:
             break;

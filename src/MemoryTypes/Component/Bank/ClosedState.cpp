@@ -6,6 +6,8 @@
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
 #include "Stats/StatBlock.h"
 
+#include <stdexcept>
+
 using namespace NVM::Modeling;
 
 NVM::ComponentType::ClosedState::ClosedState(
@@ -41,6 +43,13 @@ void NVM::ComponentType::ClosedState::process() {
             stats.addStat(1, "activates");
             break;
         }
+        case BankCommand::Opcode::COPY:
+            throw std::runtime_error("Cannot copy in closed bank!\n");
+            break;
+        case BankCommand::Opcode::TRANSVERSE_READ:
+            throw std::runtime_error(
+                "Cannot transverse read in closed bank!\n");
+            break;
         default:
             break;
     }
