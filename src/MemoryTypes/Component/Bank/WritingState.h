@@ -1,13 +1,12 @@
 #pragma once
 
-#include "MemoryTypes/Component/Bank/BankState.h"
+#include "MemoryTypes/Component/Bank/Bank.h"
 
 namespace NVM::ComponentType {
 
-class WritingState : public BankState {
+class WritingState : public State<BankInfo> {
     public:
-    WritingState(Connection<BankCommand>* cmd,
-                 Connection<BankResponse>* response, unsigned int row);
+    WritingState(BankInfo& i, unsigned int row);
 
     void process();
     void cycle();

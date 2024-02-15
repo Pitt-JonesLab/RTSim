@@ -10,16 +10,15 @@
 
 using namespace NVM::Modeling;
 
-NVM::ComponentType::ClosedState::ClosedState(
-    Connection<BankCommand>* cmd, Connection<BankResponse>* response) :
-    BankState(cmd, response) {}
+NVM::ComponentType::ClosedState::ClosedState(BankInfo& i) :
+    State<BankInfo>(i) {}
 
 NVM::Stats::ValueStatBlock NVM::ComponentType::ClosedState::getStats() {
     return stats;
 }
 
 void NVM::ComponentType::ClosedState::process() {
-    auto busCommand = commandConnection->receive();
+    auto busCommand = info.commandConnection->receive();
 
     switch (busCommand.getOpcode()) {
         case BankCommand::Opcode::READ:
@@ -38,8 +37,7 @@ void NVM::ComponentType::ClosedState::process() {
             Logging::log() << Logging::LogLevel::EVENT
                            << "Bank received ACTIVATE command for row " << row
                            << "\n";
-            nextState = std::make_unique<OpenState>(commandConnection,
-                                                    responseConnection, row);
+            nextState = std::make_unique<OpenState>(info, row);
             stats.addStat(1, "activates");
             break;
         }

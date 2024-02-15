@@ -12,13 +12,12 @@
 using namespace NVM::ComponentType;
 using namespace NVM::Modeling;
 
-OpenState::OpenState(Connection<BankCommand>* cmd,
-                     Connection<BankResponse>* response, unsigned int r) :
-    BankState(cmd, response),
+OpenState::OpenState(BankInfo& i, unsigned int r) :
+    State<BankInfo>(i),
     row(r) {}
 
 void OpenState::process() {
-    auto busCommand = commandConnection->receive();
+    auto busCommand = info.commandConnection->receive();
 
     switch (busCommand.getOpcode()) {
         case BankCommand::Opcode::READ: {
@@ -31,8 +30,7 @@ void OpenState::process() {
                            << "Bank received READ command for row " << row
                            << " address " << busCommand.getAddress().getData()
                            << "\n";
-            nextState = std::make_unique<ReadingState>(commandConnection,
-                                                       responseConnection, row);
+            nextState = std::make_unique<ReadingState>(info, row);
             break;
         }
         case BankCommand::Opcode::WRITE: {
@@ -44,8 +42,7 @@ void OpenState::process() {
             Logging::log() << Logging::LogLevel::EVENT
                            << "Bank received WRITE command for row " << row
                            << "\n";
-            nextState = std::make_unique<WritingState>(commandConnection,
-                                                       responseConnection, row);
+            nextState = std::make_unique<WritingState>(info, row);
             break;
         }
         case BankCommand::Opcode::ACTIVATE:
@@ -54,8 +51,7 @@ void OpenState::process() {
         case BankCommand::Opcode::PRECHARGE:
             Logging::log() << Logging::LogLevel::EVENT
                            << "Bank received PRECHARGE command\n";
-            nextState = std::make_unique<ClosedState>(commandConnection,
-                                                      responseConnection);
+            nextState = std::make_unique<ClosedState>(info);
             stats.addStat(1, "precharges");
             break;
         case BankCommand::Opcode::COPY:

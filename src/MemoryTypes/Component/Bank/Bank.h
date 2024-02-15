@@ -2,7 +2,6 @@
 
 #include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/Bank/BankResponse.h"
-#include "MemoryTypes/Component/Bank/BankState.h"
 #include "MemoryTypes/Component/Component.h"
 #include "MemoryTypes/Component/Connection.h"
 #include "MemoryTypes/Component/State/StateMachine.h"
@@ -10,7 +9,18 @@
 
 namespace NVM::ComponentType {
 
-class Bank : public StateMachine {
+struct EnergyCosts {
+    double readEnergy, writeEnergy, activateEnergy, copyEnergy,
+        transverseReadEnergy;
+};
+
+struct BankInfo {
+    Connection<BankResponse>* responseConnection;
+    Connection<BankCommand>* commandConnection;
+    EnergyCosts energyCosts;
+};
+
+class Bank : public StateMachine<BankInfo> {
     public:
     Bank();
 
@@ -21,8 +31,10 @@ class Bank : public StateMachine {
     bool busy() const;
 
     private:
-    Connection<BankResponse>* responseConnection;
-    Connection<BankCommand>* commandConnection;
+    // Connection<BankResponse>* responseConnection;
+    // Connection<BankCommand>* commandConnection;
+
+    // EnergyCosts energyCosts;
 };
 
 } // namespace NVM::ComponentType

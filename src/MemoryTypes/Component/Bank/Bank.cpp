@@ -4,34 +4,51 @@
 #include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/Bank/ClosedState.h"
 #include "Stats/StatBlock.h"
+#include "Utils/ConfigParser.h"
 
 using namespace NVM::ComponentType;
+using namespace NVM::Memory;
 
-NVM::ComponentType::Bank::Bank() :
-    responseConnection(nullptr),
-    commandConnection(nullptr),
-    StateMachine(
-        std::make_unique<ClosedState>(commandConnection, responseConnection)) {
+NVM::ComponentType::Bank::Bank() {
+    info.responseConnection = nullptr;
+    info.commandConnection = nullptr;
+
+    ConfigParser::registerValue("ReadEnergy", 1.0,
+                                &info.energyCosts.readEnergy);
+    ConfigParser::registerValue("WriteEnergy", 1.0,
+                                &info.energyCosts.writeEnergy);
+    ConfigParser::registerValue("ActivateEnergy", 1.0,
+                                &info.energyCosts.activateEnergy);
+    ConfigParser::registerValue("CopyEnergy", 1.0,
+                                &info.energyCosts.copyEnergy);
+    ConfigParser::registerValue("TREnergy", 1.0,
+                                &info.energyCosts.transverseReadEnergy);
+
     stats.addStat(0, "reads");
+    stats.addStat<double>(0.0, "read_energy");
     stats.addStat(0, "writes");
+    stats.addStat<double>(0.0, "write_energy");
     stats.addStat(0, "precharges");
     stats.addStat(0, "activates");
+    stats.addStat<double>(0.0, "activate_energy");
     stats.addStat(0, "row_clones");
+    stats.addStat<double>(0.0, "copy_energy");
     stats.addStat(0, "transverse_reads");
+    stats.addStat<double>(0.0, "transverse_read_energy");
+
+    initialize(std::make_unique<ClosedState>(info));
 }
 
 void NVM::ComponentType::Bank::setResponseConnection(
     Connection<BankResponse>* connection) {
-    responseConnection = connection;
-    state =
-        std::make_unique<ClosedState>(commandConnection, responseConnection);
+    info.responseConnection = connection;
+    state = std::make_unique<ClosedState>(info);
 }
 
 void NVM::ComponentType::Bank::setCommandConnection(
     Connection<BankCommand>* connection) {
-    commandConnection = connection;
-    state =
-        std::make_unique<ClosedState>(commandConnection, responseConnection);
+    info.commandConnection = connection;
+    state = std::make_unique<ClosedState>(info);
 }
 
 bool NVM::ComponentType::Bank::busy() const { return state->busy(); }

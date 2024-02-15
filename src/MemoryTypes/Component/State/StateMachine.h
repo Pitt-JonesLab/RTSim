@@ -8,10 +8,9 @@
 
 namespace NVM::ComponentType {
 
-class StateMachine : public Component {
+template<typename MachineInfo> class StateMachine : public Component {
     public:
-    StateMachine(std::unique_ptr<StateWrapper> firstState) :
-        state(std::move(firstState)) {}
+    StateMachine() : state(nullptr) {}
 
     void process() { state->process(); }
 
@@ -33,8 +32,14 @@ class StateMachine : public Component {
     }
 
     protected:
-    std::unique_ptr<StateWrapper> state;
+    void initialize(std::unique_ptr<State<MachineInfo>> s) {
+        state = std::move(s);
+    }
+
+    std::unique_ptr<State<MachineInfo>> state;
     Stats::ValueStatBlock stats;
+
+    MachineInfo info;
 };
 
 } // namespace NVM::ComponentType

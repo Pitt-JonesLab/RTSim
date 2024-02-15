@@ -5,17 +5,13 @@
 
 using namespace NVM::ComponentType;
 
-NVM::ComponentType::ReadingState::ReadingState(
-    Connection<BankCommand>* cmd, Connection<BankResponse>* response,
-    unsigned int r) :
-    BankState(cmd, response),
+NVM::ComponentType::ReadingState::ReadingState(BankInfo& i, unsigned int r) :
+    State(i),
     delay(1),
     row(r) {}
 
 void NVM::ComponentType::ReadingState::process() {
-    if (!delay)
-        nextState = std::make_unique<OpenState>(commandConnection,
-                                                responseConnection, row);
+    if (!delay) nextState = std::make_unique<OpenState>(info, row);
 }
 
 void NVM::ComponentType::ReadingState::cycle() { delay--; }

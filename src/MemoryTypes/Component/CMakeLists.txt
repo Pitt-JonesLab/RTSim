@@ -2,7 +2,6 @@ set(COMPONENT_SOURCES
     Bank/Bank.cpp
     Bank/BankCommand.cpp
     Bank/BankResponse.cpp
-    Bank/BankState.cpp
     Bank/ClosedState.cpp
     Bank/OpenState.cpp
     Bank/ReadingState.cpp

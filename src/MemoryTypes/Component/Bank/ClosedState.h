@@ -1,14 +1,13 @@
 #pragma once
 
-#include "MemoryTypes/Component/Bank/BankState.h"
+#include "MemoryTypes/Component/Bank/Bank.h"
 #include "Stats/StatBlock.h"
 
 namespace NVM::ComponentType {
 
-class ClosedState : public BankState {
+class ClosedState : public State<BankInfo> {
     public:
-    ClosedState(Connection<BankCommand>* cmd,
-                Connection<BankResponse>* response);
+    ClosedState(BankInfo& i);
 
     NVM::Stats::ValueStatBlock getStats();
 
