@@ -66,6 +66,8 @@ void OpenState::process() {
                            << "Bank received TRANSVERSE_READ command\n";
             // TODO: make TransverseReadingState
             stats.addStat(1, "transverse_reads");
+            stats.addStat(info.energyCosts.transverseReadEnergy,
+                          "transverse_read_energy");
             break;
         default:
             break;
