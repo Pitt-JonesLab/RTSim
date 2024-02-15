@@ -65,13 +65,16 @@ bool NVM::ComponentType::ComponentSystem::write(const Address& address,
 bool NVM::ComponentType::ComponentSystem::rowClone(const Address& srcAddress,
                                                    const Address& destAddress,
                                                    const RowData& data) {
-    return true;
+    return controller.issue(
+        {MemoryCommand::Opcode::ROWCLONE, srcAddress, destAddress, data});
 }
 
+// TODO: TR should have a single source address (base row address for TR)
 bool NVM::ComponentType::ComponentSystem::pim(std::vector<Address> operands,
                                               const Address& destAddress,
                                               std::vector<RowData> data) {
-    return true;
+    return controller.issue({MemoryCommand::Opcode::TRANSVERSE_READ,
+                             operands[0], destAddress, data[0]});
 }
 
 bool NVM::ComponentType::ComponentSystem::isEmpty() const {
