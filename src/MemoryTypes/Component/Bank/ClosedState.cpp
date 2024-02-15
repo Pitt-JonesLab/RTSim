@@ -39,6 +39,8 @@ void NVM::ComponentType::ClosedState::process() {
                            << "\n";
             nextState = std::make_unique<OpenState>(info, row);
             stats.addStat(1, "activates");
+            stats.addStat(info.energyCosts.activateEnergy, "activate_energy");
+            stats.addStat(info.energyCosts.activateEnergy, "total_energy");
             break;
         }
         case BankCommand::Opcode::COPY:

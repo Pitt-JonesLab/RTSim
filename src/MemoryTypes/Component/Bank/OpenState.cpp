@@ -64,6 +64,7 @@ void OpenState::process() {
             // TODO: make CopyingState
             stats.addStat(1, "row_clones");
             stats.addStat(info.energyCosts.copyEnergy, "copy_energy");
+            stats.addStat(info.energyCosts.copyEnergy, "total_energy");
             break;
         case BankCommand::Opcode::TRANSVERSE_READ:
             Logging::log() << Logging::LogLevel::EVENT
@@ -72,6 +73,8 @@ void OpenState::process() {
             stats.addStat(1, "transverse_reads");
             stats.addStat(info.energyCosts.transverseReadEnergy,
                           "transverse_read_energy");
+            stats.addStat(info.energyCosts.transverseReadEnergy,
+                          "total_energy");
 
             if (info.faultModel.check()) {
                 Logging::log() << Logging::LogLevel::EVENT

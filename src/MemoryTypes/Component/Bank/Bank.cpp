@@ -35,6 +35,7 @@ NVM::ComponentType::Bank::Bank() {
     stats.addStat<double>(0.0, "copy_energy", "nJ");
     stats.addStat(0, "transverse_reads");
     stats.addStat<double>(0.0, "transverse_read_energy", "nJ");
+    stats.addStat<double>(0.0, "total_energy", "nJ");
     stats.addStat(0, "pim_faults");
     stats.addStat(0, "uncorrectable_pim_faults");
 

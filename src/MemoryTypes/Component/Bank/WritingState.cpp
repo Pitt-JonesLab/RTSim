@@ -21,5 +21,7 @@ bool NVM::ComponentType::WritingState::busy() const { return true; }
 NVM::Stats::ValueStatBlock NVM::ComponentType::WritingState::getStats() {
     Stats::ValueStatBlock stats;
     stats.addStat(1, "writes");
+    stats.addStat(info.energyCosts.writeEnergy, "write_energy");
+    stats.addStat(info.energyCosts.writeEnergy, "total_energy");
     return stats;
 }

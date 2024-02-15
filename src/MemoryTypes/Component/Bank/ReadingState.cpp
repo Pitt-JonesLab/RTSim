@@ -22,5 +22,6 @@ NVM::Stats::ValueStatBlock NVM::ComponentType::ReadingState::getStats() {
     Stats::ValueStatBlock stats;
     stats.addStat(1, "reads");
     stats.addStat(info.energyCosts.readEnergy, "read_energy");
+    stats.addStat(info.energyCosts.readEnergy, "total_energy");
     return stats;
 }
