@@ -4,6 +4,8 @@ namespace NVM::ComponentType {
 
 template<typename CommandType> class TimingRules {
     public:
+    virtual ~TimingRules() {}
+
     /*
      *   Signals a command being issued in the current cycle. Allows the
      * implementation to maintain a history of sent commands.

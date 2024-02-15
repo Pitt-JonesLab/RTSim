@@ -34,7 +34,7 @@ class SimpleBankTimingRules : public TimingRules<BankCommand> {
 
     private:
     int currentCycle;
-    std::unordered_map<BankCommand::Opcode, int> nextCycle;
+    std::map<BankCommand::Opcode, int> nextCycle;
     std::map<std::pair<BankCommand::Opcode, BankCommand::Opcode>, int> delays;
     BankCommand::Opcode lastCommand;
 };

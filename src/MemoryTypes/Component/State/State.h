@@ -10,6 +10,8 @@ template<typename StateInfo> class State {
     public:
     State(StateInfo& i) : info(i) {}
 
+    virtual ~State() {}
+
     std::unique_ptr<State<StateInfo>> getNext() { return std::move(nextState); }
 
     virtual void process() = 0;
