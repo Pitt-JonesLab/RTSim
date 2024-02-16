@@ -15,8 +15,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -35,8 +35,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -55,8 +55,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -75,8 +75,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -95,8 +95,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -115,8 +115,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -135,8 +135,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -155,8 +155,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -175,8 +175,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -195,8 +195,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -215,8 +215,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -235,8 +235,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -255,8 +255,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -275,8 +275,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -295,8 +295,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -315,8 +315,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -335,8 +335,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -355,8 +355,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -375,8 +375,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -395,8 +395,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -415,8 +415,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -435,8 +435,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -455,8 +455,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -475,8 +475,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -495,8 +495,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -515,8 +515,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -535,8 +535,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -555,8 +555,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -575,8 +575,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -595,8 +595,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -615,8 +615,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         },
@@ -635,8 +635,8 @@
                 "system.channel0.i0.rank0.bank0.activate_energy",
                 "system.channel0.i0.rank0.bank0.read_energy",
                 "system.channel0.i0.rank0.bank0.write_energy",
-                "system.channel0.i0.rank0.bank0.shift_energy",
-                "system.channel0.i0.rank0.bank0.pim_energy",
+                "system.channel0.i0.rank0.bank0.copy_energy",
+                "system.channel0.i0.rank0.bank0.transverse_read_energy",
                 "system.channel0.i0.rank0.bank0.total_energy"
             ]
         }

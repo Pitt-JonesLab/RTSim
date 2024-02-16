@@ -72,11 +72,11 @@ int main(int argc, char* argv[]) {
     ncycle_t simulateCycles = getMaxCycles((argc > 3) ? argv[3] : nullptr);
 
     NVM::Simulation::Config conf = readConfig(argv[1]);
-    ConfigParser::setConfig(conf);
-
     for (int i = 4; i < argc; i++) {
         conf.override(argv[i]);
     }
+
+    ConfigParser::setConfig(conf);
 
     setLogLevel();
     setAddressScheme();
