@@ -31,6 +31,8 @@ template<typename MachineInfo> class StateMachine : public Component {
         return stats;
     }
 
+    typename MachineInfo::Name getStateName() const { return state->getName(); }
+
     protected:
     void initialize(std::unique_ptr<State<MachineInfo>> s) {
         state = std::move(s);

@@ -21,6 +21,8 @@ template<typename StateInfo> class State {
 
     virtual bool busy() const = 0;
 
+    typename StateInfo::Name getState() const { return info.getName(); }
+
     protected:
     StateInfo& info;
     std::unique_ptr<State<StateInfo>> nextState;

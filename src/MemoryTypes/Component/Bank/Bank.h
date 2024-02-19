@@ -20,6 +20,16 @@ struct BankInfo {
     Connection<BankCommand>* commandConnection;
     EnergyCosts energyCosts;
     FaultModel faultModel;
+
+    enum class Name {
+        READING,
+        WRITING,
+        OPEN,
+        CLOSED
+    };
+    Name name;
+
+    Name getName() const { return name; }
 };
 
 class Bank : public StateMachine<BankInfo> {
