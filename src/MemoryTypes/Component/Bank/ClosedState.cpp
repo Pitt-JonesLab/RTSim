@@ -1,6 +1,7 @@
 #include "MemoryTypes/Component/Bank/ClosedState.h"
 
 #include "Logging/Logging.h"
+#include "MemoryTypes/Component/Bank/Bank.h"
 #include "MemoryTypes/Component/Bank/BankCommand.h"
 #include "MemoryTypes/Component/Bank/OpenState.h"
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
@@ -10,8 +11,9 @@
 
 using namespace NVM::Modeling;
 
-NVM::ComponentType::ClosedState::ClosedState(BankInfo& i) :
-    State<BankInfo>(i) {}
+NVM::ComponentType::ClosedState::ClosedState(BankInfo& i) : State<BankInfo>(i) {
+    info.name = BankInfo::Name::CLOSED;
+}
 
 NVM::Stats::ValueStatBlock NVM::ComponentType::ClosedState::getStats() {
     return stats;

@@ -18,7 +18,9 @@ using namespace NVM::Modeling;
 OpenState::OpenState(BankInfo& i, unsigned int r) :
     State<BankInfo>(i),
     row(r),
-    responseCmd(BankResponse::Opcode::NO_OP) {}
+    responseCmd(BankResponse::Opcode::NO_OP) {
+    info.name = BankInfo::Name::OPEN;
+}
 
 void OpenState::process() {
     auto busCommand = info.commandConnection->receive();

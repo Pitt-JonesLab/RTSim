@@ -8,7 +8,9 @@ using namespace NVM::ComponentType;
 NVM::ComponentType::ReadingState::ReadingState(BankInfo& i, unsigned int r) :
     State(i),
     delay(1),
-    row(r) {}
+    row(r) {
+    info.name = BankInfo::Name::READING;
+}
 
 void NVM::ComponentType::ReadingState::process() {
     if (!delay) nextState = std::make_unique<OpenState>(info, row);

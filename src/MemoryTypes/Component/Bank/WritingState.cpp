@@ -8,7 +8,9 @@ using namespace NVM::ComponentType;
 NVM::ComponentType::WritingState::WritingState(BankInfo& i, unsigned int r) :
     State(i),
     row(r),
-    delay(1) {}
+    delay(1) {
+    info.name = BankInfo::Name::WRITING;
+}
 
 void NVM::ComponentType::WritingState::process() {
     if (!delay) nextState = std::make_unique<OpenState>(info, row);
