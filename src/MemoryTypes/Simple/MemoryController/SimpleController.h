@@ -19,8 +19,7 @@ class SimpleController : public MemoryController {
                   NVM::Simulation::DataBlock data);
     bool transverseRead(uint64_t baseAddress, uint64_t destAddress,
                         std::vector<NVM::Simulation::DataBlock> data);
-    bool transverseWrite(uint64_t address,
-                         std::vector<NVM::Simulation::DataBlock> data);
+    bool transverseWrite(uint64_t address, NVM::Simulation::DataBlock data);
 
     void cycle(unsigned int cycles);
 

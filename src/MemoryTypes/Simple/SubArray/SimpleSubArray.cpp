@@ -50,6 +50,7 @@ NVM::Stats::StatBlock SimpleSubArray::getStats(std::string tag) const {
     stats.addStat(&writeEnergy, "write_energy", "nJ");
     stats.addStat(&shiftEnergy, "shift_energy", "nJ");
     stats.addStat(&pimEnergy, "pim_energy", "nJ");
+    stats.addStat(&TWEnergy, "transverse_write_energy", "nJ");
     stats.addStat(&totalEnergy, "total_energy", "nJ");
     stats.addStat(&numFaults, "pim_faults");
     stats.addStat(&numUncorrectableFaults, "uncorrectable_faults");
@@ -102,9 +103,13 @@ bool SimpleSubArray::issue(NVM::Command cmd) {
         case CommandType::PRECHARGE:
             totalPrecharges++;
             break;
+        case CommandType::TRANSVERSE_WRITE:
+            totalTWs++;
+            TWEnergy += 0.403;
+            break;
     }
-    totalEnergy =
-        readEnergy + writeEnergy + actEnergy + shiftEnergy + pimEnergy;
+    totalEnergy = readEnergy + writeEnergy + actEnergy + shiftEnergy +
+                  pimEnergy + TWEnergy;
 
     return true;
 }

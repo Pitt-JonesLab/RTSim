@@ -33,7 +33,7 @@ class SimpleSubArray : public SubArray {
     unsigned int numTries;
     unsigned int numFaults, numUncorrectableFaults;
 
-    double actEnergy, readEnergy, writeEnergy, shiftEnergy, pimEnergy,
+    double actEnergy, readEnergy, writeEnergy, shiftEnergy, pimEnergy, TWEnergy,
         totalEnergy;
 
     FaultModel faultModel;
