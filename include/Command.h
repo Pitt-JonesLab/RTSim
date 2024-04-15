@@ -8,7 +8,15 @@ namespace NVM {
 
 // using Address = uint64_t;
 
-enum class CommandType { READ = 0, WRITE, ROWCLONE, PIM, ACTIVATE, PRECHARGE };
+enum class CommandType {
+    READ = 0,
+    WRITE,
+    ROWCLONE,
+    PIM,
+    ACTIVATE,
+    PRECHARGE,
+    TRANSVERSE_WRITE
+};
 
 const unsigned int numCommandTypes = 6;
 

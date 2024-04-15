@@ -24,6 +24,10 @@ bool StateSystem::pim(std::vector<Address> operands, const Address& destAddress,
     return true;
 }
 
+bool StateSystem::transverseWrite(const Address& address, const RowData& data) {
+    return true;
+}
+
 bool StateSystem::isEmpty() const { return true; }
 
 void StateSystem::cycle(unsigned int cycles) {
@@ -32,6 +36,6 @@ void StateSystem::cycle(unsigned int cycles) {
 
 void StateSystem::printStats(std::ostream& statStream) {
     auto stats = bank.getStats();
-    stats.log(statStream);
+    stats.log();
     bus.printCycles();
 }

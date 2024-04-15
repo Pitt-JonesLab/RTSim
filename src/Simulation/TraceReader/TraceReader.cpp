@@ -212,7 +212,9 @@ TraceReader::Command TraceReader::getNextCommand() {
         case Opcode1::SHIFT:
             return [](MemorySystem& receiver) -> bool { return true; };
         case Opcode1::TRANSVERSE_WRITE:
-            return [](MemorySystem& receiver) -> bool { return true; };
+            return [address, data](MemorySystem& receiver) -> bool {
+                return receiver.transverseWrite(address, data);
+            };
         default:
             throw std::runtime_error("Unknown trace operation!");
     }

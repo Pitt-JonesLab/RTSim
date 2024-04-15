@@ -12,7 +12,7 @@ using NVM::Simulation::Config;
 
 class ConfigurableTimer : public NVM::Memory::CommandTimer {
     public:
-    ConfigurableTimer(const Config& conf);
+    ConfigurableTimer();
 
     void cycle();
     bool busy() const;

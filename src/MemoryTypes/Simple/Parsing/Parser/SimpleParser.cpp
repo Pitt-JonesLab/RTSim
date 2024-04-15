@@ -1,6 +1,7 @@
 #include "MemoryTypes/Simple/Parsing/Parser/SimpleParser.h"
 
 #include "MemoryTypes/Simple/Modeling/Decoder.h"
+#include "MemoryTypes/Simple/Scheduling/Instruction.h"
 
 using namespace NVM::Parsing;
 using namespace NVM::Modeling;
@@ -19,6 +20,8 @@ CommandType instToCmd(InstructionType type) {
             return CommandType::ROWCLONE;
         case InstructionType::PIM:
             return CommandType::PIM;
+        case InstructionType::TRANSVERSE_WRITE:
+            return CommandType::TRANSVERSE_WRITE;
         default:
             return CommandType::READ;
     }

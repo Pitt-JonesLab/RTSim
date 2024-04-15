@@ -4,7 +4,7 @@
 
 namespace NVM::Scheduling {
 
-enum class InstructionType { READ, WRITE, ROWCLONE, PIM };
+enum class InstructionType { READ, WRITE, ROWCLONE, PIM, TRANSVERSE_WRITE };
 
 using NVM::Modeling::Address;
 

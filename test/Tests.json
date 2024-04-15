@@ -4,7 +4,7 @@
             "name": "Simple R/W",
             "exec": "rtsim.fast",
             "trace": "test/Traces/hello_world.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -14,19 +14,15 @@
                 "system.channel0.writes 48275",
                 "system.channel0.i0.reads 49676",
                 "system.channel0.i0.writes 48275",
-                "system.channel0.i0.rank0.reads 49676",
-                "system.channel0.i0.rank0.writes 48275",
                 "system.channel0.i0.rank0.bank0.reads 49676",
-                "system.channel0.i0.rank0.bank0.writes 48275",
-                "system.channel0.i0.rank0.bank0.subArray0.reads 49676",
-                "system.channel0.i0.rank0.bank0.subArray0.writes 48275"
+                "system.channel0.i0.rank0.bank0.writes 48275"
             ]
         },
         {
             "name": "Random Reads",
             "exec": "rtsim.fast",
             "trace": "test/Traces/read/random_reads.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -35,15 +31,9 @@
                 "system.channel0.i0.reads 20",
                 "system.channel0.i0.activates 20",
                 "system.channel0.i0.precharges 19",
-                "system.channel0.i0.rank0.reads 20",
-                "system.channel0.i0.rank0.activates 20",
-                "system.channel0.i0.rank0.precharges 19",
                 "system.channel0.i0.rank0.bank0.reads 20",
                 "system.channel0.i0.rank0.bank0.activates 20",
                 "system.channel0.i0.rank0.bank0.precharges 19",
-                "system.channel0.i0.rank0.bank0.subArray0.reads 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 20",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 19",
                 "system.channel0.row_buffer_hits 0"
             ]
         },
@@ -51,7 +41,7 @@
             "name": "Local Reads - RB Hit Reorder",
             "exec": "rtsim.fast",
             "trace": "test/Traces/read/local_reads.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -60,15 +50,9 @@
                 "system.channel0.i0.reads 20",
                 "system.channel0.i0.activates 3",
                 "system.channel0.i0.precharges 2",
-                "system.channel0.i0.rank0.reads 20",
-                "system.channel0.i0.rank0.activates 3",
-                "system.channel0.i0.rank0.precharges 2",
                 "system.channel0.i0.rank0.bank0.reads 20",
                 "system.channel0.i0.rank0.bank0.activates 3",
                 "system.channel0.i0.rank0.bank0.precharges 2",
-                "system.channel0.i0.rank0.bank0.subArray0.reads 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 3",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 2",
                 "system.channel0.row_buffer_hits 17"
             ]
         },
@@ -76,7 +60,7 @@
             "name": "Repeated Reads",
             "exec": "rtsim.fast",
             "trace": "test/Traces/read/repeated_reads.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -85,15 +69,9 @@
                 "system.channel0.i0.reads 20",
                 "system.channel0.i0.activates 1",
                 "system.channel0.i0.precharges 0",
-                "system.channel0.i0.rank0.reads 20",
-                "system.channel0.i0.rank0.activates 1",
-                "system.channel0.i0.rank0.precharges 0",
                 "system.channel0.i0.rank0.bank0.reads 20",
                 "system.channel0.i0.rank0.bank0.activates 1",
                 "system.channel0.i0.rank0.bank0.precharges 0",
-                "system.channel0.i0.rank0.bank0.subArray0.reads 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 1",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 0",
                 "system.channel0.row_buffer_hits 19"
             ]
         },
@@ -101,7 +79,7 @@
             "name": "Random Writes",
             "exec": "rtsim.fast",
             "trace": "test/Traces/write/random_writes.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -110,15 +88,9 @@
                 "system.channel0.i0.writes 20",
                 "system.channel0.i0.activates 20",
                 "system.channel0.i0.precharges 19",
-                "system.channel0.i0.rank0.writes 20",
-                "system.channel0.i0.rank0.activates 20",
-                "system.channel0.i0.rank0.precharges 19",
                 "system.channel0.i0.rank0.bank0.writes 20",
                 "system.channel0.i0.rank0.bank0.activates 20",
                 "system.channel0.i0.rank0.bank0.precharges 19",
-                "system.channel0.i0.rank0.bank0.subArray0.writes 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 20",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 19",
                 "system.channel0.row_buffer_hits 0"
             ]
         },
@@ -126,7 +98,7 @@
             "name": "Local Writes - RB Hit Reorder",
             "exec": "rtsim.fast",
             "trace": "test/Traces/write/local_writes.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -135,15 +107,9 @@
                 "system.channel0.i0.writes 20",
                 "system.channel0.i0.activates 3",
                 "system.channel0.i0.precharges 2",
-                "system.channel0.i0.rank0.writes 20",
-                "system.channel0.i0.rank0.activates 3",
-                "system.channel0.i0.rank0.precharges 2",
                 "system.channel0.i0.rank0.bank0.writes 20",
                 "system.channel0.i0.rank0.bank0.activates 3",
                 "system.channel0.i0.rank0.bank0.precharges 2",
-                "system.channel0.i0.rank0.bank0.subArray0.writes 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 3",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 2",
                 "system.channel0.row_buffer_hits 17"
             ]
         },
@@ -151,7 +117,7 @@
             "name": "Repeated Writes",
             "exec": "rtsim.fast",
             "trace": "test/Traces/write/repeated_writes.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -160,15 +126,9 @@
                 "system.channel0.i0.writes 20",
                 "system.channel0.i0.activates 1",
                 "system.channel0.i0.precharges 0",
-                "system.channel0.i0.rank0.writes 20",
-                "system.channel0.i0.rank0.activates 1",
-                "system.channel0.i0.rank0.precharges 0",
                 "system.channel0.i0.rank0.bank0.writes 20",
                 "system.channel0.i0.rank0.bank0.activates 1",
                 "system.channel0.i0.rank0.bank0.precharges 0",
-                "system.channel0.i0.rank0.bank0.subArray0.writes 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 1",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 0",
                 "system.channel0.row_buffer_hits 19"
             ]
         },
@@ -176,57 +136,45 @@
             "name": "Local RowClones",
             "exec": "rtsim.fast",
             "trace": "test/Traces/rowclone/local_rowclones.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
                 "system.row_clones 20",
                 "system.channel0.row_clones 20",
                 "system.channel0.i0.row_clones 20",
-                "system.channel0.i0.activates 40",
-                "system.channel0.i0.precharges 20",
-                "system.channel0.i0.rank0.row_clones 20",
-                "system.channel0.i0.rank0.activates 40",
-                "system.channel0.i0.rank0.precharges 20",
+                "system.channel0.i0.activates 3",
+                "system.channel0.i0.precharges 2",
                 "system.channel0.i0.rank0.bank0.row_clones 20",
-                "system.channel0.i0.rank0.bank0.activates 40",
-                "system.channel0.i0.rank0.bank0.precharges 20",
-                "system.channel0.i0.rank0.bank0.subArray0.row_clones 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 40",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 20",
-                "system.channel0.row_buffer_hits 0"
+                "system.channel0.i0.rank0.bank0.activates 3",
+                "system.channel0.i0.rank0.bank0.precharges 2",
+                "system.channel0.row_buffer_hits 17"
             ]
         },
         {
             "name": "Local PIM",
             "exec": "rtsim.fast",
             "trace": "test/Traces/pim/local_pim.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
-                "system.channel0.activates 20",
-                "system.channel0.precharges 20",
-                "system.channel0.i0.activates 20",
-                "system.channel0.i0.precharges 20",
+                "system.channel0.activates 3",
+                "system.channel0.precharges 2",
+                "system.channel0.i0.activates 3",
+                "system.channel0.i0.precharges 2",
                 "system.channel0.i0.transverse_reads 20",
-                "system.channel0.i0.rank0.activates 20",
-                "system.channel0.i0.rank0.precharges 20",
-                "system.channel0.i0.rank0.transverse_reads 20",
-                "system.channel0.i0.rank0.bank0.activates 20",
-                "system.channel0.i0.rank0.bank0.precharges 20",
+                "system.channel0.i0.rank0.bank0.activates 3",
+                "system.channel0.i0.rank0.bank0.precharges 2",
                 "system.channel0.i0.rank0.bank0.transverse_reads 20",
-                "system.channel0.i0.rank0.bank0.subArray0.activates 20",
-                "system.channel0.i0.rank0.bank0.subArray0.precharges 20",
-                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads 20",
-                "system.channel0.row_buffer_hits 0"
+                "system.channel0.row_buffer_hits 17"
             ]
         },
         {
             "name": "Non-predicated Counting",
             "exec": "rtsim.fast",
             "trace": "test/Traces/counters/increment_non_predicate.nvt",
-            "config": "Config/RM.config",
+            "config": "Config/Component.config",
             "cycles": "0",
             "overrides": "",
             "checks": [
@@ -238,18 +186,10 @@
                 "system.channel0.i0.row_clones 175",
                 "system.channel0.i0.reads 205",
                 "system.channel0.i0.writes 0",
-                "system.channel0.i0.rank0.transverse_reads 255",
-                "system.channel0.i0.rank0.row_clones 175",
-                "system.channel0.i0.rank0.reads 205",
-                "system.channel0.i0.rank0.writes 0",
                 "system.channel0.i0.rank0.bank0.transverse_reads 255",
                 "system.channel0.i0.rank0.bank0.row_clones 175",
                 "system.channel0.i0.rank0.bank0.reads 205",
-                "system.channel0.i0.rank0.bank0.writes 0",
-                "system.channel0.i0.rank0.bank0.subArray0.transverse_reads 255",
-                "system.channel0.i0.rank0.bank0.subArray0.row_clones 175",
-                "system.channel0.i0.rank0.bank0.subArray0.reads 205",
-                "system.channel0.i0.rank0.bank0.subArray0.writes 0"
+                "system.channel0.i0.rank0.bank0.writes 0"
             ]
         }
     ]

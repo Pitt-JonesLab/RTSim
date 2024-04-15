@@ -80,9 +80,16 @@ bool SimpleController::transverseRead(
     return true;
 }
 
-bool SimpleController::transverseWrite(
-    uint64_t address, std::vector<NVM::Simulation::DataBlock> data) {
-    return false;
+bool SimpleController::transverseWrite(uint64_t address,
+                                       NVM::Simulation::DataBlock data) {
+    if (received || !scheduler.isAvailable()) return false;
+
+    rInst = {NVM::Scheduling::InstructionType::TRANSVERSE_WRITE, address};
+    received = true;
+    log() << LogLevel::EVENT << "SimpleController received TW\n"
+          << "Address: " << address << "\n";
+
+    return true;
 }
 
 void SimpleController::cycle(unsigned int cycles) {

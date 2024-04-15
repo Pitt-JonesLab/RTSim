@@ -11,6 +11,7 @@ SimpleSystem::SimpleSystem() :
     totalWrites(0),
     totalRowClones(0),
     totalPIMs(0),
+    totalTWs(0),
     currentCycle(0) {}
 
 bool SimpleSystem::available() const { return !channels.empty(); }
@@ -94,5 +95,16 @@ bool SimpleSystem::pim(std::vector<Address> operands,
     if (!channelCmd) return false;
     totalPIMs++;
     log() << LogLevel::EVENT << "SimpleSystem received PIM\n";
+    return true;
+}
+
+bool SimpleSystem::transverseWrite(const Address& address,
+                                   const RowData& data) {
+    if (!available()) return false;
+
+    auto channelCmd = channels[0]->transverseWrite(address.getData(), data);
+    if (!channelCmd) return false;
+    totalTWs++;
+    log() << LogLevel::EVENT << "SimpleSystem received TW\n";
     return true;
 }

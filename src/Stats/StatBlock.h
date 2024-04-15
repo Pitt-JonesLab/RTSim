@@ -1,8 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <memory>
 #include <sstream>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace NVM::Stats {
@@ -69,6 +71,9 @@ class ValueStatValue {
         virtual std::string print() const = 0;
         virtual std::unique_ptr<Stat> clone() const = 0;
         virtual Stat& operator+(Stat& rhs) = 0;
+
+        virtual Stat& operator+(std::variant<int, double> number) = 0;
+        virtual Stat& operator=(std::variant<int, double> number) = 0;
     };
 
     template<typename T> class PrintableWrapper : public Stat {
@@ -87,6 +92,16 @@ class ValueStatValue {
 
         Stat& operator+(Stat& rhs) {
             value += dynamic_cast<PrintableWrapper<T>&>(rhs).value;
+            return *this;
+        }
+
+        Stat& operator+(std::variant<int, double> number) {
+            value += std::get<T>(number);
+            return *this;
+        }
+
+        Stat& operator=(std::variant<int, double> number) {
+            value = std::get<T>(number);
             return *this;
         }
 
@@ -125,6 +140,16 @@ class ValueStatValue {
         return *this;
     }
 
+    template<typename T> ValueStatValue& operator+=(T rhs) {
+        *value = (*value) + rhs;
+        return *this;
+    }
+
+    template<typename T> ValueStatValue& operator=(T rhs) {
+        *value = rhs;
+        return *this;
+    }
+
     friend std::ostream& operator<<(std::ostream&, const ValueStatValue&);
 };
 
@@ -153,21 +178,46 @@ class ValueStatBlock {
     private:
     std::string tag;
     std::vector<ValueStatValue> values;
+    std::vector<ValueStatBlock> children;
 
     public:
     ValueStatBlock(std::string t = "");
 
     ValueStatBlock& operator+=(ValueStatBlock& rhs);
 
+    void setTag(std::string t);
+
     template<typename T>
     void addStat(T stat, std::string name, std::string unit = "") {
-        values.emplace_back(stat, name, unit);
+        auto same_name = std::find_if(
+            values.begin(), values.end(),
+            [&name](ValueStatValue& value) { return value.getName() == name; });
+
+        if (same_name != values.end()) {
+            (*same_name) += stat;
+        } else {
+            values.emplace_back(stat, name, unit);
+        }
     }
 
+    template<typename T>
+    void setStat(T stat, std::string name, std::string unit = "") {
+        auto same_name = std::find_if(
+            values.begin(), values.end(),
+            [&name](ValueStatValue& value) { return value.getName() == name; });
+
+        if (same_name != values.end()) {
+            (*same_name) = stat;
+        } else {
+            values.emplace_back(stat, name, unit);
+        }
+    }
+
+    void addChild(ValueStatBlock childBlock);
     void addChildStat(ValueStatBlock childBlock, std::string name,
                       std::string unit = "");
     void log() const;
-    void log(std::ostream& out) const;
+    void log(std::string parentTag) const;
 };
 
 std::ostream& operator<<(std::ostream&, const StatValue&);

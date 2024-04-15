@@ -39,10 +39,12 @@ class SimpleSystem : public MemorySystem {
     bool pim(std::vector<Address> operands, const Address& destAddress,
              std::vector<RowData> data);
 
+    bool transverseWrite(const Address& address, const RowData& data);
+
     private:
     bool available() const;
 
-    unsigned int totalReads, totalWrites, totalRowClones, totalPIMs,
+    unsigned int totalReads, totalWrites, totalRowClones, totalPIMs, totalTWs,
         currentCycle;
 
     std::vector<std::unique_ptr<MemoryController>> channels;

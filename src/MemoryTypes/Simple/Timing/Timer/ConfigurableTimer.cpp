@@ -1,16 +1,21 @@
 #include "MemoryTypes/Simple/Timing/Timer/ConfigurableTimer.h"
 
+#include "Utils/ConfigParser.h"
+
 using namespace NVM::Timing;
 using NVM::Command;
+using namespace NVM::Memory;
 
-ConfigurableTimer::ConfigurableTimer(const NVM::Simulation::Config& conf) :
-    remainingCycles(0) {
+ConfigurableTimer::ConfigurableTimer() : remainingCycles(0) {
     timings[static_cast<size_t>(CommandType::READ)] = 5;
     timings[static_cast<size_t>(CommandType::WRITE)] = 5;
-    timings[static_cast<size_t>(CommandType::ACTIVATE)] = conf.get<int>("tACT");
     timings[static_cast<size_t>(CommandType::PIM)] = 5;
     timings[static_cast<size_t>(CommandType::ROWCLONE)] = 5;
-    timings[static_cast<size_t>(CommandType::PRECHARGE)] = conf.get<int>("tRP");
+
+    ConfigParser::registerValue<unsigned int>(
+        "tACT", 1, &timings[static_cast<size_t>(CommandType::ACTIVATE)]);
+    ConfigParser::registerValue<unsigned int>(
+        "tRP", 1, &timings[static_cast<size_t>(CommandType::PRECHARGE)]);
 }
 
 void ConfigurableTimer::cycle() {

@@ -18,9 +18,8 @@ class MemoryController {
     transverseRead(uint64_t baseAddress, uint64_t destAddress,
                    std::vector<NVM::Simulation::DataBlock> data) = 0;
 
-    virtual bool
-    transverseWrite(uint64_t address,
-                    std::vector<NVM::Simulation::DataBlock> data) = 0;
+    virtual bool transverseWrite(uint64_t address,
+                                 NVM::Simulation::DataBlock data) = 0;
 
     virtual bool isEmpty() const = 0;
 

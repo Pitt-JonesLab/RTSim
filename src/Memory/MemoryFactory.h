@@ -13,10 +13,10 @@ class MemorySystem;
  *
  * @return Unique pointer to the created MemorySystem
  */
-std::unique_ptr<MemorySystem>
-makeSimpleSystem(const NVM::Simulation::Config& conf);
+std::unique_ptr<MemorySystem> makeSimpleSystem();
 
-std::unique_ptr<MemorySystem>
-makeStateSystem(const NVM::Simulation::Config& conf);
+std::unique_ptr<MemorySystem> makeStateSystem();
+
+std::unique_ptr<MemorySystem> makeComponentSystem();
 
 } // namespace NVM::Memory
