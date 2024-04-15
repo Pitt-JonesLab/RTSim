@@ -42,6 +42,8 @@ class TraceSimulator {
     NVM::Memory::CommandEventQueue<NVM::Memory::MemorySystem> queue;
     std::unique_ptr<NVM::Memory::MemorySystem> receiver;
     CycleTimer timer;
+
+    bool debugMode;
 };
 
 } // namespace NVM::Simulation

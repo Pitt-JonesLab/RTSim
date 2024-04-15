@@ -39,6 +39,8 @@ class SimpleSystem : public MemorySystem {
     bool pim(std::vector<Address> operands, const Address& destAddress,
              std::vector<RowData> data);
 
+    bool transverseWrite(const Address& address, const RowData& data);
+
     private:
     bool available() const;
 

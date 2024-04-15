@@ -24,6 +24,10 @@ bool StateSystem::pim(std::vector<Address> operands, const Address& destAddress,
     return true;
 }
 
+bool StateSystem::transverseWrite(const Address& address, const RowData& data) {
+    return true;
+}
+
 bool StateSystem::isEmpty() const { return true; }
 
 void StateSystem::cycle(unsigned int cycles) {

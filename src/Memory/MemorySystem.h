@@ -20,6 +20,9 @@ class MemorySystem {
     virtual bool pim(std::vector<Address> operands, const Address& destAddress,
                      std::vector<RowData> data) = 0;
 
+    virtual bool transverseWrite(const Address& address,
+                                 const RowData& data) = 0;
+
     virtual bool isEmpty() const = 0;
 
     virtual void cycle(unsigned int cycles = 1) = 0;

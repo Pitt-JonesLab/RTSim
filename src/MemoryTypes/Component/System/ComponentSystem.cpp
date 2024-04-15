@@ -84,6 +84,11 @@ bool NVM::ComponentType::ComponentSystem::pim(std::vector<Address> operands,
                              operands[0], destAddress, data[0]});
 }
 
+bool NVM::ComponentType::ComponentSystem::transverseWrite(
+    const Address& address, const RowData& data) {
+    return true;
+}
+
 bool NVM::ComponentType::ComponentSystem::isEmpty() const {
     return !(bank.busy() || bus.busy() || controller.busy());
 }

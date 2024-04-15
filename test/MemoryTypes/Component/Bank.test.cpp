@@ -27,6 +27,20 @@ TEST_CASE("Works properly", "[Component], [Bank]") {
         REQUIRE(bank.getStateName() == BankInfo::Name::OPEN);
     }
 
+    SECTION("Precharge closes bank") {
+        commandPort.issue({BankCommand::Opcode::ACTIVATE});
+        commandPort.cycle();
+        bank.process();
+        bank.cycle();
+        REQUIRE(bank.getStateName() == BankInfo::Name::OPEN);
+
+        commandPort.issue({BankCommand::Opcode::PRECHARGE});
+        commandPort.cycle();
+        bank.process();
+        bank.cycle();
+        REQUIRE(bank.getStateName() == BankInfo::Name::CLOSED);
+    }
+
     SECTION("Can't perform transaction on closed bank") {
         commandPort.issue({BankCommand::Opcode::READ});
         commandPort.cycle();
@@ -42,6 +56,22 @@ TEST_CASE("Works properly", "[Component], [Bank]") {
 
         commandPort.issue({BankCommand::Opcode::COPY});
         commandPort.cycle();
+        REQUIRE_THROWS(bank.process());
+    }
+
+    SECTION("Can't precharge closed bank") {
+        commandPort.issue({BankCommand::Opcode::PRECHARGE});
+        commandPort.cycle();
+
+        REQUIRE_THROWS(bank.process());
+    }
+
+    SECTION("Can't activate open bank") {
+        commandPort.issue({BankCommand::Opcode::ACTIVATE});
+        commandPort.cycle();
+        bank.process();
+        bank.cycle();
+
         REQUIRE_THROWS(bank.process());
     }
 

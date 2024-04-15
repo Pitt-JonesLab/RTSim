@@ -37,6 +37,8 @@ class ComponentSystem : public NVM::Memory::MemorySystem, Component {
     bool pim(std::vector<Address> operands, const Address& destAddress,
              std::vector<RowData> data);
 
+    bool transverseWrite(const Address& address, const RowData& data);
+
     bool isEmpty() const;
 
     void cycle(unsigned int cycles);

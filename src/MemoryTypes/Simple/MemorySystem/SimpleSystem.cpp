@@ -96,3 +96,8 @@ bool SimpleSystem::pim(std::vector<Address> operands,
     log() << LogLevel::EVENT << "SimpleSystem received PIM\n";
     return true;
 }
+
+bool SimpleSystem::transverseWrite(const Address& address,
+                                   const RowData& data) {
+    return true;
+}

@@ -36,7 +36,11 @@ class MockMemorySystem : public NVM::Memory::MemorySystem {
 
     bool pim(std::vector<Address> operands, const Address& destAddress,
              std::vector<RowData> data) {
-        return true;
+        return available;
+    }
+
+    bool transverseWrite(const Address& address, const RowData& data) {
+        return available;
     }
 
     bool isEmpty() const { return currentCycle > lastCycle + 10; }
